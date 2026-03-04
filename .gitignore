@@ -1,0 +1,98 @@
+# =====================
+# IntelliJ / JetBrains
+# =====================
+.idea/
+*.iml
+out/
+*.class
+
+# =====================
+# Visual Studio
+# =====================
+.vs/
+
+# =====================
+# C++ / CMake Build
+# =====================
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.exe
+*.so
+*.dylib
+Makefile
+*.vcxproj
+*.sln
+*.suo
+*.user
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.opendb
+x64/
+x86/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+
+# =====================
+# Python
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+.eggs/
+.env
+.venv
+venv/
+env/
+*.log
+
+# =====================
+# Unreal Engine
+# =====================
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.uasset
+*.umap
+*.pak
+*.sig
+*.ucas
+*.utoc
+# Keep source files (*.cpp, *.h, *.cs)
+
+# =====================
+# OS & Editor
+# =====================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# =====================
+# Test / Coverage
+# =====================
+*.gcov
+*.gcda
+*.gcno
+coverage/
+
+

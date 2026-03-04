@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RunConfigurationProducerService">
+    <option name="ignoredProducers">
+      <set>
+        <option value="com.android.tools.idea.compose.preview.PreviewRunLineMarkerContributor" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.GameGUI">
+    <configuration name="GameGUI" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="edu.wctc.GameGUI" />
+      <module name="The Maze" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="RunConfigurationTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="edu.wctc.Main" />
+      <module name="The Maze" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="RunConfigurationTask" enabled="true" />
+      </method>
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" value="GameGUI" />
+      <item index="1" class="java.lang.String" value="Main" />
+    </list>
+  </component>
+</project>

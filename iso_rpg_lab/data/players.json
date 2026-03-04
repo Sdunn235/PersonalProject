@@ -1,0 +1,13 @@
+[
+  {
+    "id": "hero",
+    "name": "Hero",
+    "hp": 200,
+    "base": { "VIT": 20, "STR": 20, "DEX": 8, "MAG": 0, "WIS": 0, "LCK": 8 },
+    "equipment": { "weapon": "short_sword", "armor": null, "acc": null },
+    "bag": [ { "id": "potion_small", "qty": 2 }, { "id": "ether_small", "qty": 1 } ],
+    "cycles": { "start": 100, "max": 120, "regen": 6 },
+    "abilities": ["basic_strike", "fireball", "first_aid"],
+    "resistances": { "neutral": 1.0 }
+  }
+]
