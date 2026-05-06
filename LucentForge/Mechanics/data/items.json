@@ -1,0 +1,69 @@
+[
+  {
+    "id": "health_potion",
+    "name": "Health Potion",
+    "type": "consumable",
+    "effects": { "heal": 30 },
+    "description": "Restores 30 HP."
+  },
+  {
+    "id": "stamina_potion",
+    "name": "Stamina Potion",
+    "type": "consumable",
+    "effects": { "restore_sp": 20 },
+    "description": "Restores 20 SP."
+  },
+  {
+    "id": "mana_potion",
+    "name": "Mana Potion",
+    "type": "consumable",
+    "effects": { "restore_mp": 20 },
+    "description": "Restores 20 MP."
+  },
+  {
+    "id": "iron_sword",
+    "name": "Iron Sword",
+    "type": "weapon",
+    "slot": "weapon",
+    "effects": { "atk": 5 },
+    "description": "+5 attack power."
+  },
+  {
+    "id": "wooden_staff",
+    "name": "Wooden Staff",
+    "type": "weapon",
+    "slot": "weapon",
+    "effects": {
+      "atk": 2,
+      "mag": 4
+    },
+    "description": "+2 attack, +4 magic power."
+  },
+  {
+    "id": "leather_armor",
+    "name": "Leather Armor",
+    "type": "armor",
+    "slot": "armor",
+    "effects": { "def": 3 },
+    "description": "+3 defense."
+  },
+  {
+    "id": "cloth_robe",
+    "name": "Cloth Robe",
+    "type": "armor",
+    "slot": "armor",
+    "effects": {
+      "def": 1,
+      "res": 3
+    },
+    "description": "+1 defense, +3 resistance."
+  },
+  {
+    "id": "steel_shield",
+    "name": "Steel Shield",
+    "type": "armor",
+    "slot": "shield",
+    "effects": { "def": 5 },
+    "description": "+5 defense."
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "basic_strike",
+    "name": "Basic Strike",
+    "kind": "attack",
+    "power": 1.0,
+    "cost_cycles": 16,
+    "element": "neutral"
+  },
+  {
+    "id": "piercing_thrust",
+    "name": "Piercing Thrust",
+    "kind": "attack",
+    "power": 1.25,
+    "cost_cycles": 32,
+    "element": "neutral"
+  },
+  {
+    "id": "first_aid",
+    "name": "First Aid",
+    "kind": "heal",
+    "amount": 120,
+    "cost_cycles": 12
+  },
+  {
+    "id": "vicious_slash",
+    "name": "Vicious Slash",
+    "kind": "attack",
+    "power": 1.2,
+    "cost_cycles": 22,
+    "element": "neutral"
+  },
+  
+  {
+    "id": "fireball",
+    "name": "Fireball",
+    "kind": "attack",
+    "power": 1.3,
+    "cost_cycles": 20,
+    "element": "fire"
+  }
+]

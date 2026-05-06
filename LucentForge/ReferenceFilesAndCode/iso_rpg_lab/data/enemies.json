@@ -1,0 +1,57 @@
+[
+  {
+    "id": "slime_green",
+    "name": "Green Slime",
+    "hp": 100,
+    "str": 12,
+    "mag": 0,
+    "lck": 2,
+    "defense": 10,
+    "resist": 0,
+    "dex": 4,
+    "resistances": {
+      "neutral": 1.0,
+      "fire": 0.5,
+      "ice": 1.5
+    }
+  },
+  {
+    "id": "bandit",
+    "name": "Bandit",
+    "hp": 150,
+    "str": 18,
+    "mag": 0,
+    "lck": 6,
+    "defense": 8,
+    "resist": 0,
+    "dex": 7,
+    "abilities": [
+      "vicious_slash",
+      "basic_strike"
+    ],
+    "resistances": {
+      "neutral": 1.0,
+      "fire": 1.25,
+      "ice": 0.75
+    },
+    "bag": [
+      {
+        "id": "potion_small",
+        "qty": 1
+      },
+      {
+        "id":"ether_small",
+        "qty":1
+      }
+    ],
+    "equipment": {
+      "weapon": "bandit_knife",
+      "armor": "leather_jacket",
+      "acc": "lucky_charm"
+    },
+    "cycles": { 
+      "start": 80,
+      "max": 120,
+      "regen": 5}
+  }
+]

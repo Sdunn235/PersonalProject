@@ -1,0 +1,10 @@
+{
+    "editor.quickSuggestions": {
+        "comments": "inline",
+        "other": "inline",
+        "strings": "inline"
+    },
+    "editor.defaultFormatter": "GitHub.copilot",
+    "editor.inlineSuggest.suppressSuggestions": true,
+    "github.copilot.nextEditSuggestions.enabled": true
+}

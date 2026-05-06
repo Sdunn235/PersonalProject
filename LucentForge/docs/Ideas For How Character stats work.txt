@@ -1,0 +1,52 @@
+Ideas For How Character stats work: The LucentForge world is based off of wanting a life simulator that is for AI and the players to interact in. For this I want most concepts based off of data systems found in coding and hardware. So I figured a lot of actions, abilities, and magic are based off of the concept of bits and bytes (256bits = 32bytes, does not have to be this system and I am open to debate.) 
+
+Character Statistics: The overall "character sheet" of both players and npc's. These stats will determine a characters effectiveness at everything they do in the world. As a character progresses in their life Stats will increase or decrease depending on actions.
+
+-Physique: Physical capabilities of the body. Effects carrying capacity, weapon attacks, lifting/pushing/pulling capacity. Lifting that Great Sword or Pulling the Longbow back requires good strength
+
+-Reflexes: How quick the body is able to react. How many attacks can get off. You can see the arrow but can you dodge it? Catch it? Is the mouth and hands able to react intime to cast the shield?
+
+-Constitution: The overall Health of ones body. How effective most buffs and debuffs are on the character. How well their natural regen is, how easy they get drunk. How long they can endure physical and mental aspects. How long can you fight before your stamina is gone? How long can you hold the Great Ax up or the Arrow notched on the bow? How much will this spell drain the mages magic and stamina?
+
+-Intellect: Overall Knowledge and ability to recall knowledge. Skills like read and right. Recall history or text book knowledge. A magic user would need this to memorize spells and their components. To recall history and naturally come to answers without maybe even without knowing exactly how.
+
+-Intuition: Pattern recognition fueled by past experience. Like recognizing traps, knowing when someone is lying, Seeing a 10 ft gap everyday in life lets you know if you can jump the canal or not.
+
+-Linguistic: To be able to communicate. You understand the moment and know that 10% of communication is the words. The other bits is what you say and how you say it. Or maybe even dont say. The ability to learn language's and know when to properly motivate, frighten, and inspire and how to do so fall her.
+
+-Luck: Negative and Positive things happen to oneself. Can effect most aspects of life. Some have little, some have lots. Some peoples luck is all saved for specific time. While others use it all the time and never have enough for big moments in life. A little like Karma to because not all luck is good luck and not all have any at all.
+
+-These stats help determine the classic RPG system of Health, Stamina, and Magic(Bits or Bytes)
+
+Needs and Want system: Every creature has basic needs that need to be met. Their Hunger, Thirst, and need Sleep. When Needs are met through mechanics of the simulation, Characters are able to explore and obtain wants that can be treated as personality traits or are. Like wanting entertainment, gluttonous for food, workaholic, obsessed over shinney objects, etc. When needs are at different tiers it will effect the regen of health stamina and Bits/Bytes   
+
+
+Character Skills: A characters skill should be based on factors of the characters statistics. They are learned skills through repetitive self teaching or being formally taught. Skills will be based off of one stat or multiples stats. More skills need to be made as time goes on. Skills and Wants can effect each other. As skills increase like with short swords or weapon smithing. Attacks will become stronger or able to make better weapons. These increases can unlock abilities.
+
+
+Abilities: As skill proficiency and or use of skill increases as well as certain stat requirements abilities will unlock. Abilities can seem lack luster untiled mastered. Use brings around mastery. Skills plus Stats will determine results of when abilities are used. Abilities can have either multiple routes to be obtained and used or very specific conditions have to be met. Like  stat, skill, weapon, and event needed to unlock unique god tier ability.
+
+Magic: Magic is a big part of the world. From building, enchanting, task completion, combat, etc.. In LucentForge its in all facets of life and experiences. So some characters my have buffs, debuffs, abilities, or cast magic from abilities. They may learn it from other areas of life, or be part of their learned class like in other RPG's. They will have to use their magic points, MP (Or for their world culture Bits or Bytes what ever works best). Also like Firebolt or Cure would be the System Call to the Class, and then if its cast on one person, many, special effect, upcasted etc., those are Method calls and property changes. I mean all this as in lore understanding and casting like.
+
+
+****Intricacies of the mechanics and world****
+
+I want the mechanics to be easy to learn but Extremely difficult to master. This is because so many facets will have to cross over and be used and effect other areas. The weight of the weapon, attack style, weapon type, character stats, and skill will effect the characters attack speed, attack power, abilities, ability effectiveness, how much each attack and defend drains resources. This goes for jumping over a ravine to mining for ore, to fishing in the pond. 
+
+I don't want people to be able to naturally  be max all stats, skills, and abilities. As you begin to push the limits of one area, another will be effected negatively. Like how typically a body builder isn't going to be fast as say runner, but a runner wont have the lifting strength of the body builder. So all these little areas play effectiveness of everything. Weapons, items, equipment, skills, abilities, spells, and interactions could and should with more complexity use multiple facets of the character to perform the task good or bad. That's another thing. Fail bad enough and their could be consequences. 
+
+Multiple ways to solve the problems and quest. If the mission is to turn off the candle you should be able to do it multiple ways. Throw water on it, cast or create a gust of wind, blow on, snuff it our with hand or object. What's the point of having all these unique abilities, skills, magic, and capabilities if you can not come up with fun exciting ways to use it. 
+
+I want event driven world. Events can be driven by a multitude of factors. Some events will never happen while others can happen multiple times. Maybe some can only happen once. My best reference of how this works is in the shows Sword Art Online or even more so Shangri-La Frontier. Where even characters might have to be built a certain way and trigger unique actions, abilities, times, or compound events to trigger others.
+
+There is a lot of idea in here. Lots of areas to work with in the future. This is meant to be the first iteration of probably many of this layout. Will probably be broken down and each area expanded on.
+
+I don't know if I want a level system per say. In some way yes abilities and stats what not will have scores and or levels. But not necessarily the character themselves have a level.
+
+Resources are finite. Agriculture is needed to get past wandering tribe and nomad states. With the races and groups that have a civilization survival should kind of feel secondary or at least different then surviving out in nature away from towns and cities. 
+
+  
+
+
+
+

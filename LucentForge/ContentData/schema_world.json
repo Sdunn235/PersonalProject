@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "World State Schema",
+  "description": "LucentForge World data structure",
+  "type": "object",
+  "required": ["world_state", "agents", "locations", "items"],
+  "properties": {
+    "world_state": {
+      "type": "object",
+      "required": ["time_cycle", "time_phase"],
+      "properties": {
+        "time_cycle": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Current simulation cycle number"
+        },
+        "time_phase": {
+          "type": "string",
+          "enum": ["morning", "afternoon", "evening", "night"]
+        },
+        "weather": {
+          "type": "string",
+          "enum": ["clear", "rain", "storm"]
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": { "$ref": "schema_agent.json" }
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["location_id", "name", "type", "position"],
+        "properties": {
+          "location_id": { "type": "string" },
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["settlement", "farm", "dungeon", "wilderness", "landmark"]
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          },
+          "agents_present": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "resources": { "type": "object" },
+          "connections": { "type": "array" }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item_id", "name", "category"],
+        "properties": {
+          "item_id": { "type": "string" },
+          "name": { "type": "string" },
+          "category": {
+            "type": "string",
+            "enum": ["weapon", "armor", "tool", "consumable", "material"]
+          },
+          "rarity": {
+            "type": "string",
+            "enum": ["common", "uncommon", "rare", "legendary"]
+          },
+          "properties": { "type": "object" },
+          "value": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "factions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "faction_id": { "type": "string" },
+          "name": { "type": "string" },
+          "members": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "treasury": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}
+

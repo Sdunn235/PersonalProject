@@ -1,0 +1,57 @@
+Caelum Session Start
+
+Date: 03/19/2026 @ (Record Prompt time)
+Session Topic: Code Review Compared to References And Refactoring
+
+What I’m working on: Review of the codes in Mechanics. Using the references. I feel alot of SOLID and LINQ principles, as well as the reference codes are missing in current work. Especially from the C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\ReferenceFilesAndCode\RPGDatabaseManager\w7-mid-term-prep Database Manager and C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\ReferenceFilesAndCode\iso_rpg_lab project. Specifically there data files JSON files need to be integrated. Needs feel lack luster compared to the files in C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\ReferenceFilesAndCode\UnrealTxtFilesOfNeedSystem 
+
+Task: 
+-1. A overhaul of the system to more in line with SOLID and LINQ Principles. Also Needs to be more intergrated with the references from C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\ReferenceFilesAndCode\RPGDatabaseManager\w7-mid-term-prep, I really like its structure and abstract class system as it makes it way more modular. The need text files need to be relooked at in C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\ReferenceFilesAndCode\UnrealTxtFilesOfNeedSystem, right now ours does not look modular and able to build on. In general not enough seems plug and play style to be able to be built on. 
+
+-2. The data in these JSON Folder locations need to be combined to be used by the mechanics system. Reference theRPGDatabaseManager on how the data should me used. C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\data, C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\Mechanics\data, C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\ReferenceFilesAndCode\RPGDatabaseManager\w7-mid-term-prep\ConsoleRpgEntities\Files
+
+
+
+Time Available: Open
+
+***The Reference Folders Content-Never change but used to reference, copy, and deconstruct to rebuild***
+-RPGDatabaseManager: Contains a school project that is current state in a 16 week long coarse. This system is very modular and based on abstracts so more systems can be built off it. This is mostly to be used in managing the database as it grows.
+
+-UnrealTxtFilesOfNeedSystem: Several text files of nodes systems I built in Unreal Engine for a basic needs system that will become modular and more in depth. The txt files are of me copying the nodes and pasting in a txt file. These will need to be rebuilt as it will be an essential part of the characters and npcs of LucentForge. I am assuming the best file types for this is C++.
+
+-iso_rpg_lab: This is a project and code for stats of characters and monsters, items, abilities, ect. This was built in an attempt to test mechanics and systems for a balance of combat but started building some AI decision making for those combats to simulate the battles. These can either stay python if it can integrate into something that other engines can use or be remade into C++ files
+
+-Tower Defense: This folder I am not sure how much we need. It has alot of images in it for sprites and levels. The levels use images and CSV files for mapping. There is alot of mechanics for moving and stats that the iso_rpg_lab folder might be able to use. Maybe even the NeedSystem can use some of these movements to show visuals of a working system if I go the PyGames route and not Unreal for right now  
+
+-CreatureRepo: I love the thought of adding old technology that failed do to other tech not being progressed enough. Creatures the game was known for an AI need and personality system that was a head of its time but failed due to hardware and computer languages of the time. I want this rebuilt since its an open source project now and rebuilt for my system. CreatureRepo is there so we can learn and take from their need and personality system and integrate as our own.
+
+-TheMaze: This was a school project that was made in Java. It was so we can learn abstract classes and child classes. I ended up making a little moving and dialog system that had variable out comes and things needed to be done so events could change and win the game. Not sure if we need any of this and sure that it doesn't need to be Java files if we do need it can be rebuilt if need in another language.
+
+These files should be studied and deconstructed, then rebuilt into a /Mechanics folder. As you build this use SOLID principles to seperate mechanics of the game into proper folders.
+
+***IMPORTANT ADDITIONAL INFORMATION***
+-Maintain SOLID and LINQ principles
+-Keep things modular
+-Clean file structures and best practices
+-Directories and file names should be basic, clear, and short for what the file does
+-Make a README.md or update for each directory that would be updated.
+-Update a folder or directory that another AI agent or session can reference to know where you left off found in /LucentForge
+
+What feels unclear: Why there is so much data in the ReferenceFilesAndCode folder but the content of the Mechanics feels lack luster. Not saying it should be but it just seems more was freely created and did not use the references much past imagery. Also I keep saying SOLID, LINQ, and Modular Principles but I look in the files and it seems that some classes are just doing way to much and not broken down and abstract enough so they can be used in unique ways.
+
+Ask me questions to clarify the project requirements, technical requirements, functionality, engineering principles, hard constraints, and deliverables.
+
+Framework: (Used as the Agent Brain and Decision making as well as a learning Ai companion)
+C:\Users\Shawn\Documents\Workspace\Caelum\Caelum_Framework_Shawn_2026-03-12_Workflow_Expansion
+
+Canonical Session Log Location: ( this is for learning later)
+C:\Users\Shawn\Documents\Workspace\Caelum\Caelum_Framework_Shawn_2026-03-12_Workflow_Expansion\sessions\
+
+When this prompt is used:
+- create or resume the canonical session log in `sessions/` using `YYYY-MM-DD_HHMM_session_topic.md`
+- keep that log updated throughout the session
+- finalize that same log on `Session End`
+
+1 help orient me
+2 choose or adapt the right workflow
+3 produce a short execution plan

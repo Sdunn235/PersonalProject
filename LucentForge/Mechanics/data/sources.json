@@ -1,0 +1,32 @@
+[
+  {
+    "id": "food_source",
+    "need_id": "hunger",
+    "label": "FOOD",
+    "grid_col": 3,
+    "grid_row": 3,
+    "color": [ 180, 110, 50 ],
+    "satisfaction_amount": 80.0,
+    "interaction_time": 8.0
+  },
+  {
+    "id": "water_source",
+    "need_id": "thirst",
+    "label": "WATER",
+    "grid_col": 18,
+    "grid_row": 3,
+    "color": [ 50, 120, 200 ],
+    "satisfaction_amount": 80.0,
+    "interaction_time": 3.0
+  },
+  {
+    "id": "bed_source",
+    "need_id": "sleep",
+    "label": "BED",
+    "grid_col": 3,
+    "grid_row": 14,
+    "color": [ 80, 55, 140 ],
+    "satisfaction_amount": 80.0,
+    "interaction_time": 30.0
+  }
+]

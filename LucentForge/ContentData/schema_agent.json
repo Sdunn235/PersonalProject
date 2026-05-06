@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Schema",
+  "description": "LucentForge Agent data structure",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "name",
+    "traits",
+    "needs",
+    "skills",
+    "inventory",
+    "wealth",
+    "memory",
+    "social_graph"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "description": "Unique identifier for the agent"
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": ["merchant", "warrior", "farmer", "scholar", "adventurer"]
+    },
+    "traits": {
+      "type": "object",
+      "properties": {
+        "aggression": { "type": "number", "minimum": 0, "maximum": 1 },
+        "boldness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "curiosity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "greed": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sociability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "loyalty": { "type": "number", "minimum": 0, "maximum": 1 },
+        "patience": { "type": "number", "minimum": 0, "maximum": 1 },
+        "risk_tolerance": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "needs": {
+      "type": "object",
+      "properties": {
+        "hunger": { "type": "number", "minimum": 0, "maximum": 1 },
+        "thirst": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sleep": { "type": "number", "minimum": 0, "maximum": 1 },
+        "safety": { "type": "number", "minimum": 0, "maximum": 1 },
+        "social": { "type": "number", "minimum": 0, "maximum": 1 },
+        "wealth": { "type": "number", "minimum": 0, "maximum": 1 },
+        "power": { "type": "number", "minimum": 0, "maximum": 1 },
+        "curiosity": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "properties": {
+        "combat": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "crafting": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "leadership": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "farming": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "mining": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "trade_efficiency": { "type": "integer", "minimum": 0, "maximum": 10 }
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "wealth": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "events": { "type": "array" },
+        "relationships": { "type": "object" },
+        "trauma": { "type": "array" },
+        "success_count": { "type": "integer" },
+        "trade_history": { "type": "array" }
+      }
+    },
+    "social_graph": {
+      "type": "object",
+      "properties": {
+        "faction": { "type": "string" },
+        "reputation": { "type": "integer" },
+        "debt": { "type": "object" },
+        "oaths": { "type": "array" }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "hunger",
+    "label": "Hunger",
+    "warning_threshold": 60.0,
+    "critical_threshold": 30.0,
+    "decay_per_day": 180.0,
+    "fill_rate_sec": 8.0,
+    "hp_drain_per_day": 10.0,
+    "sleep_decay_mult": 0.2,
+    "chemical": "hunger_chem",
+    "drive_weight": 1.2
+  },
+  {
+    "id": "thirst",
+    "label": "Thirst",
+    "warning_threshold": 50.0,
+    "critical_threshold": 25.0,
+    "decay_per_day": 375.0,
+    "fill_rate_sec": 3.0,
+    "hp_drain_per_day": 50.0,
+    "sleep_decay_mult": 0.2,
+    "chemical": "thirst_chem",
+    "drive_weight": 1.4
+  },
+  {
+    "id": "sleep",
+    "label": "Sleep",
+    "warning_threshold": 40.0,
+    "critical_threshold": 20.0,
+    "decay_per_day": 90.0,
+    "fill_rate_sec": 30.0,
+    "hp_drain_per_day": 20.0,
+    "sleep_decay_mult": 1.0,
+    "chemical": "tiredness",
+    "drive_weight": 0.9
+  }
+]

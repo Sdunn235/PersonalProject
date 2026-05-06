@@ -1,0 +1,368 @@
+[
+  {
+    "id": "player",
+    "name": "Player",
+    "type": "player",
+    "subtype": "human",
+    "level": 5,
+    "character_class": "warrior",
+    "hp": 100,
+    "max_hp": 100,
+    "stats": {
+      "STR": 10,
+      "MAG": 6,
+      "LCK": 5,
+      "DEF": 5,
+      "RES": 0,
+      "DEX": 8
+    },
+    "traits": {
+      "curiosity": 0.5,
+      "aggression": 0.3,
+      "fearfulness": 0.2,
+      "sociability": 0.5
+    },
+    "cycles": {
+      "start": 100,
+      "max": 100
+    },
+    "mp": {
+      "start": 50,
+      "max": 50
+    },
+    "spawn": {
+      "col": 8,
+      "row": 1
+    },
+    "sprite": "assets/images/human_shadow_warrior.png",
+    "is_enemy": false,
+    "abilities": [ "strike", "power_blow", "recover" ],
+    "spells": [ "fireball", "heal_light" ],
+    "equipment": {
+      "weapon": "iron_sword",
+      "armor": "leather_armor"
+    },
+    "bag": [
+      {
+        "item_id": "health_potion",
+        "qty": 2
+      },
+      {
+        "item_id": "stamina_potion",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "id": "npc_01",
+    "name": "Alder",
+    "type": "npc",
+    "subtype": "human",
+    "level": 3,
+    "character_class": "ranger",
+    "hp": 80,
+    "max_hp": 80,
+    "stats": {
+      "STR": 12,
+      "MAG": 0,
+      "LCK": 5,
+      "DEF": 4,
+      "RES": 0,
+      "DEX": 6
+    },
+    "traits": {
+      "curiosity": 0.4,
+      "aggression": 0.3,
+      "fearfulness": 0.4,
+      "sociability": 0.6
+    },
+    "cycles": {
+      "start": 100,
+      "max": 100
+    },
+    "mp": {
+      "start": 50,
+      "max": 50
+    },
+    "spawn": {
+      "col": 12,
+      "row": 7
+    },
+    "sprite": "assets/images/human_corrupt_lord.png",
+    "is_enemy": true,
+    "abilities": [ "quick_shot", "heavy_draw", "volley" ],
+    "spells": [],
+    "equipment": {
+      "weapon": "iron_sword",
+      "armor": "leather_armor"
+    },
+    "bag": []
+  },
+  {
+    "id": "npc_02",
+    "name": "Sylva",
+    "type": "npc",
+    "subtype": "human",
+    "level": 4,
+    "character_class": "mage",
+    "hp": 70,
+    "max_hp": 70,
+    "stats": {
+      "STR": 8,
+      "MAG": 14,
+      "LCK": 5,
+      "DEF": 3,
+      "RES": 3,
+      "DEX": 9
+    },
+    "traits": {
+      "curiosity": 0.8,
+      "aggression": 0.5,
+      "fearfulness": 0.2,
+      "sociability": 0.4
+    },
+    "cycles": {
+      "start": 100,
+      "max": 100
+    },
+    "mp": {
+      "start": 50,
+      "max": 50
+    },
+    "spawn": {
+      "col": 13,
+      "row": 16
+    },
+    "sprite": "assets/images/human_mystic.png",
+    "is_enemy": true,
+    "abilities": [ "arcane_bolt", "focus_strike", "mend" ],
+    "spells": [ "ice_shard", "lightning", "heal_light" ],
+    "equipment": {
+      "weapon": "wooden_staff",
+      "armor": "cloth_robe"
+    },
+    "bag": []
+  },
+  {
+    "id": "npc_03",
+    "name": "Grom",
+    "type": "npc",
+    "subtype": "human",
+    "level": 4,
+    "character_class": "fighter",
+    "hp": 90,
+    "max_hp": 90,
+    "stats": {
+      "STR": 14,
+      "MAG": 0,
+      "LCK": 4,
+      "DEF": 6,
+      "RES": 0,
+      "DEX": 5
+    },
+    "traits": {
+      "curiosity": 0.2,
+      "aggression": 0.7,
+      "fearfulness": 0.1,
+      "sociability": 0.3
+    },
+    "cycles": {
+      "start": 100,
+      "max": 100
+    },
+    "mp": {
+      "start": 50,
+      "max": 50
+    },
+    "spawn": {
+      "col": 10,
+      "row": 10
+    },
+    "sprite": "assets/images/human_shadow_warrior.png",
+    "is_enemy": true,
+    "abilities": [ "strike", "crush", "guard" ],
+    "spells": [],
+    "equipment": {
+      "weapon": "iron_sword",
+      "armor": "leather_armor"
+    },
+    "bag": []
+  },
+  {
+    "id": "npc_04",
+    "name": "Elara",
+    "type": "npc",
+    "subtype": "human",
+    "level": 3,
+    "character_class": "mage",
+    "hp": 60,
+    "max_hp": 60,
+    "stats": {
+      "STR": 6,
+      "MAG": 12,
+      "LCK": 6,
+      "DEF": 3,
+      "RES": 4,
+      "DEX": 10
+    },
+    "traits": {
+      "curiosity": 0.7,
+      "aggression": 0.4,
+      "fearfulness": 0.3,
+      "sociability": 0.6
+    },
+    "cycles": {
+      "start": 100,
+      "max": 100
+    },
+    "mp": {
+      "start": 50,
+      "max": 50
+    },
+    "spawn": {
+      "col": 16,
+      "row": 12
+    },
+    "sprite": "assets/images/human_jacked_o_lantern.png",
+    "is_enemy": true,
+    "abilities": [ "spark", "focus_strike" ],
+    "spells": [ "ice_shard", "lightning", "heal_light" ],
+    "equipment": {
+      "weapon": "wooden_staff",
+      "armor": "cloth_robe"
+    },
+    "bag": []
+  },
+  {
+    "id": "goblin_01",
+    "name": "Gruk",
+    "type": "npc",
+    "subtype": "goblin",
+    "level": 1,
+    "character_class": "grunt",
+    "hp": 45,
+    "max_hp": 45,
+    "stats": {
+      "STR": 8,
+      "MAG": 0,
+      "LCK": 3,
+      "DEF": 2,
+      "RES": 0,
+      "DEX": 6
+    },
+    "traits": {
+      "curiosity": 0.3,
+      "aggression": 0.8,
+      "fearfulness": 0.5,
+      "sociability": 0.2
+    },
+    "cycles": {
+      "start": 80,
+      "max": 80
+    },
+    "mp": {
+      "start": 0,
+      "max": 0
+    },
+    "spawn": {
+      "col": 2,
+      "row": 13
+    },
+    "sprite": "assets/images/goblin_axeman.png",
+    "is_enemy": true,
+    "abilities": [ "strike" ],
+    "spells": [],
+    "equipment": {},
+    "bag": []
+  },
+  {
+    "id": "goblin_02",
+    "name": "Skrix",
+    "type": "npc",
+    "subtype": "goblin",
+    "level": 2,
+    "character_class": "scout",
+    "hp": 55,
+    "max_hp": 55,
+    "stats": {
+      "STR": 10,
+      "MAG": 0,
+      "LCK": 5,
+      "DEF": 3,
+      "RES": 0,
+      "DEX": 8
+    },
+    "traits": {
+      "curiosity": 0.4,
+      "aggression": 0.7,
+      "fearfulness": 0.4,
+      "sociability": 0.3
+    },
+    "cycles": {
+      "start": 90,
+      "max": 90
+    },
+    "mp": {
+      "start": 0,
+      "max": 0
+    },
+    "spawn": {
+      "col": 3,
+      "row": 14
+    },
+    "sprite": "assets/images/goblin_spearman.png",
+    "is_enemy": true,
+    "abilities": [ "strike", "quick_shot" ],
+    "spells": [],
+    "equipment": { "weapon": "iron_sword" },
+    "bag": []
+  },
+  {
+    "id": "dragon_01",
+    "name": "Ignarix",
+    "type": "npc",
+    "subtype": "dragon",
+    "level": 10,
+    "character_class": "wyrm",
+    "hp": 300,
+    "max_hp": 300,
+    "stats": {
+      "STR": 22,
+      "MAG": 18,
+      "LCK": 8,
+      "DEF": 12,
+      "RES": 8,
+      "DEX": 6
+    },
+    "traits": {
+      "curiosity": 0.1,
+      "aggression": 0.9,
+      "fearfulness": 0.0,
+      "sociability": 0.0
+    },
+    "cycles": {
+      "start": 150,
+      "max": 150
+    },
+    "mp": {
+      "start": 80,
+      "max": 80
+    },
+    "spawn": {
+      "col": 1,
+      "row": 8
+    },
+    "sprite": "assets/images/devil_demon.png",
+    "is_enemy": true,
+    "abilities": [ "crush", "strike" ],
+    "spells": [ "fireball", "lightning" ],
+    "equipment": {},
+    "bag": [],
+    "fire_damage": 25,
+    "resistances": {
+      "neutral": 1.0,
+      "fire": 0.25,
+      "ice": 1.75
+    }
+  }
+]

@@ -1,0 +1,179 @@
+[
+  {
+    "id": "strike",
+    "name": "Attack",
+    "kind": "attack",
+    "category": "basic",
+    "power": 1.0,
+    "cost_cycles": 8,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A basic physical strike."
+  },
+  {
+    "id": "power_blow",
+    "name": "Power Blow",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.6,
+    "cost_cycles": 12,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A heavy overhead swing dealing extra damage."
+  },
+  {
+    "id": "recover",
+    "name": "Recover",
+    "kind": "heal",
+    "category": "ability",
+    "amount_pct": 0.15,
+    "cost_cycles": 10,
+    "cost_mp": 0,
+    "description": "Rest briefly to recover HP."
+  },
+  {
+    "id": "quick_shot",
+    "name": "Quick Shot",
+    "kind": "attack",
+    "category": "ability",
+    "power": 0.9,
+    "cost_cycles": 0,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A fast arrow shot with reduced power."
+  },
+  {
+    "id": "heavy_draw",
+    "name": "Heavy Draw",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.5,
+    "cost_cycles": 12,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A fully drawn bowshot for maximum damage."
+  },
+  {
+    "id": "volley",
+    "name": "Volley",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.2,
+    "cost_cycles": 8,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "Rapid successive arrows."
+  },
+  {
+    "id": "arcane_bolt",
+    "name": "Arcane Bolt",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.1,
+    "cost_cycles": 0,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A bolt of raw arcane energy."
+  },
+  {
+    "id": "focus_strike",
+    "name": "Focus Strike",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.4,
+    "cost_cycles": 10,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "Channel focus into a precise strike."
+  },
+  {
+    "id": "mend",
+    "name": "Mend",
+    "kind": "heal",
+    "category": "ability",
+    "amount_pct": 0.12,
+    "cost_cycles": 10,
+    "cost_mp": 0,
+    "description": "Mend wounds with a healing touch."
+  },
+  {
+    "id": "crush",
+    "name": "Crush",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.7,
+    "cost_cycles": 14,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A devastating overhead crush."
+  },
+  {
+    "id": "guard",
+    "name": "Guard",
+    "kind": "heal",
+    "category": "ability",
+    "amount_pct": 0.10,
+    "cost_cycles": 8,
+    "cost_mp": 0,
+    "description": "Brace and recover a small amount of HP."
+  },
+  {
+    "id": "spark",
+    "name": "Spark",
+    "kind": "attack",
+    "category": "ability",
+    "power": 1.0,
+    "cost_cycles": 0,
+    "cost_mp": 0,
+    "element": "neutral",
+    "description": "A quick magical spark."
+  },
+  {
+    "id": "fireball",
+    "name": "Fireball",
+    "kind": "attack",
+    "category": "spell",
+    "power": 1.4,
+    "cost_cycles": 0,
+    "cost_mp": 15,
+    "element": "fire",
+    "stat": "MAG",
+    "description": "Hurls a ball of flame."
+  },
+  {
+    "id": "ice_shard",
+    "name": "Ice Shard",
+    "kind": "attack",
+    "category": "spell",
+    "power": 1.2,
+    "cost_cycles": 0,
+    "cost_mp": 10,
+    "element": "ice",
+    "stat": "MAG",
+    "description": "A fast shard of razor ice."
+  },
+  {
+    "id": "lightning",
+    "name": "Lightning",
+    "kind": "attack",
+    "category": "spell",
+    "power": 1.6,
+    "cost_cycles": 0,
+    "cost_mp": 20,
+    "element": "lightning",
+    "stat": "MAG",
+    "description": "Calls down a bolt of lightning."
+  },
+  {
+    "id": "heal_light",
+    "name": "Heal Light",
+    "kind": "heal",
+    "category": "spell",
+    "amount_pct": 0.20,
+    "cost_cycles": 0,
+    "cost_mp": 12,
+    "element": "holy",
+    "stat": "MAG",
+    "description": "A soft glow that mends wounds."
+  }
+]

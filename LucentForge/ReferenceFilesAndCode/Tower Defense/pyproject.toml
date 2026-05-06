@@ -1,0 +1,12 @@
+
+[project]
+name = "Tower Defense" 
+version = "0.2.0"
+description = "A simple tower defense game"
+authors = [
+    {name = "Shawn Dunn" , email = "sdunn15@my.wctc.edu"}
+]
+
+maintainers = [
+    {name = "Shawn Dunn" , email = "sdunn15@my.wctc.edu"}
+]
