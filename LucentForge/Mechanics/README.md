@@ -11,8 +11,9 @@ Core game systems for LucentForge. Each subfolder is one isolated concern (SOLID
 | `items/` | Item dataclass and loader |
 | `world/` | TileMap (CSV + procedural), BFS pathfinder |
 | `ai/` | NPC entity (hp, stats, cycles/stamina), NPCController (state machine), PlayerController (keyboard + source interaction) |
-| `renderer/` | EntitySprite (world-map stat bars), HealthBar, CombatScene, HUD |
+| `renderer/` | EntitySprite (world-map stat bars), HealthBar, CombatScene, HUD, ObservationPanel (H6 world-overview) |
+| `observation/` | Heartbeat-6: RunLogger — per-run CSV record (world/npcs) + emergence summary |
 
-## Key design ruleg
+## Key design rules
 `ai/controller.py` depends on abstractions from `needs/`, `biochem/`, and `world/` — never on renderer details.
 The biochem layer sits between raw needs and the decision layer. Personality traits only modify biochem weights, not game rules.

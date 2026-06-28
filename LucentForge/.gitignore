@@ -1,0 +1,9 @@
+# Heartbeat-6 run-logs (per-run CSV + summary)
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/

@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-04-07 (Session 22 — Heartbeat-5 Resource Economy + Fixes)
+# Session State — Last updated: 2026-06-27 (Heartbeat-6 Observation Layer — arc complete)
 
 ## Current status: STABLE — NEEDS VISUAL TEST
 
@@ -81,6 +81,14 @@
 - **Faster threat escalation**: PASSIVE threshold 30→20, hunger threat weight 0.05→0.12. Goblins reach RAIDING by day 2.
 - **Player source-aware fill**: PlayerController uses source-specific fill rates.
 
+## Heartbeat-6 (Observation Layer) — NEW (2026-06-27)
+- **Observation panel** (`renderer/observation_panel.py`): world-overview in the left margin — WORLD (day/town/food/threat+bar), SOURCES (finite stock bars), NPCS (per-character state + priority need + target). Toggle with `O` (default on).
+- **Run-log** (`observation/run_logger.py`): `RunLogger` writes `logs/run_<timestamp>/world.csv` + `npcs.csv` every `RUN_LOG_INTERVAL` (30) sim-ticks, plus `summary.txt` (min food, peak threat, raid count, worst town, final NPC state) on exit.
+- **Depletion-log de-dupe** (`needs/need_source.py`): `[ECON] … DEPLETED` is now edge-triggered (logs once on stock→0, re-arms only after >10% recovery). 86→6 lines over a 2-day run.
+- **Settings/ignore**: `OBS_PANEL_*`, `TOWN_STATE_COLORS`, `RUN_LOG_INTERVAL`, `RUN_LOG_DIR`; new `.gitignore` (`logs/`).
+- **Verified**: headless 36k-tick run crash-free (run-log cadence correct, panel render path exercised, summary written) + visual confirm by Shawn. **Heartbeat arc COMPLETE.**
+- **Env**: Python 3.14.6 + pygame-ce 2.5.7; run `python3 main.py`.
+
 ## Heartbeat Arc Status
 | Phase | Status |
 |-------|--------|
@@ -89,7 +97,7 @@
 | Heartbeat-3: NPC Decision Loop | **Complete** |
 | Heartbeat-4: Goblin Behavior | **Complete** |
 | Heartbeat-5: Resource Economy | **Complete** |
-| Heartbeat-6: Observation Layer | Next |
+| Heartbeat-6: Observation Layer | **Complete** |
 
 ## Known issues / next session work
 1. **Visual test needed** — Heartbeat-5 + fixes passed headless tests but needs live visual verification (stock bars, silo tile, BED relocation, riverbank tiles, raid behavior)

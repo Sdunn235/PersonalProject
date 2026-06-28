@@ -19,6 +19,8 @@ from Mechanics.ai.player import PlayerController
 from Mechanics.renderer.sprite import EntitySprite
 from Mechanics.renderer.hud import draw_hud
 from Mechanics.renderer.health_bar import draw_stat_bar
+from Mechanics.renderer.observation_panel import draw_observation_panel
+from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
 from Mechanics.ai.proximity import update_proximity_fear
 
@@ -80,6 +82,9 @@ def main():
           + ", ".join(f"{s.label}({s.stock:.0f}/{s.capacity:.0f})" for s in finite_sources))
     print()
 
+    # Heartbeat-6: per-run CSV log + emergence summary
+    run_logger = RunLogger(settings.RUN_LOG_DIR)
+
     sprite_group = pygame.sprite.Group(
         *[s for _, _, s in npc_list], player_sprite
     )
@@ -94,6 +99,7 @@ def main():
         (npc, ctrl, None) for npc, ctrl, _ in npc_list
     ]
     hud_index = 0
+    obs_visible = True   # Heartbeat-6 observation panel (toggle with 'O')
 
     # --- Game loop ---
     running          = True
@@ -112,6 +118,8 @@ def main():
                     running = False
                 elif event.key == pygame.K_TAB:
                     hud_index = (hud_index + 1) % len(_hud_subjects)
+                elif event.key == pygame.K_o:
+                    obs_visible = not obs_visible
 
         if not in_combat:
             # --- World simulation tick ---
@@ -132,6 +140,12 @@ def main():
             sim_ticks = world_sim.tick(dt, living_count, avg_goblin_hunger)
             if sim_ticks > 0 and world_sim.clock.tick_count % 30 == 0:
                 print(world_sim.status_line())
+
+            # Heartbeat-6: sample world + NPC state to the run-log
+            if (sim_ticks > 0
+                    and world_sim.clock.tick_count % settings.RUN_LOG_INTERVAL == 0):
+                run_logger.sample(world_sim, sources, npc_list,
+                                  defeated_npcs, world_sim.clock.tick_count)
 
             def _grid(entity):
                 return tile_map.world_to_grid(entity.x, entity.y)
@@ -227,6 +241,11 @@ def main():
         _state = _lbl         if _ctrl is None else _ctrl.state
         draw_hud(screen, _e, _needs, _state, font)
 
+        # Heartbeat-6: world-overview observation panel (left margin)
+        if obs_visible:
+            draw_observation_panel(screen, world_sim, sources, npc_list,
+                                   defeated_npcs, font)
+
         # Level border outline
         pygame.draw.rect(screen, (80, 80, 100),
                          pygame.Rect(settings.LEVEL_X - 2, settings.LEVEL_Y - 2,
@@ -242,6 +261,7 @@ def main():
 
         pygame.display.flip()
 
+    run_logger.finalize(world_sim, npc_list, defeated_npcs)
     pygame.quit()
     print("\n[EXIT] Session ended.")
 

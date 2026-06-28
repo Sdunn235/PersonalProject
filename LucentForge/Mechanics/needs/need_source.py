@@ -18,6 +18,8 @@ class NeedSource:
     stock: float = -1.0                # current units available (-1 = infinite)
     capacity: float = -1.0             # max units (-1 = infinite)
     regen_rate: float = 0.0            # units restored per sim tick
+    # Heartbeat-6: edge-triggered depletion logging (avoid raid-time spam)
+    _depleted_logged: bool = field(default=False, init=False, repr=False)
 
     @property
     def is_finite(self) -> bool:
@@ -32,7 +34,9 @@ class NeedSource:
         self.stock -= actual
         if self.stock <= 0 and actual > 0:
             self.stock = 0.0
-            print(f"[ECON] {self.label} DEPLETED (capacity={self.capacity:.0f})")
+            if not self._depleted_logged:   # H6: log once per depletion event
+                print(f"[ECON] {self.label} DEPLETED (capacity={self.capacity:.0f})")
+                self._depleted_logged = True
         return actual
 
     def regenerate(self) -> None:
@@ -42,6 +46,8 @@ class NeedSource:
         old_pct = self.stock / self.capacity if self.capacity > 0 else 0.0
         self.stock = min(self.capacity, self.stock + self.regen_rate)
         new_pct = self.stock / self.capacity
+        if self._depleted_logged and self.stock > self.capacity * 0.1:
+            self._depleted_logged = False   # H6: re-arm only after real recovery (>10%)
         for milestone in (0.25, 0.50, 0.75, 1.0):
             if old_pct < milestone <= new_pct:
                 print(f"[ECON] {self.label} regen {milestone * 100:.0f}% "

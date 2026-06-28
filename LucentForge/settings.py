@@ -208,3 +208,26 @@ SOURCE_BAR_OFFSET_Y    = -8      # pixels above source center tile
 
 # --- Economy Logging ---
 ECON_LOG_INTERVAL      = 30      # source stock summary every N sim ticks
+
+# =============================================================================
+# HEARTBEAT-6 — Observation Layer (world-overview panel + per-run CSV log)
+# =============================================================================
+
+# --- Observation panel (left margin; the level starts at LEVEL_X=224) ---
+OBS_PANEL_X        = 8        # left edge of the world-overview panel
+OBS_PANEL_W        = 208      # width — fits the free left margin
+OBS_PANEL_BG       = (18, 18, 24, 200)   # translucent dark background
+OBS_HEADER_COLOR   = (200, 200, 230)
+OBS_LABEL_COLOR    = (175, 175, 190)
+OBS_HINT_COLOR     = (100, 100, 120)
+
+# Town state -> panel color
+TOWN_STATE_COLORS  = {
+    "stable":     (68, 206, 27),    # green
+    "strained":   (242, 161, 52),   # orange
+    "collapsing": (229, 31, 31),    # red
+}
+
+# --- Run-log (CSV emergence record) ---
+RUN_LOG_INTERVAL   = 30      # sample world + NPC state every N sim ticks
+RUN_LOG_DIR        = "logs"  # per-run folders created here (gitignored)
