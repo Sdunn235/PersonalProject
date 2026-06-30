@@ -231,3 +231,10 @@ TOWN_STATE_COLORS  = {
 # --- Run-log (CSV emergence record) ---
 RUN_LOG_INTERVAL   = 30      # sample world + NPC state every N sim ticks
 RUN_LOG_DIR        = "logs"  # per-run folders created here (gitignored)
+
+# =============================================================================
+# PHASE 1.5 — World-State Save / Load
+# =============================================================================
+
+AUTOSAVE_INTERVAL  = 1800    # sim ticks between autosaves (~5 sim-minutes at 300s/day)
+SAVE_ON_QUIT       = True    # write save slot 0 on clean exit

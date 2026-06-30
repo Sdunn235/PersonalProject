@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 from Mechanics.data.db import Database
 from Mechanics.data.dao import SqliteDao
+from Mechanics.data.save_manager import SaveManager
 
 
 class GameContext:
@@ -27,10 +28,15 @@ class GameContext:
         self._items = SqliteDao(self._db, "items")
         self._needs = SqliteDao(self._db, "needs")
         self._sources = SqliteDao(self._db, "sources")
+        self._save_manager = SaveManager(self._db)
 
     @property
     def db(self) -> Database:
         return self._db
+
+    @property
+    def save_manager(self) -> SaveManager:
+        return self._save_manager
 
     @property
     def entities(self) -> SqliteDao:

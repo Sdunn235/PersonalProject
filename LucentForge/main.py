@@ -11,7 +11,8 @@ import pygame
 import settings
 
 from Mechanics.bootstrap import (create_game_context, create_needs,
-                                 create_npc_controller, create_world_sim)
+                                 create_npc_controller, create_world_sim,
+                                 apply_save)
 from Mechanics.entities.factory import create_player, create_all_npcs, get_sprite_path
 from Mechanics.needs.needs_system import apply_health_drain, apply_regen, update_needs
 from Mechanics.world.tile_map import TileMap
@@ -62,6 +63,7 @@ def main():
         print(f"[SPAWN] {npc.name} at ({int(npc.x)}, {int(npc.y)})")
 
     defeated_npcs: set[str] = set()
+    combat_cooldowns: dict[str, float] = {}
 
     # --- Spawn player from entities.json ---
     player = create_player(ctx)
@@ -81,6 +83,20 @@ def main():
     print(f"[H5] Resource economy active | {len(finite_sources)} finite sources: "
           + ", ".join(f"{s.label}({s.stock:.0f}/{s.capacity:.0f})" for s in finite_sources))
     print()
+
+    # --- Phase 1.5: restore world state from save if one exists ---
+    _npc_controllers = [ctrl for _, ctrl, _ in npc_list]
+    _save_data = ctx.save_manager.restore()
+    if _save_data:
+        apply_save(_save_data, world_sim, sources, _npc_controllers,
+                   player, player_needs, defeated_npcs, combat_cooldowns)
+        # Remove sprites for NPCs that were dead when we saved
+        for _npc_e, _, _npc_sprite in npc_list:
+            if _npc_e.entity_id in defeated_npcs:
+                _npc_sprite.kill()
+        print(f"[SAVE] Session resumed from save.")
+    else:
+        print(f"[SAVE] No save found — starting fresh.")
 
     # Heartbeat-6: per-run CSV log + emergence summary
     run_logger = RunLogger(settings.RUN_LOG_DIR)
@@ -102,10 +118,9 @@ def main():
     obs_visible = True   # Heartbeat-6 observation panel (toggle with 'O')
 
     # --- Game loop ---
-    running          = True
-    in_combat        = False
-    combat_cooldowns: dict[str, float] = {}
-    COMBAT_COOLDOWN  = 4.0
+    running         = True
+    in_combat       = False
+    COMBAT_COOLDOWN = 4.0
 
     while running:
         dt = clock.tick(settings.FPS) / 1000.0
@@ -120,6 +135,11 @@ def main():
                     hud_index = (hud_index + 1) % len(_hud_subjects)
                 elif event.key == pygame.K_o:
                     obs_visible = not obs_visible
+                elif event.key == pygame.K_s:
+                    ctx.save_manager.snapshot(
+                        world_sim, sources, _npc_controllers,
+                        player, player_needs, defeated_npcs, combat_cooldowns,
+                    )
 
         if not in_combat:
             # --- World simulation tick ---
@@ -140,6 +160,15 @@ def main():
             sim_ticks = world_sim.tick(dt, living_count, avg_goblin_hunger)
             if sim_ticks > 0 and world_sim.clock.tick_count % 30 == 0:
                 print(world_sim.status_line())
+
+            # Phase 1.5: periodic autosave
+            if (sim_ticks > 0
+                    and settings.AUTOSAVE_INTERVAL > 0
+                    and world_sim.clock.tick_count % settings.AUTOSAVE_INTERVAL == 0):
+                ctx.save_manager.snapshot(
+                    world_sim, sources, _npc_controllers,
+                    player, player_needs, defeated_npcs, combat_cooldowns,
+                )
 
             # Heartbeat-6: sample world + NPC state to the run-log
             if (sim_ticks > 0
@@ -260,6 +289,13 @@ def main():
         screen.blit(info_txt, (settings.LEVEL_X, 10))
 
         pygame.display.flip()
+
+    # Phase 1.5: save-on-quit
+    if settings.SAVE_ON_QUIT:
+        ctx.save_manager.snapshot(
+            world_sim, sources, _npc_controllers,
+            player, player_needs, defeated_npcs, combat_cooldowns,
+        )
 
     run_logger.finalize(world_sim, npc_list, defeated_npcs)
     pygame.quit()

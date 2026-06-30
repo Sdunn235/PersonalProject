@@ -1,7 +1,7 @@
-# Session State — Last updated: 2026-06-29 (Stage 1 Phase 1 — SQLite persistence backbone)
+# Session State — Last updated: 2026-06-30 (Stage 1 Phase 1.5 — World-state save/load)
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1
-Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a deepened Python data layer. Plan: `.claude/plans/session-start-caelum-glittery-meteor.md`.
+Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a deepened Python data layer. Plan: `.claude/plans/caelum-session-start-date-graceful-ladybug.md`.
 
 ### Phase 1 — SQLite Persistence Backbone — COMPLETE (2026-06-29, C0003)
 - Storage swapped from flat JSON to **SQLite** behind the existing DAO API — the game runs identically.
@@ -12,7 +12,16 @@ Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a de
 - `Mechanics/needs/need_factory.py`: uses `ctx.needs`. `.gitignore`: `*.db`.
 - **DB is a gitignored runtime artifact; JSON stays canonical.** Reseed = delete `lucentforge.db` + rerun.
 - Verified: fresh-seed, idempotent re-run, JSON round-trip, 36k-tick regression crash-free; confirmed in-game.
-- **NEXT: Phase 1.5 — world-state save/load** (snapshot world-sim/source-stock/per-NPC state to the DB, restore on launch).
+
+### Phase 1.5 — World-State Save/Load — COMPLETE (2026-06-30)
+- **`m0002_runtime_state.py`**: 4 new tables (`world_state`, `source_state`, `entity_state`, `game_state`), all with `slot_id INTEGER` for Phase 1.6 slot-picker UI. Migration registered in `migrations/__init__.py`.
+- **`Mechanics/data/save_manager.py`**: `SaveManager` Facade — `snapshot()` (single atomic transaction), `restore()` (returns `dict | None`), `has_save()`, `delete_save()`. Owned by `GameContext` as `ctx.save_manager`.
+- **`Mechanics/bootstrap.py`**: `apply_save()` — patches live `WorldSim`, sources, `NPCController` list, player, `defeated_npcs`, `combat_cooldowns` in place from restore data. NPCs drop to IDLE on load (re-evaluate within 1–2 ticks). Full state machine restore is Phase 1.6+.
+- **`main.py`**: restore on launch → `apply_save()` → kill sprites of defeated NPCs. `S` key = manual save. Autosave every `AUTOSAVE_INTERVAL` (1800) sim ticks. `SAVE_ON_QUIT=True` writes final snapshot before exit.
+- **What is saved**: clock tick/accumulator, threat level/stage, town state, finite source stocks, per-entity hp/x/y/cycles/mp/equipment/needs/traits/chemicals/memory, defeated NPC set, combat cooldowns.
+- **Boundary preserved**: m0001 content tables untouched; JSON stays canonical. Delete `lucentforge.db` → fresh game.
+- **Verified**: 3-test headless smoke suite (`scratchpad/smoke_test.py`) — fresh-seed, round-trip (500 ticks → snapshot → restore → assert), autosave interval. All PASS. Live DB migrated cleanly.
+- **NEXT: Phase 1.6** — Save slot UI (3 manual slots + autosave slot 0, slot-picker menu on launch).
 
 
 ## Current status: STABLE — NEEDS VISUAL TEST

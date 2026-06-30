@@ -1,14 +1,17 @@
-# Mechanics/data — Data Layer (SQLite-backed, Phase 1)
+# Mechanics/data — Data Layer (SQLite-backed, Phase 1 + Phase 1.5)
 
-Data access layer modeled after RPGDatabaseManager's `GameContext` + `IEntityDao` pattern. **Phase 1** moved storage from flat JSON to a real **SQLite** database; the query API is unchanged, so consumers don't care where the data lives.
+Data access layer modeled after RPGDatabaseManager's `GameContext` + `IEntityDao` pattern. **Phase 1** moved storage from flat JSON to a real **SQLite** database; the query API is unchanged, so consumers don't care where the data lives. **Phase 1.5** added world-state save/load via `SaveManager` and migration `m0002`.
 
 ## Architecture
 
 ```
 data/
   db.py            — Database: SQLite connection + hand-written migrations runner
-  migrations/      — Ordered, versioned migrations (m####_<name>.py); 0001 creates + seeds tables
-  context.py       — GameContext: owns the Database + one SqliteDao per collection
+  migrations/      — Ordered, versioned migrations (m####_<name>.py)
+    m0001_initial_content.py  — creates + seeds 5 content tables from JSON
+    m0002_runtime_state.py    — creates 4 runtime-state tables (Phase 1.5)
+  save_manager.py  — SaveManager: snapshot() + restore() for world runtime state
+  context.py       — GameContext: owns Database, 5 SqliteDao instances, and SaveManager
   dao.py           — Dao (JSON, legacy/fallback) + SqliteDao (LINQ-style query API over a table)
   loader.py        — Generic JSON loader (used by the seed migration)
   protocols.py     — IEntityDao / IContext Protocols
@@ -54,11 +57,42 @@ lucentforge.db  ──reload()──►  SqliteDao (in-memory dicts)  ──► 
 1. Edit the relevant `*.json` file (`id` is the primary key).
 2. **Delete `lucentforge.db`** and re-run — migration `0001` recreates and reseeds the tables.
 
-> The `.db` is a gitignored runtime artifact. The JSON files are the version-controlled source of truth. Runtime world-state save/load (NPC positions, source stocks, etc.) is **Phase 1.5** and will live only in the DB.
+> The `.db` is a gitignored runtime artifact. The JSON files are the version-controlled source of truth. Delete `lucentforge.db` for a complete fresh start (m0001 + m0002 re-run on next launch).
 
 ## Migrations
 
 `db.py` records applied versions in `schema_migrations` and runs pending ones in order on startup (idempotent). Add a new step as `migrations/m####_<name>.py` exposing `migrate(conn)`, then register it in `migrations/__init__.py`. Hand-edit migrations deliberately (TheForge discipline) — review before relying on them.
+
+## Phase 1.5 — World-State Save/Load
+
+`SaveManager` (`save_manager.py`) writes/reads runtime simulation state using the 4 tables from `m0002`:
+
+| Table | Key | What it stores |
+|-------|-----|----------------|
+| `world_state` | `slot_id` | Clock tick, goblin threat, town state |
+| `source_state` | `(slot_id, label)` | Finite source stock levels |
+| `entity_state` | `(slot_id, entity_id)` | HP, position, needs, traits, chemicals, memory |
+| `game_state` | `slot_id` | Defeated NPCs, combat cooldowns |
+
+All tables include a `slot_id INTEGER` column — Phase 1.5 uses slot 0; Phase 1.6 adds a slot-picker UI without schema changes.
+
+**API (via `ctx.save_manager`):**
+
+```python
+ctx.save_manager.snapshot(world_sim, sources, controllers, player, player_needs,
+                           defeated_npcs, combat_cooldowns)   # write slot 0
+ctx.save_manager.restore()    # -> dict | None (None = no save)
+ctx.save_manager.has_save()   # -> bool
+ctx.save_manager.delete_save()
+```
+
+**Boundary rule:** `m0002` tables are runtime-only. Never seed them from JSON. Delete `lucentforge.db` for a clean slate; the game re-seeds content from JSON and starts fresh automatically.
+
+**Integration in main.py:**
+- Launch: `restore()` → `apply_save()` if save exists; sprites of defeated NPCs removed
+- `S` key: manual snapshot
+- Autosave: every `AUTOSAVE_INTERVAL` sim ticks (default 1800, ~5 sim-minutes)
+- Quit: `SAVE_ON_QUIT=True` writes final snapshot before exit
 
 ## SOLID
 
