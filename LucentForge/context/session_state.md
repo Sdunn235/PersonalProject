@@ -1,4 +1,19 @@
-# Session State — Last updated: 2026-06-27 (Heartbeat-6 Observation Layer — arc complete)
+# Session State — Last updated: 2026-06-29 (Stage 1 Phase 1 — SQLite persistence backbone)
+
+## Forge-Combine Arc (TheForge → LucentForge) — Stage 1
+Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a deepened Python data layer. Plan: `.claude/plans/session-start-caelum-glittery-meteor.md`.
+
+### Phase 1 — SQLite Persistence Backbone — COMPLETE (2026-06-29, C0003)
+- Storage swapped from flat JSON to **SQLite** behind the existing DAO API — the game runs identically.
+- `Mechanics/data/db.py`: `Database` — sqlite3 connection + idempotent migrations runner (`schema_migrations` tracks applied versions).
+- `Mechanics/data/migrations/m0001_initial_content.py`: creates 5 document tables (`entities`, `abilities`, `items`, `needs`, `sources` — each `id TEXT PK, data JSON`) and seeds them from the canonical JSON files.
+- `Mechanics/data/dao.py`: new `SqliteDao` (same lambda query API as `Dao`; rows load into memory as dicts so **no call site changed**; `add/update/delete/save` write through). JSON `Dao` kept for hardcoded fallbacks.
+- `Mechanics/data/context.py`: `GameContext` opens the DB, runs migrations, owns DAOs for all 5 collections.
+- `Mechanics/needs/need_factory.py`: uses `ctx.needs`. `.gitignore`: `*.db`.
+- **DB is a gitignored runtime artifact; JSON stays canonical.** Reseed = delete `lucentforge.db` + rerun.
+- Verified: fresh-seed, idempotent re-run, JSON round-trip, 36k-tick regression crash-free; confirmed in-game.
+- **NEXT: Phase 1.5 — world-state save/load** (snapshot world-sim/source-stock/per-NPC state to the DB, restore on launch).
+
 
 ## Current status: STABLE — NEEDS VISUAL TEST
 
