@@ -1,6 +1,9 @@
 # Heartbeat-6 run-logs (per-run CSV + summary)
 logs/
 
+# Phase 1 SQLite store — runtime artifact, seeded from the canonical JSON
+*.db
+
 # Python
 __pycache__/
 *.py[cod]

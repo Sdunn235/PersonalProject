@@ -1,58 +1,69 @@
-# Mechanics/data — JSON Data Layer
+# Mechanics/data — Data Layer (SQLite-backed, Phase 1)
 
-Data access layer modeled after RPGDatabaseManager's GameContext + IEntityDao pattern.
+Data access layer modeled after RPGDatabaseManager's `GameContext` + `IEntityDao` pattern. **Phase 1** moved storage from flat JSON to a real **SQLite** database; the query API is unchanged, so consumers don't care where the data lives.
 
 ## Architecture
 
 ```
 data/
-  loader.py       — Generic JSON file loader (reads/writes JSON arrays)
-  dao.py          — Generic DAO with LINQ-style query methods
-  entities.json   — Entity definitions (player + NPCs: stats, traits, spawn, abilities, bag)
-  abilities.json  — All ability definitions (attack, heal, basic, spells)
-  items.json      — Item templates (consumables, gear)
-  spells.json     — Spell definitions (4 spells: fireball, ice_shard, lightning, heal_light)
+  db.py            — Database: SQLite connection + hand-written migrations runner
+  migrations/      — Ordered, versioned migrations (m####_<name>.py); 0001 creates + seeds tables
+  context.py       — GameContext: owns the Database + one SqliteDao per collection
+  dao.py           — Dao (JSON, legacy/fallback) + SqliteDao (LINQ-style query API over a table)
+  loader.py        — Generic JSON loader (used by the seed migration)
+  protocols.py     — IEntityDao / IContext Protocols
+  models.py        — Typed dataclasses (AbilityDef, ItemDef, EntityDef)
+  *.json           — Canonical seed content (see below)
+  lucentforge.db   — Runtime SQLite store (GITIGNORED; rebuilt from JSON by migration 0001)
 ```
 
-## Data Flow
+### Collections (one document table each)
+
+`entities` · `abilities` (includes spells) · `items` · `needs` · `sources`
+
+Each table is `(id TEXT PRIMARY KEY, data TEXT)` where `data` is the JSON for one record. On `reload()`, `SqliteDao` loads every row's `data` back into dicts, so the lambda-based query methods run in memory exactly as before.
+
+## Data flow
 
 ```
-JSON files  -->  loader.py (read)  -->  dao.py (query)  -->  consumers
-                                                              |
-                                                  ability_sets.py (combat abilities)
-                                                  spell_sets.py (combat spells)
-                                                  equip.py (equipment stat mods)
-                                                  items.py (combat inventory)
-                                                  factory.py (entity spawning)
-                                                  combat_scene.py (UI)
+*.json (canonical seed)
+   │  migration 0001 (once)
+   ▼
+lucentforge.db  ──reload()──►  SqliteDao (in-memory dicts)  ──►  consumers
+   ▲                                                              factory.py (spawning)
+   └─ GameContext opens DB + runs migrations on startup          ability_sets / spell_sets / equip / items (combat)
+                                                                  need_factory.py (needs)
 ```
 
-## DAO Query Methods (Python LINQ equivalents)
+## DAO query methods (Python LINQ equivalents — same on `Dao` and `SqliteDao`)
 
 | Method | LINQ Equivalent | Example |
 |---|---|---|
-| `get_all()` | `.ToList()` | `dao.get_all()` |
-| `get_by_id(id)` | `.FirstOrDefault(x => x.Id == id)` | `dao.get_by_id("strike")` |
-| `where(predicate)` | `.Where(pred).ToList()` | `dao.where(lambda a: a["kind"] == "heal")` |
-| `first_or_default(pred)` | `.FirstOrDefault(pred)` | `dao.first_or_default(lambda e: e["type"] == "npc")` |
-| `select(transform)` | `.Select(fn).ToList()` | `dao.select(lambda a: a["name"])` |
-| `any(predicate)` | `.Any(pred)` | `dao.any(lambda e: e["is_enemy"])` |
-| `count(predicate)` | `.Count(pred)` | `dao.count(lambda a: a["kind"] == "attack")` |
+| `get_all()` | `.ToList()` | `ctx.abilities.get_all()` |
+| `get_by_id(id)` | `.FirstOrDefault(x => x.Id == id)` | `ctx.abilities.get_by_id("strike")` |
+| `where(predicate)` | `.Where(pred).ToList()` | `ctx.entities.where(lambda e: e["type"] == "npc")` |
+| `first_or_default(pred)` | `.FirstOrDefault(pred)` | `ctx.entities.first_or_default(lambda e: e["is_enemy"])` |
+| `select(transform)` | `.Select(fn).ToList()` | `ctx.abilities.select(lambda a: a["name"])` |
+| `any(predicate)` | `.Any(pred)` | `ctx.entities.any(lambda e: e["is_enemy"])` |
+| `count(predicate)` | `.Count(pred)` | `ctx.abilities.count(lambda a: a["kind"] == "attack")` |
 
-## Adding New Content
+`add` / `update` / `delete` / `save` on `SqliteDao` write through to the table (keyed on `id`).
 
-- **New entity**: Add an entry to `entities.json` with `id`, `type`, `stats`, etc.
-- **New ability**: Add to `abilities.json`, then reference its `id` in entity's `abilities` array.
-- **New item**: Add to `items.json`, then reference its `id` in entity's `bag` array.
-- **New spell**: Add to `spells.json`, then reference its `id` in entity's `spells` array. Spells cost MP and scale off MAG stat.
-- **New equipment**: Add to `items.json` with `type: "weapon"/"armor"`, `slot`, and `effects`. Reference id in entity's `equipment` object.
+## Editing content (JSON stays canonical)
 
-No code changes needed for new content — just edit JSON.
+1. Edit the relevant `*.json` file (`id` is the primary key).
+2. **Delete `lucentforge.db`** and re-run — migration `0001` recreates and reseeds the tables.
 
-## SOLID Principles Applied
+> The `.db` is a gitignored runtime artifact. The JSON files are the version-controlled source of truth. Runtime world-state save/load (NPC positions, source stocks, etc.) is **Phase 1.5** and will live only in the DB.
 
-- **S**: Each file has one job (loader loads, dao queries, JSON stores data)
-- **O**: New entities/abilities/items added via JSON, not code changes
-- **L**: Dao works identically for any JSON content type
-- **I**: Consumers only import what they need (get_abilities_dao, get_items_dao, etc.)
-- **D**: Combat system depends on DAO abstractions, not hardcoded dicts
+## Migrations
+
+`db.py` records applied versions in `schema_migrations` and runs pending ones in order on startup (idempotent). Add a new step as `migrations/m####_<name>.py` exposing `migrate(conn)`, then register it in `migrations/__init__.py`. Hand-edit migrations deliberately (TheForge discipline) — review before relying on them.
+
+## SOLID
+
+- **S**: `db.py` connects/migrates, `dao.py` queries, JSON seeds, migrations evolve schema.
+- **O**: new content via JSON; new schema via a new migration file — no edits to existing code.
+- **L**: `Dao` and `SqliteDao` are interchangeable behind `IEntityDao`.
+- **I**: consumers depend only on the small DAO query surface.
+- **D**: systems depend on `GameContext` / DAO abstractions, not on storage details.

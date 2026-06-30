@@ -1,43 +1,67 @@
-# context.py — GameContext: single owner of all DAOs
-# Mirrors RPGDatabaseManager's GameContext class
+# context.py — GameContext: single owner of the database + all DAOs.
+# Mirrors RPGDatabaseManager's GameContext / IContext.
+#
+# Phase 1: data now lives in SQLite (lucentforge.db), seeded from the canonical
+# JSON files via migrations. The DAO query API is unchanged, so callers don't care.
 from __future__ import annotations
 import os
-from Mechanics.data.dao import Dao
+from Mechanics.data.db import Database
+from Mechanics.data.dao import SqliteDao
 
 
 class GameContext:
-    """Single point of data access. Owns all DAO instances.
+    """Single point of data access. Owns the Database and all collection DAOs.
 
     All game systems receive this via constructor injection instead of
     importing singleton functions.
     """
 
-    def __init__(self, data_dir: str | None = None):
+    def __init__(self, data_dir: str | None = None, db_path: str | None = None):
         if data_dir is None:
             data_dir = os.path.dirname(os.path.abspath(__file__))
         self._data_dir = data_dir
-        self._entities = Dao(os.path.join(data_dir, "entities.json"))
-        self._abilities = Dao(os.path.join(data_dir, "abilities.json"))
-        self._items = Dao(os.path.join(data_dir, "items.json"))
+        # Opening the Database runs pending migrations (creates + seeds on first run).
+        self._db = Database(db_path)
+        self._entities = SqliteDao(self._db, "entities")
+        self._abilities = SqliteDao(self._db, "abilities")
+        self._items = SqliteDao(self._db, "items")
+        self._needs = SqliteDao(self._db, "needs")
+        self._sources = SqliteDao(self._db, "sources")
 
     @property
-    def entities(self) -> Dao:
+    def db(self) -> Database:
+        return self._db
+
+    @property
+    def entities(self) -> SqliteDao:
         return self._entities
 
     @property
-    def abilities(self) -> Dao:
+    def abilities(self) -> SqliteDao:
         return self._abilities
 
     @property
-    def items(self) -> Dao:
+    def items(self) -> SqliteDao:
         return self._items
+
+    @property
+    def needs(self) -> SqliteDao:
+        return self._needs
+
+    @property
+    def sources(self) -> SqliteDao:
+        return self._sources
 
     def reload(self) -> None:
         self._entities.reload()
         self._abilities.reload()
         self._items.reload()
+        self._needs.reload()
+        self._sources.reload()
 
     def save(self) -> None:
         self._entities.save()
         self._abilities.save()
         self._items.save()
+        self._needs.save()
+        self._sources.save()
