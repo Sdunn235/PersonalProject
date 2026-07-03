@@ -13,6 +13,7 @@ import settings
 from Mechanics.bootstrap import (create_game_context, create_needs,
                                  create_npc_controller, create_world_sim,
                                  apply_save)
+from Mechanics.renderer.save_menu import run_load_menu, run_save_menu
 from Mechanics.entities.factory import create_player, create_all_npcs, get_sprite_path
 from Mechanics.needs.needs_system import apply_health_drain, apply_regen, update_needs
 from Mechanics.world.tile_map import TileMap
@@ -84,19 +85,22 @@ def main():
           + ", ".join(f"{s.label}({s.stock:.0f}/{s.capacity:.0f})" for s in finite_sources))
     print()
 
-    # --- Phase 1.5: restore world state from save if one exists ---
+    # --- Phase 1.6: launch slot-picker — always shown so New Game is reachable ---
     _npc_controllers = [ctrl for _, ctrl, _ in npc_list]
-    _save_data = ctx.save_manager.restore()
-    if _save_data:
-        apply_save(_save_data, world_sim, sources, _npc_controllers,
-                   player, player_needs, defeated_npcs, combat_cooldowns)
-        # Remove sprites for NPCs that were dead when we saved
-        for _npc_e, _, _npc_sprite in npc_list:
-            if _npc_e.entity_id in defeated_npcs:
-                _npc_sprite.kill()
-        print(f"[SAVE] Session resumed from save.")
+    _chosen_slot = run_load_menu(screen, clock, ctx, font)
+    if _chosen_slot is not None:
+        _save_data = ctx.save_manager.restore(slot_id=_chosen_slot)
+        if _save_data:
+            apply_save(_save_data, world_sim, sources, _npc_controllers,
+                       player, player_needs, defeated_npcs, combat_cooldowns)
+            for _npc_e, _, _npc_sprite in npc_list:
+                if _npc_e.entity_id in defeated_npcs:
+                    _npc_sprite.kill()
+            print(f"[SAVE] Session resumed from slot {_chosen_slot}.")
+        else:
+            print(f"[SAVE] Slot {_chosen_slot} empty — starting fresh.")
     else:
-        print(f"[SAVE] No save found — starting fresh.")
+        print("[SAVE] New Game — starting fresh.")
 
     # Heartbeat-6: per-run CSV log + emergence summary
     run_logger = RunLogger(settings.RUN_LOG_DIR)
@@ -136,10 +140,13 @@ def main():
                 elif event.key == pygame.K_o:
                     obs_visible = not obs_visible
                 elif event.key == pygame.K_s:
-                    ctx.save_manager.snapshot(
-                        world_sim, sources, _npc_controllers,
-                        player, player_needs, defeated_npcs, combat_cooldowns,
-                    )
+                    _slot = run_save_menu(screen, clock, ctx, font)
+                    if _slot is not None:
+                        ctx.save_manager.snapshot(
+                            world_sim, sources, _npc_controllers,
+                            player, player_needs, defeated_npcs, combat_cooldowns,
+                            slot_id=_slot,
+                        )
 
         if not in_combat:
             # --- World simulation tick ---

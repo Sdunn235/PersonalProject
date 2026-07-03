@@ -80,10 +80,14 @@ All tables include a `slot_id INTEGER` column — Phase 1.5 uses slot 0; Phase 1
 
 ```python
 ctx.save_manager.snapshot(world_sim, sources, controllers, player, player_needs,
-                           defeated_npcs, combat_cooldowns)   # write slot 0
-ctx.save_manager.restore()    # -> dict | None (None = no save)
-ctx.save_manager.has_save()   # -> bool
-ctx.save_manager.delete_save()
+                           defeated_npcs, combat_cooldowns, slot_id=0)   # write a slot
+ctx.save_manager.restore(slot_id=0)     # -> dict | None (None = no save in that slot)
+ctx.save_manager.has_save(slot_id=0)    # -> bool
+ctx.save_manager.delete_save(slot_id=0)
+
+# Phase 1.6 — lightweight display queries for the slot-picker UI
+ctx.save_manager.get_slot_info(slot_id)          # -> {slot_id, tick_count, town_state, saved_at} | None
+ctx.save_manager.list_all_slots([0, 1, 2, 3])    # -> list[dict | None], parallel to slot_ids
 ```
 
 **Boundary rule:** `m0002` tables are runtime-only. Never seed them from JSON. Delete `lucentforge.db` for a clean slate; the game re-seeds content from JSON and starts fresh automatically.

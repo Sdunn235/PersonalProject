@@ -215,3 +215,26 @@ class SaveManager:
             conn.execute("DELETE FROM entity_state WHERE slot_id = ?", (slot_id,))
             conn.execute("DELETE FROM game_state WHERE slot_id = ?",   (slot_id,))
         print(f"[SAVE] Slot {slot_id} deleted.")
+
+    def get_slot_info(self, slot_id: int) -> dict | None:
+        """Return lightweight display metadata for one slot, or None if empty.
+
+        Does NOT load the full save — used by the slot-picker UI to populate
+        the slot list without reading all entity and source data.
+        """
+        row = self._db.conn.execute(
+            "SELECT tick_count, town_state, saved_at FROM world_state WHERE slot_id = ?",
+            (slot_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return {
+            "slot_id":    slot_id,
+            "tick_count": row["tick_count"],
+            "town_state": row["town_state"],
+            "saved_at":   row["saved_at"],
+        }
+
+    def list_all_slots(self, slot_ids: list[int]) -> list[dict | None]:
+        """Return get_slot_info results for each slot_id, in order."""
+        return [self.get_slot_info(sid) for sid in slot_ids]

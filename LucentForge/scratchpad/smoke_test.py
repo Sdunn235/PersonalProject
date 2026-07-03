@@ -197,15 +197,62 @@ def test_autosave_interval():
         os.unlink(tmp_db)
 
 
+# ─── Test 4: Slot isolation — get_slot_info / list_all_slots ─────────────────
+
+def test_slot_isolation():
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx, world_sim, sources, npc_list, player, player_needs, d_npcs, cooldowns = \
+            _build_game(db_path=tmp_db)
+        controllers = [ctrl for _, ctrl in npc_list]
+
+        # Write different tick counts to slots 0, 1, 2
+        for slot, ticks in [(0, 100), (1, 200), (2, 300)]:
+            _tick_n(world_sim, npc_list, d_npcs, n=ticks - world_sim.clock.tick_count)
+            ctx.save_manager.snapshot(
+                world_sim, sources, controllers,
+                player, player_needs, d_npcs, cooldowns, slot_id=slot,
+            )
+
+        # Verify get_slot_info per slot
+        info0 = ctx.save_manager.get_slot_info(0)
+        info1 = ctx.save_manager.get_slot_info(1)
+        info2 = ctx.save_manager.get_slot_info(2)
+        info3 = ctx.save_manager.get_slot_info(3)   # never written
+
+        assert info0 is not None and info0["tick_count"] == 100, f"slot 0: {info0}"
+        assert info1 is not None and info1["tick_count"] == 200, f"slot 1: {info1}"
+        assert info2 is not None and info2["tick_count"] == 300, f"slot 2: {info2}"
+        assert info3 is None, f"slot 3 should be empty, got: {info3}"
+        assert "town_state" in info0 and "saved_at" in info0
+
+        # Verify list_all_slots
+        all_infos = ctx.save_manager.list_all_slots([0, 1, 2, 3])
+        assert len(all_infos) == 4
+        assert all_infos[0]["tick_count"] == 100
+        assert all_infos[1]["tick_count"] == 200
+        assert all_infos[2]["tick_count"] == 300
+        assert all_infos[3] is None
+
+        print("[TEST 4 PASS] Slot isolation — slots 0/1/2 independent, slot 3 empty, list_all_slots correct")
+    finally:
+        if ctx: ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ─────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Phase 1.5 — Save/Load Smoke Test")
+    print("Phase 1.5 / 1.6 — Save/Load Smoke Tests")
     print("=" * 60)
     test_fresh_seed()
     test_round_trip()
     test_autosave_interval()
+    test_slot_isolation()
     print("=" * 60)
     print("All tests passed.")
     print("=" * 60)

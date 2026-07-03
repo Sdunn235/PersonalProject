@@ -238,3 +238,7 @@ RUN_LOG_DIR        = "logs"  # per-run folders created here (gitignored)
 
 AUTOSAVE_INTERVAL  = 1800    # sim ticks between autosaves (~5 sim-minutes at 300s/day)
 SAVE_ON_QUIT       = True    # write save slot 0 on clean exit
+
+# PHASE 1.6 — Save Slot UI
+AUTOSAVE_SLOT_ID   = 0       # slot 0 is reserved for autosave and quit-save
+SAVE_SLOT_COUNT    = 3       # manual save slots (IDs 1, 2, 3)
