@@ -54,27 +54,35 @@ def main():
     sources  = tile_map.get_need_sources()
     world_sim = create_world_sim(sources)
 
-    # --- Spawn NPCs from entities.json ---
-    npc_list = []  # each entry: (entity, controller, sprite)
-    for npc in create_all_npcs(ctx):
-        controller = create_npc_controller(npc, ctx, sources, tile_map,
-                                              world_sim=world_sim)
-        sprite     = EntitySprite(npc, image_path=get_sprite_path(ctx, npc.entity_id),
+    # --- Inner helper: spawn fresh NPCs, player, controllers, sprites ---
+    # Closure reads world_sim at call time — rebind world_sim before calling for New Game.
+    def _spawn_entities():
+        _npc_list = []
+        for npc in create_all_npcs(ctx):
+            controller = create_npc_controller(npc, ctx, sources, tile_map,
+                                               world_sim=world_sim)
+            sprite = EntitySprite(npc, image_path=get_sprite_path(ctx, npc.entity_id),
                                   size=settings.TILE_SIZE - 2)
-        npc_list.append((npc, controller, sprite))
-        print(f"[SPAWN] {npc.name} at ({int(npc.x)}, {int(npc.y)})")
+            _npc_list.append((npc, controller, sprite))
+            print(f"[SPAWN] {npc.name} at ({int(npc.x)}, {int(npc.y)})")
+        _player = create_player(ctx)
+        _player_needs = create_needs(ctx)
+        _player_ctrl = PlayerController(_player, tile_map=tile_map,
+                                        needs=_player_needs, sources=sources)
+        _player_sprite = EntitySprite(_player,
+                                      image_path=get_sprite_path(ctx, _player.entity_id),
+                                      size=settings.TILE_SIZE - 2)
+        print(f"[SPAWN] Player at ({int(_player.x)}, {int(_player.y)})  [Arrow keys to move]")
+        _defeated: set[str] = set()
+        _cooldowns: dict[str, float] = {}
+        _ctrls = [ctrl for _, ctrl, _ in _npc_list]
+        _group = pygame.sprite.Group(*[s for _, _, s in _npc_list], _player_sprite)
+        return (_npc_list, _player, _player_needs, _player_ctrl,
+                _player_sprite, _group, _ctrls, _defeated, _cooldowns)
 
-    defeated_npcs: set[str] = set()
-    combat_cooldowns: dict[str, float] = {}
+    (npc_list, player, player_needs, player_controller, player_sprite,
+     sprite_group, _npc_controllers, defeated_npcs, combat_cooldowns) = _spawn_entities()
 
-    # --- Spawn player from entities.json ---
-    player = create_player(ctx)
-    player_needs = create_needs(ctx)
-    player_controller = PlayerController(player, tile_map=tile_map,
-                                         needs=player_needs, sources=sources)
-    player_sprite     = EntitySprite(player, image_path=get_sprite_path(ctx, player.entity_id),
-                                     size=settings.TILE_SIZE - 2)
-    print(f"[SPAWN] Player at ({int(player.x)}, {int(player.y)})  [Arrow keys to move]")
     print(f"\n[WORLD SIM] Heartbeat-1 active | "
           f"Food={world_sim.resources.food_total:.0f} | "
           f"Threat={world_sim.threat.threat_level:.0f} | "
@@ -87,7 +95,6 @@ def main():
     print()
 
     # --- Phase 1.6: launch slot-picker — always shown so New Game is reachable ---
-    _npc_controllers = [ctrl for _, ctrl, _ in npc_list]
     _chosen_slot = run_load_menu(screen, clock, ctx, font)
     if _chosen_slot is not None:
         _save_data = ctx.save_manager.restore(slot_id=_chosen_slot)
@@ -105,10 +112,6 @@ def main():
 
     # Heartbeat-6: per-run CSV log + emergence summary
     run_logger = RunLogger(settings.RUN_LOG_DIR)
-
-    sprite_group = pygame.sprite.Group(
-        *[s for _, _, s in npc_list], player_sprite
-    )
 
     # --- Source label font ---
     label_font = pygame.font.SysFont(None, 18)
@@ -144,6 +147,29 @@ def main():
                     if _result == "quit":
                         _paused_quit = True
                         running = False
+                    elif _result == "new_game":
+                        world_sim = create_world_sim(sources)
+                        (npc_list, player, player_needs, player_controller,
+                         player_sprite, sprite_group, _npc_controllers,
+                         defeated_npcs, combat_cooldowns) = _spawn_entities()
+                        _hud_subjects = [(player, None, "Player")] + [
+                            (npc, ctrl, None) for npc, ctrl, _ in npc_list
+                        ]
+                        hud_index = 0
+                        run_logger = RunLogger(settings.RUN_LOG_DIR)
+                    elif _result.startswith("load:"):
+                        _slot_id = int(_result.split(":")[1])
+                        _save_data = ctx.save_manager.restore(slot_id=_slot_id)
+                        if _save_data:
+                            for _, _, _npc_s in npc_list:
+                                sprite_group.add(_npc_s)
+                            apply_save(_save_data, world_sim, sources, _npc_controllers,
+                                       player, player_needs, defeated_npcs, combat_cooldowns)
+                            for _npc_e, _, _npc_s in npc_list:
+                                if _npc_e.entity_id in defeated_npcs:
+                                    _npc_s.kill()
+                            print(f"[SAVE] Session resumed from slot {_slot_id}.")
+                    # else "resume" — continue
                 elif event.key == pygame.K_TAB:
                     hud_index = (hud_index + 1) % len(_hud_subjects)
                 elif event.key == pygame.K_o:

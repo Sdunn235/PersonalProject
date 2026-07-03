@@ -1,7 +1,7 @@
 import pygame
 import settings
 from Mechanics.data.context import GameContext
-from Mechanics.renderer.save_menu import run_save_menu
+from Mechanics.renderer.save_menu import run_load_menu, run_save_menu
 
 _BG      = (20, 20, 28)
 _HEADER  = (200, 200, 230)
@@ -10,7 +10,7 @@ _HL_TEXT = (20, 20, 30)
 _TEXT    = (240, 240, 240)
 _HINT    = (100, 100, 120)
 
-_OPTIONS = ["Resume", "Save", "Quit"]
+_OPTIONS = ["Resume", "Save", "Load", "New Game", "Quit"]
 
 
 def run_pause_menu(
@@ -23,8 +23,10 @@ def run_pause_menu(
 ) -> str:
     """
     Modal pause screen. Returns:
-      "resume" — player chose Resume or pressed Esc again
-      "quit"   — player chose Quit (save-on-quit handled internally)
+      "resume"       — player chose Resume or pressed Esc again
+      "quit"         — player chose Quit (save-on-quit handled internally)
+      "new_game"     — player chose New Game
+      "load:{n}"     — player chose a save slot n (0-3) from the Load modal
     """
     cursor = 0
     W, H = screen.get_size()
@@ -60,6 +62,13 @@ def run_pause_menu(
                                 combat_cooldowns, slot_id=_slot,
                             )
                         # fall through — stay in pause menu after save
+                    if choice == "Load":
+                        _slot = run_load_menu(screen, clock, ctx, font)
+                        if _slot is not None:
+                            return f"load:{_slot}"
+                        # None = cancelled — stay in pause menu
+                    if choice == "New Game":
+                        return "new_game"
                     if choice == "Quit":
                         if settings.SAVE_ON_QUIT:
                             ctx.save_manager.snapshot(
@@ -79,7 +88,7 @@ def _draw_pause(screen, W, H, cursor, title_font, option_font, hint_font):
     overlay.fill((0, 0, 0, 160))
     screen.blit(overlay, (0, 0))
 
-    panel_w, panel_h = 320, 220
+    panel_w, panel_h = 320, 290
     px = (W - panel_w) // 2
     py = (H - panel_h) // 2
     pygame.draw.rect(screen, _BG, (px, py, panel_w, panel_h), border_radius=8)
