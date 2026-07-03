@@ -14,6 +14,7 @@ from Mechanics.bootstrap import (create_game_context, create_needs,
                                  create_npc_controller, create_world_sim,
                                  apply_save)
 from Mechanics.renderer.save_menu import run_load_menu, run_save_menu
+from Mechanics.renderer.pause_menu import run_pause_menu
 from Mechanics.entities.factory import create_player, create_all_npcs, get_sprite_path
 from Mechanics.needs.needs_system import apply_health_drain, apply_regen, update_needs
 from Mechanics.world.tile_map import TileMap
@@ -125,6 +126,7 @@ def main():
     running         = True
     in_combat       = False
     COMBAT_COOLDOWN = 4.0
+    _paused_quit    = False
 
     while running:
         dt = clock.tick(settings.FPS) / 1000.0
@@ -134,7 +136,14 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
+                    _result = run_pause_menu(
+                        screen, clock, ctx, font,
+                        world_sim, sources, _npc_controllers,
+                        player, player_needs, defeated_npcs, combat_cooldowns,
+                    )
+                    if _result == "quit":
+                        _paused_quit = True
+                        running = False
                 elif event.key == pygame.K_TAB:
                     hud_index = (hud_index + 1) % len(_hud_subjects)
                 elif event.key == pygame.K_o:
@@ -297,8 +306,8 @@ def main():
 
         pygame.display.flip()
 
-    # Phase 1.5: save-on-quit
-    if settings.SAVE_ON_QUIT:
+    # Phase 1.5: save-on-quit (window-close path only; pause-menu quit saves internally)
+    if settings.SAVE_ON_QUIT and not _paused_quit:
         ctx.save_manager.snapshot(
             world_sim, sources, _npc_controllers,
             player, player_needs, defeated_npcs, combat_cooldowns,
