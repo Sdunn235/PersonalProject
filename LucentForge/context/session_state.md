@@ -1,7 +1,24 @@
-# Session State — Last updated: 2026-06-30 (Stage 1 Phase 1.5 — World-state save/load)
+# Session State — Last updated: 2026-07-04 (Stage 1 COMPLETE — Stage 2 Items/Equipment NEXT)
 
-## Forge-Combine Arc (TheForge → LucentForge) — Stage 1
-Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a deepened Python data layer. Plan: `.claude/plans/caelum-session-start-date-graceful-ladybug.md`.
+## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE
+
+### Stage 1 Summary
+| Phase | Commit | Description | Status |
+|-------|--------|-------------|--------|
+| Phase 1 | C0003 | SQLite persistence backbone (DAO swap, migrations, seeding) | COMPLETE |
+| Phase 1.5 | C0005 | World-state save/load (SaveManager, apply_save, autosave) | COMPLETE |
+| Phase 1.6 | C0006 | Save slot UI (run_load_menu + run_save_menu modals, 4 slots) | COMPLETE |
+| Phase 1.7 | C0007 | Pause menu modal (Resume / Save / Quit, _paused_quit flag) | COMPLETE |
+| Phase 1.8 | C0008 | Load + New Game from pause (_spawn_entities closure, sprite revival) | COMPLETE |
+
+**Stage 2 — Items / Equipment: NEXT**
+Planning session required before implementation. Read LucentForge bible items section first.
+Opus recommended for planning session. Key existing code: `Mechanics/combat/equip.py`,
+`Mechanics/combat/items.py`, `data/items.json`.
+
+---
+
+Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-07-04.
 
 ### Phase 1 — SQLite Persistence Backbone — COMPLETE (2026-06-29, C0003)
 - Storage swapped from flat JSON to **SQLite** behind the existing DAO API — the game runs identically.
@@ -21,10 +38,7 @@ Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a de
 - **What is saved**: clock tick/accumulator, threat level/stage, town state, finite source stocks, per-entity hp/x/y/cycles/mp/equipment/needs/traits/chemicals/memory, defeated NPC set, combat cooldowns.
 - **Boundary preserved**: m0001 content tables untouched; JSON stays canonical. Delete `lucentforge.db` → fresh game.
 - **Verified**: 3-test headless smoke suite (`scratchpad/smoke_test.py`) — fresh-seed, round-trip (500 ticks → snapshot → restore → assert), autosave interval. All PASS. Live DB migrated cleanly.
-- **NEXT: Phase 1.6** — Save slot UI (3 manual slots + autosave slot 0, slot-picker menu on launch).
-
-
-## Current status: STABLE — NEEDS VISUAL TEST
+## Current status: STABLE — Stage 1 COMPLETE, Stage 2 NEXT
 
 ## What works right now
 - `python main.py` — 1024x768 window, 576x576 level centered with border zones
@@ -111,7 +125,7 @@ Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a de
 - **Depletion-log de-dupe** (`needs/need_source.py`): `[ECON] … DEPLETED` is now edge-triggered (logs once on stock→0, re-arms only after >10% recovery). 86→6 lines over a 2-day run.
 - **Settings/ignore**: `OBS_PANEL_*`, `TOWN_STATE_COLORS`, `RUN_LOG_INTERVAL`, `RUN_LOG_DIR`; new `.gitignore` (`logs/`).
 - **Verified**: headless 36k-tick run crash-free (run-log cadence correct, panel render path exercised, summary written) + visual confirm by Shawn. **Heartbeat arc COMPLETE.**
-- **Env**: Python 3.14.6 + pygame-ce 2.5.7; run `python3 main.py`.
+- **Env**: Python 3.14.6 + pygame-ce 2.5.7; run `py main.py` (Windows PowerShell — `python3` unavailable).
 
 ## Heartbeat Arc Status
 | Phase | Status |
@@ -141,8 +155,9 @@ Heartbeat arc is closed; now combining TheForge's depth into LucentForge as a de
 ## How to run
 ```
 cd "C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge"
-python main.py
+py main.py
 ```
+(Use `py` on Windows PowerShell — `python3` and `python` may not resolve correctly.)
 Arrow keys = move player
 Walk into any NPC to trigger combat
 Tab = cycle right-side HUD between entities
