@@ -42,6 +42,7 @@ class SaveManager:
         defeated_npcs: set,
         combat_cooldowns: dict,
         slot_id: int = _DEFAULT_SLOT,
+        bags: dict[str, list] | None = None,
     ) -> None:
         """Write full world state to the given slot in a single transaction."""
         conn = self._db.conn
@@ -91,8 +92,8 @@ class SaveManager:
                 conn.execute(
                     "INSERT INTO entity_state "
                     "(slot_id, entity_id, hp, x, y, cycles, mp, equipment, needs, "
-                    "chemicals, traits, memory, ai_state, ai_data) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "chemicals, traits, memory, ai_state, ai_data, bag) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         slot_id,
                         npc.entity_id,
@@ -108,6 +109,7 @@ class SaveManager:
                         json.dumps(mem_data),
                         ctrl.state,
                         json.dumps({}),
+                        json.dumps((bags or {}).get(npc.entity_id, [])),
                     ),
                 )
 
@@ -117,8 +119,8 @@ class SaveManager:
             conn.execute(
                 "INSERT INTO entity_state "
                 "(slot_id, entity_id, hp, x, y, cycles, mp, equipment, needs, "
-                "chemicals, traits, memory, ai_state, ai_data) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "chemicals, traits, memory, ai_state, ai_data, bag) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     slot_id,
                     player.entity_id,
@@ -134,6 +136,7 @@ class SaveManager:
                     json.dumps({}),
                     "PLAYER",
                     json.dumps({}),
+                    json.dumps((bags or {}).get(player.entity_id, [])),
                 ),
             )
 
@@ -198,6 +201,7 @@ class SaveManager:
                     "traits":    json.loads(row["traits"]),
                     "memory":    json.loads(row["memory"]),
                     "ai_state":  row["ai_state"],
+                    "bag":       json.loads(row["bag"]) if row["bag"] else [],
                 }
                 for row in entity_rows
             },

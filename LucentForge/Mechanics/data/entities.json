@@ -50,6 +50,10 @@
       {
         "item_id": "stamina_potion",
         "qty": 1
+      },
+      {
+        "item_id": "lockpick",
+        "qty": 1
       }
     ]
   },
@@ -96,7 +100,12 @@
       "weapon": "iron_sword",
       "armor": "leather_armor"
     },
-    "bag": []
+    "bag": [
+      {
+        "item_id": "health_potion",
+        "qty": 1
+      }
+    ]
   },
   {
     "id": "npc_02",
@@ -186,7 +195,12 @@
       "weapon": "iron_sword",
       "armor": "leather_armor"
     },
-    "bag": []
+    "bag": [
+      {
+        "item_id": "health_potion",
+        "qty": 1
+      }
+    ]
   },
   {
     "id": "npc_04",

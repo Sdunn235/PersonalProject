@@ -173,3 +173,56 @@ def create_npc_controller(npc, ctx: GameContext,
         behavior = HumanBehavior()
     return NPCController(npc, needs, brain, sources, tile_map,
                           behavior=behavior)
+
+
+def create_item_services(ctx: GameContext):
+    """Seed InventoryService + EquipmentService from entities.json starting kits.
+    For the save-load path, call rebuild_item_services() after apply_save() instead.
+    Returns (InventoryService, EquipmentService).
+    """
+    from Mechanics.services.inventory_service import InventoryService
+    from Mechanics.services.equipment_service import EquipmentService
+    from Mechanics.items.containers import Inventory, EquipmentSet, ItemStack
+
+    inv_svc   = InventoryService()
+    equip_svc = EquipmentService(ctx.item_repo)
+
+    for entity_def in ctx.entities.get_all():
+        entity_id = entity_def["id"]
+        stacks = [
+            ItemStack(item, entry.get("qty", 1))
+            for entry in entity_def.get("bag", [])
+            if (item := ctx.item_repo.find_by_id(entry["item_id"]))
+        ]
+        inv_svc.register(entity_id, Inventory(entity_id, stacks))
+
+        equip_set = EquipmentSet(entity_id)
+        for slot_name, item_id in entity_def.get("equipment", {}).items():
+            item = ctx.item_repo.find_by_id(item_id)
+            if item:
+                equip_set.put_slot(slot_name, item)
+        equip_svc.register(entity_id, equip_set)
+
+    return inv_svc, equip_svc
+
+
+def rebuild_item_services(save_data: dict, inv_svc, equip_svc, item_repo) -> None:
+    """Rebuild InventoryService + EquipmentService from a restored save dict.
+    Call immediately after apply_save() on the load path.
+    """
+    from Mechanics.items.containers import Inventory, EquipmentSet, ItemStack
+
+    for entity_id, edata in save_data["entities"].items():
+        stacks = [
+            ItemStack(item, e.get("qty", 1))
+            for e in edata.get("bag", [])
+            if (item := item_repo.find_by_id(e["item_id"]))
+        ]
+        inv_svc.register(entity_id, Inventory(entity_id, stacks))
+
+        equip_set = EquipmentSet(entity_id)
+        for slot_name, item_id in edata.get("equipment", {}).items():
+            item = item_repo.find_by_id(item_id)
+            if item:
+                equip_set.put_slot(slot_name, item)
+        equip_svc.register(entity_id, equip_set)

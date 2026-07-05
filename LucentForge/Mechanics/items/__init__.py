@@ -9,6 +9,7 @@ from .enums import (
 )
 from .models import Armor, Consumable, DurableItem, Item, Shield, Weapon
 from .repos import IItemRepository, ItemRepository
+from .containers import EquipmentSet, Inventory, ItemStack
 
 __all__ = [
     "SlotType",
@@ -26,4 +27,7 @@ __all__ = [
     "Consumable",
     "IItemRepository",
     "ItemRepository",
+    "ItemStack",
+    "Inventory",
+    "EquipmentSet",
 ]

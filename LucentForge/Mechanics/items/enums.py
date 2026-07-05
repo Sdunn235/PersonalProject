@@ -43,6 +43,7 @@ class ConsumableEffect(IntEnum):
     HEAL       = 1
     RESTORE_SP = 2
     RESTORE_MP = 3        # non-canonical bridge term; reconcile Stage 4
+    UNLOCK     = 4        # §A1 capability grant; mechanic deferred to Stage 3
 
 
 class TrapType(IntFlag):

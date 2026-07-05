@@ -242,3 +242,9 @@ SAVE_ON_QUIT       = True    # write save slot 0 on clean exit
 # PHASE 1.6 — Save Slot UI
 AUTOSAVE_SLOT_ID   = 0       # slot 0 is reserved for autosave and quit-save
 SAVE_SLOT_COUNT    = 3       # manual save slots (IDs 1, 2, 3)
+
+# =============================================================================
+# PHASE 2.3 — Inventory carry budget (§A2)
+# =============================================================================
+CARRY_BASE    = 20   # base carry capacity in weight units
+CARRY_PER_STR = 2    # additional capacity per point of STR
