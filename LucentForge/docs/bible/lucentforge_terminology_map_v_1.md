@@ -1,0 +1,267 @@
+# LucentForge Terminology Reconciliation Map v1
+
+**Created:** 2026-07-05 | **Stage:** 2.0 | **Authority:** LucentForge Bible (Foundation v1)
+
+---
+
+## Purpose
+
+Three codebases contribute to LucentForge's item system:
+
+1. **The Bible** (`lucentforge_simulation_foundation_v_1.md`) — naming and semantics authority
+2. **TheForge C#** (`TheForge/ConsoleRpgEntities/`) — structural blueprint (read-only reference)
+3. **LucentForge Python** (`Mechanics/`) — the live implementation
+
+These three sources have drifted from each other. This map is the managed reconciliation. Every
+time a feature is ported from TheForge into LucentForge Python, it gets a reconciliation pass
+against this map before implementation.
+
+---
+
+## Standing Rule (applies to all stages, 2.0 through 5)
+
+> **TheForge is the structural blueprint. The bible is the naming and semantics authority.**
+>
+> When TheForge and the bible agree on a term: use that term.
+> When they conflict: the bible wins.
+> When the bible is silent: adopt TheForge's name in snake_case, and record it here.
+> When neither names the concept: invent a world-native term and record it here.
+>
+> **Every TheForge import gets a reconciliation pass against this map before implementation.**
+
+Extend this map as each stage imports more concepts from TheForge or the bible deepens.
+
+---
+
+## Section 1 — Core Attributes
+
+The bible (§4.1) defines seven core attributes. TheForge's `CoreAttribute` enum matches exactly.
+LucentForge Python does not yet have attribute objects — it uses a combat stat shim.
+
+| Bible (§4.1) | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| Physique | `CoreAttribute.Physique` | `Stats.STR` | Docs/comments: "Physique"; runtime shim: Physique → STR |
+| Reflexes | `CoreAttribute.Reflexes` | `Stats.DEX` | Docs/comments: "Reflexes"; runtime shim: Reflexes → DEX |
+| Intuition | `CoreAttribute.Intuition` | — (no analog) | `attribute_term(Intuition) = 0` until Stage 4; trap recognition hints are unreliable/rare |
+| Luck | `CoreAttribute.Luck` | `Stats.LCK` | Docs/comments: "Luck"; runtime shim: Luck → LCK |
+| Constitution | `CoreAttribute.Constitution` | — | Out of Stage 2 scope; mapped for the record |
+| Intellect | `CoreAttribute.Intellect` | — | Out of Stage 2 scope |
+| Linguistic | `CoreAttribute.Linguistic` | — | Out of Stage 2 scope |
+
+**Shim contract** (explicit — see also addendum §A5):
+```
+attribute_term(stat, attribute):
+    Physique    → stat.STR  × ATTR_SCALE
+    Reflexes    → stat.DEX  × ATTR_SCALE
+    Luck        → stat.LCK  × ATTR_SCALE
+    Intuition   → 0         (until Stage 4)
+    all others  → 0         (until Stage 4)
+```
+Only `attribute_term` changes when real attribute objects land in Stage 4. All call sites that
+use this shim remain valid — the shim is the extension point, not the callers.
+
+---
+
+## Section 2 — Derived Resources
+
+Resources are system states influenced by attributes, conditions, and environment (bible §5).
+They are not primary attributes.
+
+| Bible (§5) | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| Health | `Hp` (Resources.cs) | `entity.hp` | No change. `hp` = canonical in code. |
+| Stamina | `Sp` (Resources.cs) | `entity.cycles` (pre-bible holdover) | **Canonical rename: `stamina`.** `cycles` is a pre-bible holdover. Rename executes in Phase 2.3. New Stage 2 code uses `stamina`. |
+| Bits | `BitPool` (ConsumableEffect enum) | `entity.mp` (non-canonical) | **Flagged non-canonical.** Stage 2 bridge: `RESTORE_MP`. Stage 4 reconciles Bits/Bytes → `mp` → two-pool system. |
+| Bytes | `BytePool` (ConsumableEffect enum) | `entity.mp` (same field) | Same flag. Bits/Bytes split deferred to Stage 4. |
+
+**`mp` flag:** The Python field `entity.mp` and the `restore_mp` effect key are explicitly
+non-canonical. They are Stage 2 bridge terms only. Stage 4 will split into `bits`/`bytes` pools
+with separate mechanics. Do not deepen any code against `mp` — only add the Stage 2 bridge.
+
+---
+
+## Section 3 — Item Field Naming
+
+### 3.1 Item Base (all items inherit these fields)
+
+| Bible | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| — | `Id: int` | `id: str` | `id: str` — Python convention (string IDs from JSON seed). No change. |
+| — | `Name: string` | `name: str` | `name` — unchanged. |
+| — | `Description: string` | `description: str` | `description` — unchanged. |
+| §15 (economy) | `Value: int` | — (new in Stage 2) | `value: int` — unit name deferred until §15 economy design matures. |
+| §4.1 (Physique) | `Weight: int` | — (new in Stage 2) | `weight: int` — same unit as carry capacity math (CARRY_BASE + 2×STR). |
+| — | `KeyId: string?` | — (new in Stage 2) | `key_id: str | None` — semantics exact from TheForge: `None` = not a key; `"lockpick"` = generic pick (consumed on failed attempt); any other string = specific key matching a lock's `required_key_id`. |
+| — | `ContainerId: int?` | — (added in Phase 2.2) | `container_id: int | None` — FK to `containers` table. Populated in Phase 2.2 when relational schema lands. |
+
+### 3.2 DurableItem
+
+| Bible | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| — | `Durability: int` | — (new in Stage 2) | `durability: int` — decay mechanics are out-of-scope for Stage 2 (addendum §A8). Field exists in schema; value is cosmetic this stage. |
+
+### 3.3 Weapon
+
+| Bible | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| — | `AttackPower: int` | `effects.atk` | `attack_power: int` — snake_case port of TheForge. |
+| §6.6 (Bits/Bytes) | — (absent in TheForge) | `effects.mag` | `resonance: int` — **new canonical name** (see §A6 of addendum). Weapon-inherent attunement to Byte-structured patterns. Replaces Python `mag`/`magic_power`. Feeds `Stats.MAG` via `gear_mods`. Flagged for Stage 4 reconciliation. |
+| — | `WeaponType: WeaponType` | — (no enum; `type` string) | `weapon_type: WeaponType` — enum port from TheForge (see §4, Enum Naming). |
+| §10.2 | `EligibleSlot = MainHand` | `slot: "weapon"` | `eligible_slots = MAIN_HAND \| OFF_HAND` — **LucentForge deviation.** TheForge restricts weapons to MainHand; LucentForge allows either hand (dual-wield legal). `eligible_slots` is computed from class, not stored. |
+
+### 3.4 Armor
+
+| Bible | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| — | `DefenseRating: int` | `effects.def` | `defense_rating: int` — snake_case port of TheForge. Feeds `Stats.DEF` via `gear_mods`. |
+| §7 (elemental model) | — (absent in TheForge) | `effects.res` | `resist_rating: int` — **Stage 2 invention.** §7 establishes the elemental pattern model; resistance exists conceptually. Stage 2 proxy: one field covers all elemental resistance. Per-element split deferred. Feeds `Stats.RES` via `gear_mods`. |
+| — | `WeightClass: ArmorWeight` | — | `weight_class: ArmorWeight` — enum port (see §4). |
+| — | `Slot: BodySlot` | `slot: "armor"` | `body_slot: BodySlot` — enum port (see §4). Armor worn on the body. Does NOT include hand-held items. |
+| §10.2 | `EligibleSlot = per BodySlot` | — | `eligible_slots` computed from `body_slot` (not stored). Each BodySlot body value maps 1:1 to the matching SlotType bit. |
+
+### 3.5 Shield
+
+| Bible | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| — | `Shield → Armor`; `EligibleSlot = OffHand` | `slot: "shield"` | `Shield` inherits `Armor`. `body_slot = OFF_HAND`. `eligible_slots = MAIN_HAND \| OFF_HAND` (either hand — same rule as weapons). TheForge restricts to OffHand; LucentForge allows both. |
+| — | `DefenseRating: int` | `effects.def` | `defense_rating: int` — same as Armor. |
+| — | `resist_rating` not on TheForge Shield | — | `resist_rating: int` — same as Armor (shields may have elemental resist). |
+
+### 3.6 Consumable
+
+| Bible | TheForge C# | LucentForge Python today | Stage 2 decision |
+|---|---|---|---|
+| — | `Effect: ConsumableEffect` | `effects.{heal/restore_sp/restore_mp}` | `effect: ConsumableEffect` — enum (see §4). Stage 2 values: `HEAL`, `RESTORE_SP`, `RESTORE_MP`. |
+| — | `Potency: int` | `effects.{value}` (varies by key) | `potency: int` — magnitude applied to the resource named by `effect`. |
+
+---
+
+## Section 4 — Enum Naming
+
+All Python enums use `SCREAMING_SNAKE_CASE` values per Python convention. Enum class names use PascalCase.
+
+### 4.1 SlotType (equipment assignment system)
+
+Python `enum.Flag` — bitwise combinable. These are the SLOTS the EquipmentSet manages.
+
+| Value | Bit | TheForge | Notes |
+|---|---|---|---|
+| `MAIN_HAND` | 1 | `MainHand` | Dominant hand: weapons, tools |
+| `OFF_HAND` | 2 | `OffHand` | Support hand: shields, off-hand weapons |
+| `HEAD` | 4 | `Head` | Helmet, hat |
+| `CHEST` | 8 | `Chest` | Chest armor, robes |
+| `LEGS` | 16 | `Legs` | Leg armor |
+| `FEET` | 32 | `Feet` | Boots |
+| `HANDS` | 64 | `Hands` | Gauntlets — body armor worn on both hands |
+| `ANY_HAND` | 3 | `AnyHand` | `MAIN_HAND \| OFF_HAND` — weapons + shields may equip to either |
+
+`ANY_HAND = MAIN_HAND | OFF_HAND`. Equip logic prefers `OFF_HAND` for `ANY_HAND`-eligible items
+(shields naturally go to the off-hand first), falls back to `MAIN_HAND` if occupied.
+
+### 4.2 BodySlot (item storage descriptor — what body location an item belongs to)
+
+Python `enum` — stored in the `body_slot` column of the items table.
+
+**Stage 2 expansion:** BodySlot now includes hand-held positions. TheForge's `BodySlot` had
+only body-armor values (Head/Chest/Legs/Feet/Hands). LucentForge adds `MAIN_HAND` and `OFF_HAND`
+so weapons and shields can record their natural slot in the same column.
+
+| Value | TheForge | Notes |
+|---|---|---|
+| `HEAD` | `Head` | Helmet |
+| `CHEST` | `Chest` | Chest armor |
+| `LEGS` | `Legs` | Leg armor |
+| `FEET` | `Feet` | Boots |
+| `HANDS` | `Hands` | Gauntlets — body armor on both hands (not a held slot) |
+| `MAIN_HAND` | — (new) | Weapons: primary held position |
+| `OFF_HAND` | — (new) | Shields: primary held position |
+
+**BodySlot → SlotType mapping:**
+```
+BodySlot.HEAD      → SlotType.HEAD
+BodySlot.CHEST     → SlotType.CHEST
+BodySlot.LEGS      → SlotType.LEGS
+BodySlot.FEET      → SlotType.FEET
+BodySlot.HANDS     → SlotType.HANDS
+BodySlot.MAIN_HAND → SlotType.MAIN_HAND | SlotType.OFF_HAND  (eligible for either)
+BodySlot.OFF_HAND  → SlotType.MAIN_HAND | SlotType.OFF_HAND  (eligible for either)
+```
+Body armor maps 1:1. Held items (MAIN_HAND / OFF_HAND body_slot) map to `ANY_HAND` eligibility,
+because both weapons and shields are equippable to either hand by design.
+
+### 4.3 WeaponType
+
+Adopted from TheForge verbatim.
+
+| Python | TheForge | Stage 2 seed items |
+|---|---|---|
+| `SWORD` | `Sword` | iron_sword |
+| `AXE` | `Axe` | — |
+| `MACE` | `Mace` | — |
+| `BOW` | `Bow` | — |
+| `STAFF` | `Staff` | wooden_staff |
+| `DAGGER` | `Dagger` | — |
+| `SPEAR` | `Spear` | — |
+
+### 4.4 ArmorWeight
+
+| Python | TheForge |
+|---|---|
+| `LIGHT` | `Light` |
+| `MEDIUM` | `Medium` |
+| `HEAVY` | `Heavy` |
+
+### 4.5 ConsumableEffect
+
+TheForge has `BitPool`/`BytePool`. LucentForge Stage 2 uses bridge names — `RESTORE_MP` is
+explicitly non-canonical.
+
+| Python | TheForge | Notes |
+|---|---|---|
+| `HEAL` | `Heal` | Restores HP up to max. |
+| `RESTORE_SP` | `Stamina` | Restores stamina up to max. |
+| `RESTORE_MP` | — (bridge) | Restores magic pool. **Non-canonical — flagged.** TheForge has `BitPool`/`BytePool`; bible uses Bits/Bytes (§6). Stage 4 splits into `RESTORE_BITS` / `RESTORE_BYTES`. |
+
+### 4.6 TrapType
+
+Python `enum.Flag` — bitwise combinable. Adopted from TheForge.
+
+| Python | TheForge | Stage 2 status |
+|---|---|---|
+| `NONE` | `None` | No trap. |
+| `MECHANICAL` | `Mechanical` | Spring/dart/spike mechanism. **Active in Stage 2.** Disarmed via Reflexes (DEX) check (§12.2). |
+| `MAGICAL` | `Magical` | Arcane ward. **Future only** — Intuition-check mechanism deferred to Stage 3/4. |
+| `POISON` | `Poison` | Ongoing damage-over-time on trigger. **Future only.** |
+| `ELECTRIC` | `Electric` | Instant paralysis on trigger. **Future only.** |
+
+All 4 values are defined in Stage 2 for forward-compatibility. Stage 2 chest seeds use
+`MECHANICAL` only. Adding mechanic behavior to `MAGICAL`/`POISON`/`ELECTRIC` in a later
+stage requires no enum migration.
+
+---
+
+## Section 5 — Flagged Non-Canonical Terms
+
+These terms exist in the live codebase but are known to be temporary bridge names.
+Do not build new mechanics against them — they will change in the named future stage.
+
+| Current term | Location | Non-canonical because | Reconcile in |
+|---|---|---|---|
+| `mp` | `entity.mp`, `effects.restore_mp`, `Stats.MAG` (partially) | Bible §6 names the two-pool magic system "Bits" and "Bytes." A single `mp` erases that distinction. | Stage 4 (stats/skills/magic) |
+| `cycles` | `entity.cycles`, save state | Pre-bible holdover for Stamina (§5). | Phase 2.3 (rename everywhere) |
+| `RESTORE_MP` | `ConsumableEffect` | TheForge uses `BitPool`/`BytePool`; bible uses Bits/Bytes (§6). `RESTORE_MP` is a bridge. | Stage 4 |
+| `magic_power` (plan) | Plan contract only | Replaced by `resonance` (canonical). See §3.3 + addendum §A6. | Already reconciled in Stage 2.0 |
+
+---
+
+## Section 6 — Extension Protocol
+
+When a future stage imports a new TheForge concept:
+
+1. Add a row to the relevant table above (or add a new section).
+2. Record: Bible term (or "silent") | TheForge name | Python today | Stage N decision.
+3. If bible is silent and a new name is invented, add an entry to Section 5 flagging it.
+4. The addendum (`lucentforge_items_addendum_v_1.md`) may need a new section if the concept
+   has behavioral doctrine attached.
+
+This map is the reference for all reconciliation discussions. Keep it current.

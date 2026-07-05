@@ -1,6 +1,28 @@
-# Session State — Last updated: 2026-07-05 (Stage 2 Items/Equipment PLANNED — implementation next)
+# Session State — Last updated: 2026-07-05 (Stage 2 Phase 2.0 COMPLETE — implementation starts Phase 2.1)
 
-## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE
+## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 IN PROGRESS
+
+### Stage 2 Summary
+| Phase | Commit | Description | Status |
+|-------|--------|-------------|--------|
+| Phase 2.0 | C0012 | Terminology map + items bible addendum (doc-only) | COMPLETE |
+| Phase 2.1 | — | `Mechanics/items/` domain package (enums, models, base classes) | NEXT |
+| Phase 2.2 | — | Relational migration m0003 + repositories | PLANNED |
+| Phase 2.3 | — | Services + persistence (InventoryService, EquipmentService) + stamina rename | PLANNED |
+| Phase 2.4 | — | Combat refactor + defect fixes (NPC bag bug, armor-DEF, weapon-dict hack) | PLANNED |
+| Phase 2.5 | — | Inventory UI modal (I key + pause menu integration) | PLANNED |
+| Phase 2.6 | — | §12.2 outcome resolver | PLANNED |
+| Phase 2.7 | — | Chests/locks/traps/keys | PLANNED |
+| Phase 2.8 | — | Stage 2 closeout + docs | PLANNED |
+
+**Phase 2.0 docs created (C0012):**
+- `docs/bible/lucentforge_terminology_map_v_1.md` — three-way reconciliation (Bible | TheForge | LucentForge)
+- `docs/bible/lucentforge_items_addendum_v_1.md` — items doctrine §A1–A8
+
+**Standing rule (all Stage 2 phases):** TheForge = structural blueprint, bible = naming/semantics authority.
+Every TheForge import gets a reconciliation pass against `docs/bible/lucentforge_terminology_map_v_1.md`.
+Note: Phase 2.2 requires a fresh `lucentforge.db` (no save transform — delete-db is the path).
+Approved plan: `C:\Users\Shawn\.claude\plans\caelum-session-start-zesty-tome.md` (Phases 2.0–2.8).
 
 ### Stage 1 Summary
 | Phase | Commit | Description | Status |
@@ -10,13 +32,6 @@
 | Phase 1.6 | C0006 | Save slot UI (run_load_menu + run_save_menu modals, 4 slots) | COMPLETE |
 | Phase 1.7 | C0007 | Pause menu modal (Resume / Save / Quit, _paused_quit flag) | COMPLETE |
 | Phase 1.8 | C0008 | Load + New Game from pause (_spawn_entities closure, sprite revival) | COMPLETE |
-
-**Stage 2 — Items / Equipment: PLANNED 2026-07-05 — implementation NEXT**
-Approved plan: `C:\Users\Shawn\.claude\plans\caelum-session-start-zesty-tome.md` (Phases 2.0–2.8).
-Start with Phase 2.0 (terminology map + items bible addendum, doc-only, ~C0010 — verify git log).
-Standing rule: TheForge = structural blueprint, bible = naming/semantics authority; reconcile
-every import against `docs/bible/lucentforge_terminology_map_v_1.md` (created in 2.0).
-Note: Phase 2.2 requires a fresh `lucentforge.db` (no save transform — delete-db is the path).
 
 ---
 
@@ -209,7 +224,9 @@ Tab = cycle right-side HUD between entities
 | `Mechanics/biochem/brain.py` | Chemical/drive system |
 
 ## Bible reference
-- `docs/bible/lucentforge_simulation_foundation_v_1.md` — philosophical constitution
+- `docs/bible/lucentforge_simulation_foundation_v_1.md` — philosophical constitution (§numbers = requirements)
 - `docs/bible/lucentforge_sim_core_schema_v_1.md` — structural schema
 - `docs/bible/lucentforge_micro_simulation_v_1.md` — prototype spec
 - `docs/bible/heartbeat_convergence_vision.md` — arc vision + alignment analysis
+- `docs/bible/lucentforge_terminology_map_v_1.md` — three-way reconciliation (Bible | TheForge | Python); cite before every Stage 2 import
+- `docs/bible/lucentforge_items_addendum_v_1.md` — Stage 2 items doctrine (§A1–A8); cite alongside Foundation §sections
