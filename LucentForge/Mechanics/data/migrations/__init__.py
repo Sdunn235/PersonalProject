@@ -5,8 +5,10 @@
 # named m####_<name>.py (Python modules can't start with a digit).
 from Mechanics.data.migrations.m0001_initial_content import migrate as m0001
 from Mechanics.data.migrations.m0002_runtime_state import migrate as m0002
+from Mechanics.data.migrations.m0003_relational_items import migrate as m0003
 
 MIGRATIONS = [
-    (1, "initial_content", m0001),
-    (2, "runtime_state",   m0002),
+    (1, "initial_content",  m0001),
+    (2, "runtime_state",    m0002),
+    (3, "relational_items", m0003),
 ]

@@ -8,6 +8,7 @@ import os
 from Mechanics.data.db import Database
 from Mechanics.data.dao import SqliteDao
 from Mechanics.data.save_manager import SaveManager
+from Mechanics.items.repos import ItemRepository
 
 
 class GameContext:
@@ -29,6 +30,7 @@ class GameContext:
         self._needs = SqliteDao(self._db, "needs")
         self._sources = SqliteDao(self._db, "sources")
         self._save_manager = SaveManager(self._db)
+        self._item_repo = ItemRepository(self._items)
 
     @property
     def db(self) -> Database:
@@ -57,6 +59,10 @@ class GameContext:
     @property
     def sources(self) -> SqliteDao:
         return self._sources
+
+    @property
+    def item_repo(self) -> ItemRepository:
+        return self._item_repo
 
     def reload(self) -> None:
         self._entities.reload()

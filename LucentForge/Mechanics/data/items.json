@@ -3,67 +3,109 @@
     "id": "health_potion",
     "name": "Health Potion",
     "type": "consumable",
-    "effects": { "heal": 30 },
-    "description": "Restores 30 HP."
+    "slot": "",
+    "description": "Restores 30 HP.",
+    "value": 15,
+    "weight": 1,
+    "effect": "HEAL",
+    "potency": 30,
+    "effects": {"heal": 30}
   },
   {
     "id": "stamina_potion",
     "name": "Stamina Potion",
     "type": "consumable",
-    "effects": { "restore_sp": 20 },
-    "description": "Restores 20 SP."
+    "slot": "",
+    "description": "Restores 20 stamina.",
+    "value": 12,
+    "weight": 1,
+    "effect": "RESTORE_SP",
+    "potency": 20,
+    "effects": {"restore_sp": 20}
   },
   {
     "id": "mana_potion",
     "name": "Mana Potion",
     "type": "consumable",
-    "effects": { "restore_mp": 20 },
-    "description": "Restores 20 MP."
+    "slot": "",
+    "description": "Restores 20 mana.",
+    "value": 12,
+    "weight": 1,
+    "effect": "RESTORE_MP",
+    "potency": 20,
+    "effects": {"restore_mp": 20}
   },
   {
     "id": "iron_sword",
     "name": "Iron Sword",
     "type": "weapon",
     "slot": "weapon",
-    "effects": { "atk": 5 },
-    "description": "+5 attack power."
+    "description": "+5 attack power.",
+    "value": 50,
+    "weight": 8,
+    "durability": 100,
+    "attack_power": 5,
+    "resonance": 0,
+    "weapon_type": "SWORD",
+    "effects": {"atk": 5}
   },
   {
     "id": "wooden_staff",
     "name": "Wooden Staff",
     "type": "weapon",
     "slot": "weapon",
-    "effects": {
-      "atk": 2,
-      "mag": 4
-    },
-    "description": "+2 attack, +4 magic power."
+    "description": "+2 attack, +4 resonance.",
+    "value": 35,
+    "weight": 5,
+    "durability": 100,
+    "attack_power": 2,
+    "resonance": 4,
+    "weapon_type": "STAFF",
+    "effects": {"atk": 2, "mag": 4}
   },
   {
     "id": "leather_armor",
     "name": "Leather Armor",
     "type": "armor",
     "slot": "armor",
-    "effects": { "def": 3 },
-    "description": "+3 defense."
+    "description": "+3 defense.",
+    "value": 40,
+    "weight": 12,
+    "durability": 100,
+    "defense_rating": 3,
+    "resist_rating": 0,
+    "weight_class": "LIGHT",
+    "body_slot": "CHEST",
+    "effects": {"def": 3}
   },
   {
     "id": "cloth_robe",
     "name": "Cloth Robe",
     "type": "armor",
     "slot": "armor",
-    "effects": {
-      "def": 1,
-      "res": 3
-    },
-    "description": "+1 defense, +3 resistance."
+    "description": "+1 defense, +3 resistance.",
+    "value": 25,
+    "weight": 5,
+    "durability": 100,
+    "defense_rating": 1,
+    "resist_rating": 3,
+    "weight_class": "LIGHT",
+    "body_slot": "CHEST",
+    "effects": {"def": 1, "res": 3}
   },
   {
     "id": "steel_shield",
     "name": "Steel Shield",
     "type": "armor",
     "slot": "shield",
-    "effects": { "def": 5 },
-    "description": "+5 defense."
+    "description": "+5 defense.",
+    "value": 65,
+    "weight": 15,
+    "durability": 100,
+    "defense_rating": 5,
+    "resist_rating": 0,
+    "weight_class": "MEDIUM",
+    "body_slot": "OFF_HAND",
+    "effects": {"def": 5}
   }
 ]

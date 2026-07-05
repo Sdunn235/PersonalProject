@@ -8,6 +8,7 @@ from .enums import (
     body_slot_to_eligible,
 )
 from .models import Armor, Consumable, DurableItem, Item, Shield, Weapon
+from .repos import IItemRepository, ItemRepository
 
 __all__ = [
     "SlotType",
@@ -23,4 +24,6 @@ __all__ = [
     "Armor",
     "Shield",
     "Consumable",
+    "IItemRepository",
+    "ItemRepository",
 ]

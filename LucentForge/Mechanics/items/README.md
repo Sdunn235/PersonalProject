@@ -33,7 +33,7 @@ Item
 | Phase | What happens |
 |---|---|
 | **2.1 (this package)** | Enums and model classes defined. No callers wired yet. |
-| **2.2** | Migration m0003, new schema. `items.json` updated to canonical format. `from_dict()` bridge no longer needed. |
+| **2.2** | m0003 re-seeds items table with canonical fields. `items.json` enriched with `attack_power`, `weapon_type`, `body_slot`, `potency` etc.; `effects` dict kept until Phase 2.4. `ItemRepository` (`repos.py`) provides typed access via `ctx.item_repo`. |
 | **2.3** | Repository and service layers. `ItemService` uses these types. `ItemDef` in `data/models.py` retired. |
 | **2.4** | Combat refactor. `resolve_equipment()`, `get_item_as_combat()`, `fighter.weapon` all updated to use typed models instead of flat dicts. Known armor-DEF defect fixed. |
 | **2.5** | Inventory UI modal using these types. |
