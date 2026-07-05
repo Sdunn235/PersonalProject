@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-07-04 (Stage 1 COMPLETE — Stage 2 Items/Equipment NEXT)
+# Session State — Last updated: 2026-07-05 (Stage 2 Items/Equipment PLANNED — implementation next)
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE
 
@@ -11,10 +11,12 @@
 | Phase 1.7 | C0007 | Pause menu modal (Resume / Save / Quit, _paused_quit flag) | COMPLETE |
 | Phase 1.8 | C0008 | Load + New Game from pause (_spawn_entities closure, sprite revival) | COMPLETE |
 
-**Stage 2 — Items / Equipment: NEXT**
-Planning session required before implementation. Read LucentForge bible items section first.
-Opus recommended for planning session. Key existing code: `Mechanics/combat/equip.py`,
-`Mechanics/combat/items.py`, `data/items.json`.
+**Stage 2 — Items / Equipment: PLANNED 2026-07-05 — implementation NEXT**
+Approved plan: `C:\Users\Shawn\.claude\plans\caelum-session-start-zesty-tome.md` (Phases 2.0–2.8).
+Start with Phase 2.0 (terminology map + items bible addendum, doc-only, ~C0010 — verify git log).
+Standing rule: TheForge = structural blueprint, bible = naming/semantics authority; reconcile
+every import against `docs/bible/lucentforge_terminology_map_v_1.md` (created in 2.0).
+Note: Phase 2.2 requires a fresh `lucentforge.db` (no save transform — delete-db is the path).
 
 ---
 
