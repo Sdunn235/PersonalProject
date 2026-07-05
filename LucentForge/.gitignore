@@ -10,3 +10,10 @@ __pycache__/
 *$py.class
 .venv/
 venv/
+
+# TheForge vendored C# blueprint — source only, no build artifacts
+TheForge/bin/
+TheForge/obj/
+TheForge/.vs/
+TheForge/**/bin/
+TheForge/**/obj/

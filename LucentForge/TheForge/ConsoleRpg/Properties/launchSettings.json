@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "w14-doors-locks": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)",
+      "environmentVariables": {
+        "DOTNET_ROOT": "C:\\Program Files\\dotnet"
+      }
+    }
+  }
+}
