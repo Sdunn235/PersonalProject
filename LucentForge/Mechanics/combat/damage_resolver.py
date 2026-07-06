@@ -15,7 +15,7 @@ class DamageResolver:
     def damage_roll(self, att, defn, rng) -> tuple[int, bool]:
         use_mag = att.ability and att.ability.get("stat") == "MAG"
         base = att.stats.MAG if use_mag else att.stats.STR
-        wep = att.weapon["atk"] if att.weapon else 0
+        wep = att.weapon.get("atk", 0) if att.weapon else 0
         if use_mag:
             wep += att.weapon.get("mag", 0) if att.weapon else 0
         power = att.ability.get("power", 1.0) if att.ability else 1.0

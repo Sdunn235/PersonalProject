@@ -11,8 +11,7 @@ from Mechanics.combat.fighter import build_fighter
 from Mechanics.combat.rng import SimpleRng
 from Mechanics.combat.ability_sets import get_abilities, get_basic_attack
 from Mechanics.combat.spell_sets import get_spells
-from Mechanics.combat.equip import resolve_equipment
-from Mechanics.combat.items import build_bag
+from Mechanics.combat.fighter import InvStack as _CombatInvStack
 from Mechanics.entities.factory import get_sprite_path
 
 # --- Layout constants ---
@@ -179,12 +178,51 @@ def _use_item(stack, pf: Fighter, log: list[str]) -> None:
     log.append(f"You use {item['name']} — {effect_str}!")
 
 
+def _to_combat_dict(item) -> dict:
+    """Convert a typed Item model to a flat dict compatible with InvStack."""
+    from Mechanics.items.models import Consumable
+    from Mechanics.items.enums import ConsumableEffect
+    d: dict = {"id": item.id, "name": item.name}
+    if isinstance(item, Consumable):
+        if item.effect == ConsumableEffect.HEAL:
+            d["heal"] = item.potency
+        elif item.effect == ConsumableEffect.RESTORE_SP:
+            d["restore_sp"] = item.potency
+        elif item.effect == ConsumableEffect.RESTORE_MP:
+            d["restore_mp"] = item.potency
+    return d
+
+
+def _dict_to_flatmods(d: dict):
+    from Mechanics.combat.abilities import FlatMods
+    return FlatMods(
+        STR=d.get("str", 0), DEX=d.get("dex", 0), MAG=d.get("mag", 0),
+        WIS=d.get("wis", 0), LCK=d.get("lck", 0),
+        DEF=d.get("def", 0), RES=d.get("res", 0),
+    )
+
+
+def _flush_combat_bag(combat_bag: list, inv_svc, entity_id: str) -> None:
+    """Sync Fighter bag consumption back to InventoryService after combat."""
+    inv = inv_svc.get_inventory(entity_id)
+    if inv is None:
+        return
+    remaining = {st.item.get("id"): st.qty for st in combat_bag if st.item.get("id")}
+    for stack in list(inv.stacks):
+        new_qty = remaining.get(stack.item.id)
+        if new_qty is None:
+            inv.stacks.remove(stack)
+        else:
+            stack.qty = new_qty
+
+
 # --- Main entry point ---
 
 def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
                font: pygame.font.Font,
                player_entity, npc_entity,
-               ctx: GameContext) -> str:
+               ctx: GameContext,
+               inv_svc=None, equip_svc=None) -> str:
     """
     Runs the full-screen combat stage.
     Returns "win", "lose", or "flee".
@@ -223,14 +261,34 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
     player_fighter.spells = get_spells(ctx, player_entity.entity_id)
     npc_fighter.spells    = get_spells(ctx, npc_entity.entity_id)
 
-    # Resolve equipment -> weapon dict for damage_roll
-    player_equip = resolve_equipment(ctx, player_entity.entity_id)
-    npc_equip    = resolve_equipment(ctx, npc_entity.entity_id)
-    player_fighter.weapon = player_equip if player_equip else None
-    npc_fighter.weapon    = npc_equip if npc_equip else None
+    # Wire equipment stats and weapon from EquipmentService (Phase 2.4)
+    if equip_svc:
+        from Mechanics.combat.abilities import FlatMods
+        for fighter, entity in ((player_fighter, player_entity), (npc_fighter, npc_entity)):
+            weapon_item = equip_svc.weapon_profile(entity.entity_id)
+            fighter.weapon = (
+                {"id": weapon_item.id, "name": weapon_item.name,
+                 "atk": weapon_item.attack_power,
+                 "mag": getattr(weapon_item, "resonance", 0)}
+                if weapon_item else None
+            )
+            innate  = FlatMods(DEF=entity.stats.DEF, RES=entity.stats.RES)
+            gear_fm = _dict_to_flatmods(equip_svc.gear_mods(entity.entity_id))
+            fighter.loadout.gear_mods = [innate, gear_fm]
+            fighter.refresh_stats()
 
-    # Starter inventory — loaded from entities.json bag field
-    player_fighter.bag = build_bag(ctx, player_entity.entity_id)
+    # Load combat bags from InventoryService (Phase 2.4)
+    if inv_svc:
+        p_inv = inv_svc.get_inventory(player_entity.entity_id)
+        player_fighter.bag = [
+            _CombatInvStack(item=_to_combat_dict(s.item), qty=s.qty)
+            for s in (p_inv.stacks if p_inv else [])
+        ]
+        n_inv = inv_svc.get_inventory(npc_entity.entity_id)
+        npc_fighter.bag = [
+            _CombatInvStack(item=_to_combat_dict(s.item), qty=s.qty)
+            for s in (n_inv.stacks if n_inv else [])
+        ]
 
     # Lazy-load the basic attack ability
     attack_ability = get_basic_attack(ctx)
@@ -274,6 +332,9 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
         npc_entity.hp        = float(npc_fighter.hp)
         npc_entity.cycles    = npc_fighter.cycles
         npc_entity.mp        = npc_fighter.mp
+        if inv_svc:
+            _flush_combat_bag(player_fighter.bag, inv_svc, player_entity.entity_id)
+            _flush_combat_bag(npc_fighter.bag, inv_svc, npc_entity.entity_id)
         pygame.display.set_caption("LucentForge — NPC Needs Prototype")
         return outcome
 

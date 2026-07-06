@@ -1,41 +1,28 @@
-# Mechanics/combat — Combat System
+# Mechanics/combat/
 
-Turn-based combat engine, ability resolution, and item management.
+Core combat engine: turn processing, damage resolution, stat derivation, fighter model.
 
-## Files
+## Removed in Phase 2.4 (C0016)
 
-| File | Purpose |
+- **`equip.py`** — deleted. `resolve_equipment()` read equipment from the raw `effects` dict,
+  causing armor `defense_rating` to never reach damage mitigation. Equipment stat mods now
+  come from `EquipmentService.gear_mods()` (`Mechanics/services/equipment_service.py`).
+  Entity innate DEF/RES passed as a baseline `FlatMods` entry before gear mods.
+
+- **`items.py`** — deleted. `build_bag()` read from the entity blob, bypassing persistent
+  inventory entirely — NPC bags were dead code. Bags now come from
+  `InventoryService.get_inventory()` (`Mechanics/services/inventory_service.py`).
+  Item consumption persists via `_flush_combat_bag()` in `combat_scene.py` at combat end.
+
+## Key files
+
+| File | Role |
 |---|---|
-| `combat.py` | `Fighter` dataclass, `take_turn()`, `hit_check()`, `damage_roll()` |
-| `ability_sets.py` | Resolves entity_id to ability list from `data/abilities.json` |
-| `spell_sets.py` | Resolves entity_id to spell list from `data/spells.json` |
-| `equip.py` | Resolves entity equipment to flat stat mods from `data/items.json` |
-| `items.py` | Resolves item templates from `data/items.json`, builds combat bags |
-| `abilities.py` | Stat derivation (`derive_stats`), `BaseStats`, `FlatMods`, `Effect` |
-| `rules.py` | Combat tuning constants (hit rates, damage caps, regen, cooldowns) |
-| `rng.py` | `SimpleRng` — thin random wrapper for combat rolls |
-
-## Data-Driven Design (Session 10)
-
-Abilities and items now load from JSON via the DAO layer:
-
-```python
-from Mechanics.combat.ability_sets import get_abilities, get_basic_attack
-from Mechanics.combat.spell_sets import get_spells
-from Mechanics.combat.equip import resolve_equipment
-from Mechanics.combat.items import build_bag
-
-abilities = get_abilities("player")    # From data/abilities.json
-spells    = get_spells("player")       # From data/spells.json (cost MP, scale off MAG)
-strike    = get_basic_attack()          # Basic attack from JSON
-bag       = build_bag("player")         # Inventory from data/entities.json + items.json
-equip     = resolve_equipment("player") # Equipment stat mods from data/items.json
-```
-
-## Adding Content
-
-- **New ability**: Add to `data/abilities.json`, reference id in entity's abilities array
-- **New item**: Add to `data/items.json`, reference id in entity's bag array
-- **New spell**: Add to `data/spells.json`, reference id in entity's spells array. Use `cost_mp` and `stat: "MAG"`.
-- **New equipment**: Add to `data/items.json` with `type: "weapon"/"armor"`, `slot`, `effects`. Reference in entity's `equipment`.
-- No Python code changes needed for new content
+| `abilities.py` | `BaseStats`, `FlatMods`, `Stats`, `derive_stats()` |
+| `fighter.py` | `Fighter` dataclass, `CombatLoadout`, `build_fighter()` |
+| `combat.py` | Facade — `take_turn()` delegates to `TurnProcessor` |
+| `turn_processor.py` | Turn logic — ability/spell/item/flee resolution |
+| `damage_resolver.py` | Damage and hit calculations |
+| `action_selector.py` | NPC action selection heuristics |
+| `rng.py` | `SimpleRng` — thin random wrapper |
+| `rules.py` | Numeric constants (thresholds, caps, cooldowns) |

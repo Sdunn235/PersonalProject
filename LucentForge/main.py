@@ -269,7 +269,8 @@ def main():
                                   player.y - npc_entity.y)
                 if dist < COMBAT_TRIGGER_DIST:
                     in_combat = True
-                    result = run_combat(screen, clock, font, player, npc_entity, ctx)
+                    result = run_combat(screen, clock, font, player, npc_entity, ctx,
+                                       inv_svc=inv_svc, equip_svc=equip_svc)
                     in_combat = False
                     combat_cooldowns[npc_entity.entity_id] = pygame.time.get_ticks() / 1000.0
                     if result == "win":
