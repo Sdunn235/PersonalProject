@@ -10,7 +10,7 @@ _HL_TEXT = (20, 20, 30)
 _TEXT    = (240, 240, 240)
 _HINT    = (100, 100, 120)
 
-_OPTIONS = ["Resume", "Save", "Load", "New Game", "Quit"]
+_OPTIONS = ["Resume", "Inventory", "Save", "Load", "New Game", "Quit"]
 
 
 def run_pause_menu(
@@ -20,7 +20,7 @@ def run_pause_menu(
     font: pygame.font.Font,
     world_sim, sources, controllers, player,
     player_needs, defeated_npcs, combat_cooldowns,
-    inv_svc=None,
+    inv_svc=None, equip_svc=None,
 ) -> str:
     """
     Modal pause screen. Returns:
@@ -54,6 +54,11 @@ def run_pause_menu(
                     choice = _OPTIONS[cursor]
                     if choice == "Resume":
                         return "resume"
+                    if choice == "Inventory":
+                        from Mechanics.renderer.inventory_menu import run_inventory_menu
+                        run_inventory_menu(screen, clock, ctx, font,
+                                           inv_svc, equip_svc, player)
+                        # returns None — stay in pause menu
                     if choice == "Save":
                         _slot = run_save_menu(screen, clock, ctx, font)
                         if _slot is not None:
@@ -62,6 +67,7 @@ def run_pause_menu(
                                 player, player_needs, defeated_npcs,
                                 combat_cooldowns, slot_id=_slot,
                                 bags=inv_svc.serialize_all() if inv_svc is not None else None,
+                                equipment=equip_svc.serialize_all() if equip_svc is not None else None,
                             )
                         # fall through — stay in pause menu after save
                     if choice == "Load":
@@ -79,6 +85,7 @@ def run_pause_menu(
                                 combat_cooldowns,
                                 slot_id=settings.AUTOSAVE_SLOT_ID,
                                 bags=inv_svc.serialize_all() if inv_svc is not None else None,
+                                equipment=equip_svc.serialize_all() if equip_svc is not None else None,
                             )
                         return "quit"
 
@@ -91,7 +98,7 @@ def _draw_pause(screen, W, H, cursor, title_font, option_font, hint_font):
     overlay.fill((0, 0, 0, 160))
     screen.blit(overlay, (0, 0))
 
-    panel_w, panel_h = 320, 290
+    panel_w, panel_h = 320, 330
     px = (W - panel_w) // 2
     py = (H - panel_h) // 2
     pygame.draw.rect(screen, _BG, (px, py, panel_w, panel_h), border_radius=8)

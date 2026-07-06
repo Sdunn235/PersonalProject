@@ -10,7 +10,8 @@ Pure presentation. Reads game state and draws it; it never mutates simulation st
 | `combat_scene.py` | `run_combat` — full-screen turn-based combat UI |
 | `observation_panel.py` | `draw_observation_panel` — Heartbeat-6 world-overview panel (left margin, `O` toggle) |
 | `save_menu.py` | `run_load_menu` / `run_save_menu` — Phase 1.6 save-slot picker modals |
-| `pause_menu.py` | `run_pause_menu` — Phase 1.7/1.8 pause modal (Resume / Save / Load / New Game / Quit) |
+| `pause_menu.py` | `run_pause_menu` — Phase 1.7/1.8 pause modal (Resume / Inventory / Save / Load / New Game / Quit) |
+| `inventory_menu.py` | `run_inventory_menu` — Phase 2.5 inventory/equipment modal (`I` key + pause menu entry) |
 
 `observation_panel.py` reuses `health_bar.draw_stat_bar` (threat + source bars) and `needs.get_priority_need`; its matching per-run CSV log lives in `../observation/`.
 

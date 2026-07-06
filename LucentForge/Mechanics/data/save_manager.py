@@ -43,6 +43,7 @@ class SaveManager:
         combat_cooldowns: dict,
         slot_id: int = _DEFAULT_SLOT,
         bags: dict[str, list] | None = None,
+        equipment: dict[str, dict] | None = None,
     ) -> None:
         """Write full world state to the given slot in a single transaction."""
         conn = self._db.conn
@@ -102,7 +103,8 @@ class SaveManager:
                         npc.y,
                         getattr(npc, "cycles", 0),
                         getattr(npc, "mp", 0),
-                        json.dumps(getattr(npc, "equipment", {})),
+                        json.dumps((equipment or {}).get(npc.entity_id,
+                                   getattr(npc, "equipment", {}))),
                         json.dumps({n.need_id: n.current_value for n in ctrl.needs}),
                         json.dumps(ctrl.brain.chemicals.as_dict()),
                         json.dumps(ctrl.brain.traits.as_dict()),
@@ -129,7 +131,8 @@ class SaveManager:
                     player.y,
                     getattr(player, "cycles", 0),
                     getattr(player, "mp", 0),
-                    json.dumps(getattr(player, "equipment", {})),
+                    json.dumps((equipment or {}).get(player.entity_id,
+                               getattr(player, "equipment", {}))),
                     json.dumps({n.need_id: n.current_value for n in player_needs}),
                     json.dumps({}),
                     json.dumps(p_traits),

@@ -146,7 +146,7 @@ def main():
                         screen, clock, ctx, font,
                         world_sim, sources, _npc_controllers,
                         player, player_needs, defeated_npcs, combat_cooldowns,
-                        inv_svc=inv_svc,
+                        inv_svc=inv_svc, equip_svc=equip_svc,
                     )
                     if _result == "quit":
                         _paused_quit = True
@@ -178,6 +178,10 @@ def main():
                     # else "resume" — continue
                 elif event.key == pygame.K_TAB:
                     hud_index = (hud_index + 1) % len(_hud_subjects)
+                elif event.key == pygame.K_i:
+                    from Mechanics.renderer.inventory_menu import run_inventory_menu
+                    run_inventory_menu(screen, clock, ctx, font,
+                                       inv_svc, equip_svc, player)
                 elif event.key == pygame.K_o:
                     obs_visible = not obs_visible
                 elif event.key == pygame.K_s:
@@ -188,6 +192,7 @@ def main():
                             player, player_needs, defeated_npcs, combat_cooldowns,
                             slot_id=_slot,
                             bags=inv_svc.serialize_all(),
+                            equipment=equip_svc.serialize_all(),
                         )
 
         if not in_combat:
@@ -217,6 +222,8 @@ def main():
                 ctx.save_manager.snapshot(
                     world_sim, sources, _npc_controllers,
                     player, player_needs, defeated_npcs, combat_cooldowns,
+                    bags=inv_svc.serialize_all(),
+                    equipment=equip_svc.serialize_all(),
                 )
 
             # Heartbeat-6: sample world + NPC state to the run-log
@@ -346,6 +353,7 @@ def main():
             world_sim, sources, _npc_controllers,
             player, player_needs, defeated_npcs, combat_cooldowns,
             bags=inv_svc.serialize_all(),
+            equipment=equip_svc.serialize_all(),
         )
 
     run_logger.finalize(world_sim, npc_list, defeated_npcs)
