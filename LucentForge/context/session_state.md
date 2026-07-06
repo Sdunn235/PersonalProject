@@ -1,28 +1,36 @@
-# Session State — Last updated: 2026-07-05 (Stage 2 Phase 2.0 COMPLETE — implementation starts Phase 2.1)
+# Session State — Last updated: 2026-07-06 (Stage 2 Phase 2.8 COMPLETE — Stage 2 arc closed, C0020)
 
-## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 IN PROGRESS
+## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE
 
 ### Stage 2 Summary
 | Phase | Commit | Description | Status |
 |-------|--------|-------------|--------|
 | Phase 2.0 | C0012 | Terminology map + items bible addendum (doc-only) | COMPLETE |
-| Phase 2.1 | — | `Mechanics/items/` domain package (enums, models, base classes) | NEXT |
-| Phase 2.2 | — | Relational migration m0003 + repositories | PLANNED |
-| Phase 2.3 | — | Services + persistence (InventoryService, EquipmentService) + stamina rename | PLANNED |
-| Phase 2.4 | — | Combat refactor + defect fixes (NPC bag bug, armor-DEF, weapon-dict hack) | PLANNED |
-| Phase 2.5 | — | Inventory UI modal (I key + pause menu integration) | PLANNED |
-| Phase 2.6 | — | §12.2 outcome resolver | PLANNED |
-| Phase 2.7 | — | Chests/locks/traps/keys | PLANNED |
-| Phase 2.8 | — | Stage 2 closeout + docs | PLANNED |
+| Phase 2.1 | C0013 | `Mechanics/items/` domain package (enums, models) | COMPLETE |
+| Phase 2.2 | C0014 | m0003 relational schema + ItemRepository | COMPLETE |
+| Phase 2.3 | C0015 | Services + persistence (InventoryService, EquipmentService) | COMPLETE |
+| Phase 2.4 | C0016 | Combat refactor + defect fixes (NPC bag bug, armor-DEF, weapon-dict) | COMPLETE |
+| Phase 2.5 | C0017 | Inventory UI modal (I key + pause menu integration) | COMPLETE |
+| Phase 2.6 | C0018 | §12.2 outcome resolver (OutcomeResolver, OutcomeCheck) | COMPLETE |
+| Phase 2.7 | C0019 | Chests, locks, traps, keys on map (E key interaction) | COMPLETE |
+| Phase 2.8 | C0020 | Stage 2 closeout — docs, smoke suite, full regression | COMPLETE |
 
-**Phase 2.0 docs created (C0012):**
-- `docs/bible/lucentforge_terminology_map_v_1.md` — three-way reconciliation (Bible | TheForge | LucentForge)
-- `docs/bible/lucentforge_items_addendum_v_1.md` — items doctrine §A1–A8
+**Stage 2 key decisions:**
+- TheForge = structural blueprint, bible = naming/semantics authority; every import reconciled against terminology map
+- Services NOT in GameContext (decision 13) — held in `main.py` local vars
+- No world death in Stage 2 — traps clamp HP to 1 (`max(1, hp - trap_damage)`)
+- Stage 2 requires a fresh `lucentforge.db` — delete DB and relaunch to apply m0003+ migrations
+  (JSON stays canonical; delete `lucentforge.db` = reseed; no save-transform path)
 
-**Standing rule (all Stage 2 phases):** TheForge = structural blueprint, bible = naming/semantics authority.
-Every TheForge import gets a reconciliation pass against `docs/bible/lucentforge_terminology_map_v_1.md`.
-Note: Phase 2.2 requires a fresh `lucentforge.db` (no save transform — delete-db is the path).
-Approved plan: `C:\Users\Shawn\.claude\plans\caelum-session-start-zesty-tome.md` (Phases 2.0–2.8).
+**Stage 2 key bindings:**
+- `I` — Opens inventory/equipment modal (also reachable from pause menu)
+- `E` — Interact with orthogonally adjacent chest (open, pick lock, disarm trap, use key, loot)
+- `O` — Toggle observation panel (Heartbeat-6)
+- `S` — Manual save
+- `TAB` — Cycle right-side HUD between entities
+- `ESC` — Pause menu (Resume / Inventory / Save / Load / New Game / Quit)
+
+**Approved plan:** `C:\Users\Shawn\.claude\plans\caelum-session-start-zesty-tome.md` (Phases 2.0–2.8) — COMPLETE.
 
 ### Stage 1 Summary
 | Phase | Commit | Description | Status |
@@ -55,10 +63,10 @@ Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-
 - **What is saved**: clock tick/accumulator, threat level/stage, town state, finite source stocks, per-entity hp/x/y/cycles/mp/equipment/needs/traits/chemicals/memory, defeated NPC set, combat cooldowns.
 - **Boundary preserved**: m0001 content tables untouched; JSON stays canonical. Delete `lucentforge.db` → fresh game.
 - **Verified**: 3-test headless smoke suite (`scratchpad/smoke_test.py`) — fresh-seed, round-trip (500 ticks → snapshot → restore → assert), autosave interval. All PASS. Live DB migrated cleanly.
-## Current status: STABLE — Stage 1 COMPLETE, Stage 2 NEXT
+## Current status: STABLE — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 NEXT (rooms-as-zones)
 
 ## What works right now
-- `python main.py` — 1024x768 window, 576x576 level centered with border zones
+- `py main.py` (Windows PowerShell) — 1024x768 window, 576x576 level centered with border zones
 - **Grid**: 18x18 tiles, 32px — procedural region-colored map (no background image)
 - **River barrier**: 28 river tiles winding cols 4-7, blocks all movement
 - **Two 2x2 bridges**: North (rows 4-5) and south (rows 11-12) — walkable crossings
@@ -78,6 +86,14 @@ Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-
 - **HP/SP/MP persistence**: carry over between combats
 - **HUD**: Tab key cycles right-side panel, top-left day/HP/SP/MP display
 - **World-map stat bars**: all sprites show 3 stacked bars above them
+- **Persistent inventory** — items survive between combats and save/load (Stage 2, Phase 2.3)
+- **Equipment UI** — `I` key opens modal; equip/unequip from world and pause menu (Phase 2.5)
+- **Armor mitigation** — gear mods reach damage calculation; fights run longer vs armored targets (Phase 2.4)
+- **NPCs use potions** — Alder/Grom draw from their bags in combat; consumables are finite (Phase 2.4)
+- **Chests on map** — 3 seeded chests (town_supply col 11/row 8, forest_cache 2/4, goblin_hoard 2/14) (Phase 2.7)
+- **Lockpicking** — DEX-based §12.2 check; lockpick consumed on failure (Phase 2.7)
+- **Trap disarm** — DEX check; trap fires on failure then opens anyway — no softlock (Phase 2.7)
+- **Key items** — brass_key gates goblin_hoard; travel_boots + iron_helm acquirable in-world (Phase 2.7)
 
 ## Heartbeat-1 (World Orchestration Layer)
 - **SimulationClock**: tick-based time, day count, DAY/NIGHT phase
@@ -165,19 +181,19 @@ Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-
 8. **Grid expansion** — 18x18 may be too small for individual buildings, farm plots. Separate future task.
 9. **Camera scrolling** — Shawn wants scroll/pan for larger maps. Future phase.
 10. **Buff spells** — barrier/shield spells not yet implemented
-11. **Equip UI** — no in-game menu to swap equipment
-12. **Spell learning** — no way to learn new spells during gameplay
-13. **Element resistances** — elements on spells but no resistance system on entities
+11. **Spell learning** — no way to learn new spells during gameplay
+12. **Element resistances** — elements on spells but no resistance system on entities
+13. **World death deferred** — traps clamp HP to 1; full death + respawn is a Stage 4+ arc item (§A8)
+14. **Durability decay deferred** — `durability` field exists on DurableItem; wear mechanics are Stage 4+
+15. **Shops deferred** — no buy/sell economy yet; items only acquirable from chests
 
 ## How to run
-```
+```powershell
 cd "C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge"
 py main.py
 ```
-(Use `py` on Windows PowerShell — `python3` and `python` may not resolve correctly.)
-Arrow keys = move player
-Walk into any NPC to trigger combat
-Tab = cycle right-side HUD between entities
+Requires **pygame-ce** (`pip install pygame-ce`) — vanilla `pygame` fails to build on Python 3.14.
+Arrow keys = move player; walk into NPC to trigger combat; `Tab` = cycle HUD; `I` = inventory; `E` = chest; `ESC` = pause.
 
 ## Architecture to preserve
 - `Mechanics/` structure — do not flatten
@@ -222,6 +238,16 @@ Tab = cycle right-side HUD between entities
 | `Mechanics/renderer/health_bar.py` | draw_stat_bar + draw_health_bar (used for entity + source bars) |
 | `Mechanics/needs/needs_system.py` | Need decay, source-aware fill, health drain, regen |
 | `Mechanics/biochem/brain.py` | Chemical/drive system |
+| `Mechanics/items/enums.py` | SlotType, BodySlot, WeaponType, ArmorWeight, ConsumableEffect, TrapType |
+| `Mechanics/items/models.py` | Item TPH hierarchy (DurableItem → Weapon/Armor/Shield; Consumable) |
+| `Mechanics/items/containers.py` | ItemStack, Inventory, EquipmentSet, Chest dataclass |
+| `Mechanics/items/repos.py` | ItemRepository — typed SQLite access via `ctx.item_repo` |
+| `Mechanics/services/inventory_service.py` | InventoryService — get_inventory, take_from, use_consumable, carry_weight |
+| `Mechanics/services/equipment_service.py` | EquipmentService — equip/unequip, gear_mods(), weapon_profile() |
+| `Mechanics/services/outcome.py` | OutcomeResolver, OutcomeCheck, OutcomeResult (§12.2 bounded-variance check) |
+| `Mechanics/renderer/inventory_menu.py` | run_inventory_menu — I-key modal (Phase 2.5) |
+| `Mechanics/renderer/chest_menu.py` | run_chest_menu — E-key chest/lock/trap/loot modal (Phase 2.7) |
+| `Mechanics/bootstrap.py` | Composition root — create_item_services, create_chest_registry, rebuild_chest_registry |
 
 ## Bible reference
 - `docs/bible/lucentforge_simulation_foundation_v_1.md` — philosophical constitution (§numbers = requirements)

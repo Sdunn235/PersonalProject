@@ -6,8 +6,8 @@ Medieval fantasy RPG prototype in PyGame. Core goal: emergent NPC autonomy drive
 
 ## Build & Run
 
-- `pip install -r requirements.txt`
-- `python main.py`
+- `pip install -r requirements.txt` (requires `pygame-ce` — NOT vanilla `pygame`; vanilla fails to build on Python 3.14)
+- `py main.py` (Windows PowerShell — `python` and `python3` do not resolve on this machine)
 
 ## Current State
 

@@ -7,7 +7,9 @@ Domain model package for items and equipment. Stage 2 of the TheForge Combine Ar
 | File | Contents |
 |---|---|
 | `enums.py` | `SlotType`, `BodySlot`, `WeaponType`, `ArmorWeight`, `ConsumableEffect`, `TrapType`, `body_slot_to_eligible()` |
-| `models.py` | `Item`, `DurableItem`, `Weapon`, `Armor`, `Shield`, `Consumable` |
+| `models.py` | `Item`, `DurableItem`, `Weapon`, `Armor`, `Shield`, `Consumable`; `Item.from_dict()` dispatches to correct subclass |
+| `containers.py` | `ItemStack`, `Inventory`, `EquipmentSet`, `Chest` dataclass (Phase 2.3/2.7) |
+| `repos.py` | `ItemRepository` — typed SQLite access via `ctx.item_repo` (Phase 2.2) |
 | `__init__.py` | Flat re-export of all enums and model classes |
 
 ## Class Hierarchy

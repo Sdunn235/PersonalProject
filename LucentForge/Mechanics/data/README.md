@@ -10,13 +10,17 @@ data/
   migrations/      — Ordered, versioned migrations (m####_<name>.py)
     m0001_initial_content.py  — creates + seeds 5 content tables from JSON
     m0002_runtime_state.py    — creates 4 runtime-state tables (Phase 1.5)
+    m0003_items_table.py      — relational items schema (Stage 2, Phase 2.2)
+    m0004_bag_column.py       — bag JSON column + lockpick seed (Stage 2, Phase 2.3)
+    m0005_chests.py           — chest_content + chest_state tables (Stage 2, Phase 2.7)
   save_manager.py  — SaveManager: snapshot() + restore() for world runtime state
   context.py       — GameContext: owns Database, 5 SqliteDao instances, and SaveManager
   dao.py           — Dao (JSON, legacy/fallback) + SqliteDao (LINQ-style query API over a table)
   loader.py        — Generic JSON loader (used by the seed migration)
   protocols.py     — IEntityDao / IContext Protocols
   models.py        — Typed dataclasses (AbilityDef, ItemDef, EntityDef)
-  *.json           — Canonical seed content (see below)
+  *.json           — Canonical seed content (entities, abilities, items, needs, sources, chests)
+  chests.json      — Stage 2 chest seed definitions (3 chests: supply, forest_cache, goblin_hoard)
   lucentforge.db   — Runtime SQLite store (GITIGNORED; rebuilt from JSON by migration 0001)
 ```
 
@@ -90,7 +94,7 @@ ctx.save_manager.get_slot_info(slot_id)          # -> {slot_id, tick_count, town
 ctx.save_manager.list_all_slots([0, 1, 2, 3])    # -> list[dict | None], parallel to slot_ids
 ```
 
-**Boundary rule:** `m0002` tables are runtime-only. Never seed them from JSON. Delete `lucentforge.db` for a clean slate; the game re-seeds content from JSON and starts fresh automatically.
+**Boundary rule:** `m0002`–`m0005` runtime tables are never seeded from JSON. `chest_content`/`chest_state` (m0005) are seeded from `chests.json` at game init via `create_chest_registry()`. Delete `lucentforge.db` for a clean slate; Stage 2 migrations require a fresh DB (no save-transform path).
 
 **Integration in main.py:**
 - Launch: `restore()` → `apply_save()` if save exists; sprites of defeated NPCs removed
