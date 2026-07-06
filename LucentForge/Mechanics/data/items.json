@@ -119,5 +119,47 @@
     "effect": "UNLOCK",
     "potency": 1,
     "effects": {}
+  },
+  {
+    "id": "iron_helm",
+    "name": "Iron Helm",
+    "type": "armor",
+    "slot": "armor",
+    "description": "+3 defense.",
+    "value": 30,
+    "weight": 3,
+    "durability": 100,
+    "defense_rating": 3,
+    "resist_rating": 0,
+    "weight_class": "LIGHT",
+    "body_slot": "HEAD",
+    "effects": {"def": 3}
+  },
+  {
+    "id": "travel_boots",
+    "name": "Travel Boots",
+    "type": "armor",
+    "slot": "armor",
+    "description": "+1 defense.",
+    "value": 20,
+    "weight": 2,
+    "durability": 100,
+    "defense_rating": 1,
+    "resist_rating": 0,
+    "weight_class": "LIGHT",
+    "body_slot": "FEET",
+    "effects": {"def": 1}
+  },
+  {
+    "id": "brass_key",
+    "name": "Brass Key",
+    "type": "consumable",
+    "slot": "",
+    "description": "A key to a specific lock.",
+    "value": 5,
+    "weight": 1,
+    "effect": "UNLOCK",
+    "potency": 1,
+    "effects": {}
   }
 ]

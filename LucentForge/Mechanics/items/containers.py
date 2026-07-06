@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from Mechanics.items.models import Item
+from Mechanics.items.enums import TrapType
 
 
 @dataclass
@@ -61,3 +62,19 @@ class EquipmentSet:
 
     def to_dict(self) -> dict[str, str]:
         return {slot: item.id for slot, item in self.slots.items()}
+
+
+@dataclass
+class Chest:
+    """Runtime chest state. Seeded from chest_content; mutated via chest_menu."""
+    id:              str
+    col:             int
+    row:             int
+    locked:          bool       = False
+    lock_dc:         int        = 0
+    required_key_id: str | None = None   # None = pickable; specific id = exact key
+    is_trapped:      bool       = False
+    trap_type:       TrapType   = TrapType.NONE
+    trap_damage:     int        = 0
+    is_opened:       bool       = False
+    contents:        list       = field(default_factory=list)  # list[ItemStack]

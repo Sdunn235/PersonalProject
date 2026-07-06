@@ -44,6 +44,7 @@ class SaveManager:
         slot_id: int = _DEFAULT_SLOT,
         bags: dict[str, list] | None = None,
         equipment: dict[str, dict] | None = None,
+        chests: dict | None = None,
     ) -> None:
         """Write full world state to the given slot in a single transaction."""
         conn = self._db.conn
@@ -143,6 +144,23 @@ class SaveManager:
                 ),
             )
 
+            # --- Chest states ---
+            conn.execute("DELETE FROM chest_state WHERE slot_id = ?", (slot_id,))
+            for chest in (chests or {}).values():
+                conn.execute(
+                    "INSERT INTO chest_state (slot_id, chest_id, is_opened, contents) "
+                    "VALUES (?, ?, ?, ?)",
+                    (
+                        slot_id,
+                        chest.id,
+                        int(chest.is_opened),
+                        json.dumps(
+                            [{"item_id": s.item.id, "qty": s.qty}
+                             for s in chest.contents]
+                        ),
+                    ),
+                )
+
             # --- Game tracking ---
             conn.execute(
                 "INSERT OR REPLACE INTO game_state (slot_id, defeated_npcs, combat_cooldowns) "
@@ -182,6 +200,11 @@ class SaveManager:
             "SELECT * FROM game_state WHERE slot_id = ?", (slot_id,)
         ).fetchone()
 
+        chest_rows = conn.execute(
+            "SELECT chest_id, is_opened, contents FROM chest_state WHERE slot_id = ?",
+            (slot_id,),
+        ).fetchall()
+
         return {
             "world": {
                 "tick_count":   world_row["tick_count"],
@@ -212,6 +235,13 @@ class SaveManager:
                 "defeated_npcs":    json.loads(game_row["defeated_npcs"]) if game_row else [],
                 "combat_cooldowns": json.loads(game_row["combat_cooldowns"]) if game_row else {},
             },
+            "chests": {
+                row["chest_id"]: {
+                    "is_opened": bool(row["is_opened"]),
+                    "contents":  json.loads(row["contents"]),
+                }
+                for row in chest_rows
+            },
         }
 
     def delete_save(self, slot_id: int = _DEFAULT_SLOT) -> None:
@@ -221,6 +251,7 @@ class SaveManager:
             conn.execute("DELETE FROM source_state WHERE slot_id = ?", (slot_id,))
             conn.execute("DELETE FROM entity_state WHERE slot_id = ?", (slot_id,))
             conn.execute("DELETE FROM game_state WHERE slot_id = ?",   (slot_id,))
+            conn.execute("DELETE FROM chest_state WHERE slot_id = ?",  (slot_id,))
         print(f"[SAVE] Slot {slot_id} deleted.")
 
     def get_slot_info(self, slot_id: int) -> dict | None:

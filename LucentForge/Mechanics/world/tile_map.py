@@ -18,6 +18,7 @@ SLEEP2 = 8    # Second sleep source (Heartbeat-3: source variety)
 FORAGE = 9    # Goblin camp food — weak, finite (Heartbeat-4)
 SILO   = 10   # Storage silo placeholder (Heartbeat-5 visual, non-functional)
 RBANK  = 11   # Riverbank — walkable tile adjacent to river, thirst source
+CHEST  = 12   # Interactive chest — always blocks (Phase 2.7)
 
 _TILE_COLORS = {
     FLOOR:  settings.TILE_FLOOR,
@@ -32,6 +33,7 @@ _TILE_COLORS = {
     FORAGE: (100, 75, 40),      # muddy brown (goblin forage scraps)
     SILO:   (170, 155, 120),   # warm stone (storage placeholder)
     RBANK:  (45, 100, 160),    # slightly lighter blue — riverbank drinking spot
+    CHEST:  (180, 130, 40),   # gold-brown — interactive chest
 }
 
 _SOURCE_TYPES = {
@@ -318,7 +320,7 @@ class TileMap:
         if not (0 <= col < self.cols and 0 <= row < self.rows):
             return
         self.grid[row][col] = tile_type
-        self.blocked[row][col] = tile_type in (WALL, RIVER)
+        self.blocked[row][col] = tile_type in (WALL, RIVER, CHEST)
 
     # --- Queries ---
 
@@ -405,7 +407,7 @@ class TileMap:
         ox = offset_x if offset_x is not None else settings.LEVEL_X
         oy = offset_y if offset_y is not None else settings.LEVEL_Y
 
-        _tile_labels = {FOOD: "F", SLEEP: "Z", BRIDGE: "B", FOOD2: "f", SLEEP2: "c", FORAGE: "g", SILO: "S", RBANK: "~"}
+        _tile_labels = {FOOD: "F", SLEEP: "Z", BRIDGE: "B", FOOD2: "f", SLEEP2: "c", FORAGE: "g", SILO: "S", RBANK: "~", CHEST: "C"}
         _special_colors = {
             FOOD:   settings.FOOD_COLOR,
             SLEEP:  settings.SLEEP_COLOR,
@@ -416,6 +418,7 @@ class TileMap:
             SLEEP2: _TILE_COLORS[SLEEP2],
             FORAGE: _TILE_COLORS[FORAGE],
             SILO:   _TILE_COLORS[SILO],
+            CHEST:  _TILE_COLORS[CHEST],
         }
         region_colors = settings.REGION_COLORS
 
@@ -476,3 +479,8 @@ class TileMap:
                               py - txt.get_height() // 2 - 1))
             surface.blit(txt, (px - txt.get_width() // 2,
                                py - txt.get_height() // 2))
+
+    def place_chests(self, chest_reg: dict) -> None:
+        """Stamp CHEST tiles for every chest in the registry. Idempotent."""
+        for chest in chest_reg.values():
+            self._set(chest.col, chest.row, CHEST)

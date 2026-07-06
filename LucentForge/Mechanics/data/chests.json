@@ -1,0 +1,48 @@
+[
+  {
+    "id": "town_supply_chest",
+    "col": 11,
+    "row": 8,
+    "locked": false,
+    "lock_dc": 0,
+    "required_key_id": null,
+    "is_trapped": false,
+    "trap_type": 0,
+    "trap_damage": 0,
+    "loot": [
+      {"item_id": "health_potion", "qty": 2},
+      {"item_id": "mana_potion",   "qty": 1}
+    ]
+  },
+  {
+    "id": "forest_cache",
+    "col": 2,
+    "row": 4,
+    "locked": true,
+    "lock_dc": 8,
+    "required_key_id": null,
+    "is_trapped": false,
+    "trap_type": 0,
+    "trap_damage": 0,
+    "loot": [
+      {"item_id": "travel_boots",  "qty": 1},
+      {"item_id": "stamina_potion","qty": 1},
+      {"item_id": "brass_key",     "qty": 1}
+    ]
+  },
+  {
+    "id": "goblin_hoard",
+    "col": 2,
+    "row": 14,
+    "locked": true,
+    "lock_dc": 0,
+    "required_key_id": "brass_key",
+    "is_trapped": true,
+    "trap_type": 1,
+    "trap_damage": 15,
+    "loot": [
+      {"item_id": "iron_helm",     "qty": 1},
+      {"item_id": "health_potion", "qty": 2}
+    ]
+  }
+]

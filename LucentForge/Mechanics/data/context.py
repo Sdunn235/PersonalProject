@@ -29,6 +29,7 @@ class GameContext:
         self._items = SqliteDao(self._db, "items")
         self._needs = SqliteDao(self._db, "needs")
         self._sources = SqliteDao(self._db, "sources")
+        self._chests = SqliteDao(self._db, "chest_content")
         self._save_manager = SaveManager(self._db)
         self._item_repo = ItemRepository(self._items)
 
@@ -64,12 +65,17 @@ class GameContext:
     def item_repo(self) -> ItemRepository:
         return self._item_repo
 
+    @property
+    def chests(self) -> SqliteDao:
+        return self._chests
+
     def reload(self) -> None:
         self._entities.reload()
         self._abilities.reload()
         self._items.reload()
         self._needs.reload()
         self._sources.reload()
+        self._chests.reload()
 
     def save(self) -> None:
         self._entities.save()
@@ -77,3 +83,4 @@ class GameContext:
         self._items.save()
         self._needs.save()
         self._sources.save()
+        self._chests.save()

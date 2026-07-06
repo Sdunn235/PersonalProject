@@ -206,6 +206,87 @@ def create_item_services(ctx: GameContext):
     return inv_svc, equip_svc
 
 
+def create_chest_registry(ctx: GameContext) -> dict:
+    """New-game: build chest_reg from chest_content with fresh loot."""
+    from Mechanics.items.containers import Chest, ItemStack
+    from Mechanics.items.enums import TrapType
+
+    chest_reg = {}
+    for cdef in ctx.chests.get_all():
+        loot_stacks = [
+            ItemStack(item, e.get("qty", 1))
+            for e in cdef.get("loot", [])
+            if (item := ctx.item_repo.find_by_id(e["item_id"]))
+        ]
+        chest = Chest(
+            id=cdef["id"],
+            col=cdef["col"],
+            row=cdef["row"],
+            locked=cdef.get("locked", False),
+            lock_dc=cdef.get("lock_dc", 0),
+            required_key_id=cdef.get("required_key_id"),
+            is_trapped=cdef.get("is_trapped", False),
+            trap_type=TrapType(cdef.get("trap_type", 0)),
+            trap_damage=cdef.get("trap_damage", 0),
+            is_opened=False,
+            contents=loot_stacks,
+        )
+        chest_reg[chest.id] = chest
+    return chest_reg
+
+
+def rebuild_chest_registry(save_data: dict, ctx_chests, item_repo) -> dict:
+    """Load: restore chest_reg from save_data['chests'] + chest_content definitions."""
+    from Mechanics.items.containers import Chest, ItemStack
+    from Mechanics.items.enums import TrapType
+
+    saved_chests = save_data.get("chests", {})
+    chest_reg = {}
+    for cdef in ctx_chests.get_all():
+        cid = cdef["id"]
+        if cid in saved_chests:
+            sc = saved_chests[cid]
+            contents = [
+                ItemStack(item, e.get("qty", 1))
+                for e in sc.get("contents", [])
+                if (item := item_repo.find_by_id(e["item_id"]))
+            ]
+            chest = Chest(
+                id=cid,
+                col=cdef["col"],
+                row=cdef["row"],
+                locked=cdef.get("locked", False),
+                lock_dc=cdef.get("lock_dc", 0),
+                required_key_id=cdef.get("required_key_id"),
+                is_trapped=cdef.get("is_trapped", False),
+                trap_type=TrapType(cdef.get("trap_type", 0)),
+                trap_damage=cdef.get("trap_damage", 0),
+                is_opened=sc.get("is_opened", False),
+                contents=contents,
+            )
+        else:
+            loot_stacks = [
+                ItemStack(item, e.get("qty", 1))
+                for e in cdef.get("loot", [])
+                if (item := item_repo.find_by_id(e["item_id"]))
+            ]
+            chest = Chest(
+                id=cid,
+                col=cdef["col"],
+                row=cdef["row"],
+                locked=cdef.get("locked", False),
+                lock_dc=cdef.get("lock_dc", 0),
+                required_key_id=cdef.get("required_key_id"),
+                is_trapped=cdef.get("is_trapped", False),
+                trap_type=TrapType(cdef.get("trap_type", 0)),
+                trap_damage=cdef.get("trap_damage", 0),
+                is_opened=False,
+                contents=loot_stacks,
+            )
+        chest_reg[cid] = chest
+    return chest_reg
+
+
 def rebuild_item_services(save_data: dict, inv_svc, equip_svc, item_repo) -> None:
     """Rebuild InventoryService + EquipmentService from a restored save dict.
     Call immediately after apply_save() on the load path.

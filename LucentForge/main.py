@@ -13,7 +13,8 @@ import settings
 from Mechanics.bootstrap import (create_game_context, create_needs,
                                  create_npc_controller, create_world_sim,
                                  apply_save, create_item_services,
-                                 rebuild_item_services)
+                                 rebuild_item_services,
+                                 create_chest_registry, rebuild_chest_registry)
 from Mechanics.renderer.save_menu import run_load_menu, run_save_menu
 from Mechanics.renderer.pause_menu import run_pause_menu
 from Mechanics.entities.factory import create_player, create_all_npcs, get_sprite_path
@@ -84,6 +85,7 @@ def main():
     (npc_list, player, player_needs, player_controller, player_sprite,
      sprite_group, _npc_controllers, defeated_npcs, combat_cooldowns) = _spawn_entities()
     inv_svc, equip_svc = create_item_services(ctx)
+    chest_reg = create_chest_registry(ctx)
 
     print(f"\n[WORLD SIM] Heartbeat-1 active | "
           f"Food={world_sim.resources.food_total:.0f} | "
@@ -104,6 +106,7 @@ def main():
             apply_save(_save_data, world_sim, sources, _npc_controllers,
                        player, player_needs, defeated_npcs, combat_cooldowns)
             rebuild_item_services(_save_data, inv_svc, equip_svc, ctx.item_repo)
+            chest_reg = rebuild_chest_registry(_save_data, ctx.chests, ctx.item_repo)
             for _npc_e, _, _npc_sprite in npc_list:
                 if _npc_e.entity_id in defeated_npcs:
                     _npc_sprite.kill()
@@ -112,6 +115,7 @@ def main():
             print(f"[SAVE] Slot {_chosen_slot} empty — starting fresh.")
     else:
         print("[SAVE] New Game — starting fresh.")
+    tile_map.place_chests(chest_reg)
 
     # Heartbeat-6: per-run CSV log + emergence summary
     run_logger = RunLogger(settings.RUN_LOG_DIR)
@@ -147,6 +151,7 @@ def main():
                         world_sim, sources, _npc_controllers,
                         player, player_needs, defeated_npcs, combat_cooldowns,
                         inv_svc=inv_svc, equip_svc=equip_svc,
+                        chest_reg=chest_reg,
                     )
                     if _result == "quit":
                         _paused_quit = True
@@ -157,6 +162,8 @@ def main():
                          player_sprite, sprite_group, _npc_controllers,
                          defeated_npcs, combat_cooldowns) = _spawn_entities()
                         inv_svc, equip_svc = create_item_services(ctx)
+                        chest_reg = create_chest_registry(ctx)
+                        tile_map.place_chests(chest_reg)
                         _hud_subjects = [(player, None, "Player")] + [
                             (npc, ctrl, None) for npc, ctrl, _ in npc_list
                         ]
@@ -171,6 +178,8 @@ def main():
                             apply_save(_save_data, world_sim, sources, _npc_controllers,
                                        player, player_needs, defeated_npcs, combat_cooldowns)
                             rebuild_item_services(_save_data, inv_svc, equip_svc, ctx.item_repo)
+                            chest_reg = rebuild_chest_registry(_save_data, ctx.chests, ctx.item_repo)
+                            tile_map.place_chests(chest_reg)
                             for _npc_e, _, _npc_s in npc_list:
                                 if _npc_e.entity_id in defeated_npcs:
                                     _npc_s.kill()
@@ -193,7 +202,26 @@ def main():
                             slot_id=_slot,
                             bags=inv_svc.serialize_all(),
                             equipment=equip_svc.serialize_all(),
+                            chests=chest_reg,
                         )
+                elif event.key == pygame.K_e:
+                    pcol = int(player.x // settings.TILE_SIZE)
+                    prow = int(player.y // settings.TILE_SIZE)
+                    _adj_chest = None
+                    for _dc, _dr in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+                        _adj_chest = next(
+                            (c for c in chest_reg.values()
+                             if c.col == pcol + _dc and c.row == prow + _dr),
+                            None,
+                        )
+                        if _adj_chest:
+                            break
+                    if _adj_chest:
+                        from Mechanics.renderer.chest_menu import run_chest_menu
+                        from Mechanics.services.outcome import OutcomeResolver
+                        run_chest_menu(screen, clock, font, _adj_chest, player,
+                                       inv_svc, equip_svc, ctx.item_repo,
+                                       OutcomeResolver())
 
         if not in_combat:
             # --- World simulation tick ---
@@ -224,6 +252,7 @@ def main():
                     player, player_needs, defeated_npcs, combat_cooldowns,
                     bags=inv_svc.serialize_all(),
                     equipment=equip_svc.serialize_all(),
+                    chests=chest_reg,
                 )
 
             # Heartbeat-6: sample world + NPC state to the run-log
@@ -354,6 +383,7 @@ def main():
             player, player_needs, defeated_npcs, combat_cooldowns,
             bags=inv_svc.serialize_all(),
             equipment=equip_svc.serialize_all(),
+            chests=chest_reg,
         )
 
     run_logger.finalize(world_sim, npc_list, defeated_npcs)

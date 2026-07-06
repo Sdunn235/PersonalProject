@@ -20,7 +20,7 @@ def run_pause_menu(
     font: pygame.font.Font,
     world_sim, sources, controllers, player,
     player_needs, defeated_npcs, combat_cooldowns,
-    inv_svc=None, equip_svc=None,
+    inv_svc=None, equip_svc=None, chest_reg=None,
 ) -> str:
     """
     Modal pause screen. Returns:
@@ -68,6 +68,7 @@ def run_pause_menu(
                                 combat_cooldowns, slot_id=_slot,
                                 bags=inv_svc.serialize_all() if inv_svc is not None else None,
                                 equipment=equip_svc.serialize_all() if equip_svc is not None else None,
+                                chests=chest_reg,
                             )
                         # fall through — stay in pause menu after save
                     if choice == "Load":
@@ -86,6 +87,7 @@ def run_pause_menu(
                                 slot_id=settings.AUTOSAVE_SLOT_ID,
                                 bags=inv_svc.serialize_all() if inv_svc is not None else None,
                                 equipment=equip_svc.serialize_all() if equip_svc is not None else None,
+                                chests=chest_reg,
                             )
                         return "quit"
 

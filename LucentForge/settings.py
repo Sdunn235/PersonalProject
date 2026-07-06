@@ -257,3 +257,9 @@ OUTCOME_VARIANCE_MAX  = 5    # max ±variance; |det_margin| beyond this → no r
 OUTCOME_CRIT_MARGIN   = 5    # |final_margin| >= this → critical outcome
 ATTR_SCALE            = 1    # each attribute point → 1 outcome score point
 LOCKPICK_BASE_VALUE   = 5    # base score for lockpick checks (no skill until Stage 4)
+
+# =============================================================================
+# PHASE 2.7 — Chests, Locks, Traps, Keys (E key interaction)
+# Bible ref: lucentforge_items_addendum_v_1.md §12.2
+# =============================================================================
+TRAP_DISARM_DC        = 5    # difficulty class for trap disarm attempts
