@@ -248,3 +248,12 @@ SAVE_SLOT_COUNT    = 3       # manual save slots (IDs 1, 2, 3)
 # =============================================================================
 CARRY_BASE    = 20   # base carry capacity in weight units
 CARRY_PER_STR = 2    # additional capacity per point of STR
+
+# =============================================================================
+# PHASE 2.6 — §12.2 Outcome Resolver
+# Bible ref: lucentforge_items_addendum_v_1.md §A5
+# =============================================================================
+OUTCOME_VARIANCE_MAX  = 5    # max ±variance; |det_margin| beyond this → no roll
+OUTCOME_CRIT_MARGIN   = 5    # |final_margin| >= this → critical outcome
+ATTR_SCALE            = 1    # each attribute point → 1 outcome score point
+LOCKPICK_BASE_VALUE   = 5    # base score for lockpick checks (no skill until Stage 4)

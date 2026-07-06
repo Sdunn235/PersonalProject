@@ -11,6 +11,7 @@ keyed by `entity_id`. They are created in `bootstrap.py` and held by `main.py` �
 | `__init__.py` | Protocol interfaces: `ICombatService`, `INeedsService`, `IEntityFactory`, `IInventoryService`, `IEquipmentService` |
 | `inventory_service.py` | `InventoryService` — per-entity bag management, consumable use, weight/capacity |
 | `equipment_service.py` | `EquipmentService` — per-entity slot management, stat mods, equip/unequip |
+| `outcome.py` | `OutcomeResolver` — §12.2 bounded-variance outcome check engine (lock/trap/skill checks) |
 
 ## Architecture
 
@@ -34,3 +35,4 @@ Services do NOT import from each other at module level. `equip()`/`unequip()` ac
 - `§A1` — Items as capability grants (equip / use / carry / take)
 - `§A2` — Carry as bodily budget (`CARRY_BASE + 2×STR`)
 - `§A3` — Slot doctrine and equip/unequip rules
+- `§A5` — Outcome resolution for item interactions (outcome.py implementation)
