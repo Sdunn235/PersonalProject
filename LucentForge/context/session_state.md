@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-07-06 (Stage 3 Phase 3.2 COMPLETE — world coord + m0006)
+# Session State — Last updated: 2026-07-06 (Stage 3 Phase 3.3 COMPLETE — zone crossing Observer)
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 IN PROGRESS
 
@@ -11,7 +11,7 @@
 | Phase 3.0 | C0021 | Rooms/Panels addendum + terminology map §7 + session_state update (doc-only) | COMPLETE |
 | Phase 3.1 | C0022 | `Mechanics/world/rooms.py` — RoomType, RoomDefinition, RoomRegistry; `Mechanics/data/rooms.json` | COMPLETE |
 | Phase 3.2 | C0023 | `Mechanics/world/world_coord.py` — WorldPos, PanelEdge, PanelConfig, PanelLoader stub; panels.json; m0006 additive migration (panel_x/panel_y on entity_state + source_state + chests.json) | COMPLETE |
-| Phase 3.3 | — | `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker; console [ZONE] logs | — |
+| Phase 3.3 | C0024 | `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker Observer; WorldSim owns zone_tracker; npc_logger.log_spatial_zone subscriber; main.py check_and_fire in game loop | COMPLETE |
 | Phase 3.4 | — | Observation panel ZONE section + HUD zone flash | — |
 | Phase 3.5 | — | `Mechanics/ai/zone_ai.py` — ZoneAIResponder; zone-triggered chemical injection | — |
 | Phase 3.6 | — | PanelLoader architecture stub; edge detection in main.py; panels.json | — |

@@ -16,6 +16,7 @@ WorldSim ticks drive the simulation; `tile_map.py` owns the spatial grid.
 | `pathfinder.py` | `bfs_path()` — 8-directional BFS used by NPC controllers |
 | `rooms.py` | `RoomType` enum, `RoomDefinition` dataclass, `RoomRegistry` — Stage 3 room data layer (Phase 3.1) |
 | `world_coord.py` | `WorldPos` dataclass, `PanelEdge` enum, `PanelConfig` dataclass, `PanelLoader` stub — Stage 3 world coordinate + panel registry (Phase 3.2) |
+| `zone_events.py` | `ZoneCrossingEvent` dataclass, `ZoneTracker` Observer — edge-triggered spatial room crossing detection (Phase 3.3) |
 
 ## Tile constants
 
@@ -33,6 +34,21 @@ WorldSim ticks drive the simulation; `tile_map.py` owns the spatial grid.
 - `TileMap.get_need_sources()` returns the authoritative list of `NeedSource` objects.
 - `place_chests()` stamps `CHEST` tiles at seeded positions; `BFS_BLOCKED` set includes `CHEST` so pathfinder treats chests as impassable.
 - `ROWS = 18`, `COLS = 18` — grid expansion is a future arc item.
+
+## Zone crossing system (Stage 3, Phase 3.3+)
+
+`zone_events.py` is the Observer hub for entity room transitions.
+
+| Type | Purpose |
+|---|---|
+| `ZoneCrossingEvent` | Fired when entity's room changes: `entity_name, from_room, to_room, tick` |
+| `ZoneTracker` | Tracks `_current_rooms` per entity; subscribers receive events on change only |
+
+**Edge-triggered** — no event on first call (cache init); no event while entity stays in same room; fires once per boundary crossing.
+
+`world_sim.zone_tracker` — `ZoneTracker` instance owned by `WorldSim`, subscribed by `npc_logger.log_spatial_zone` in `main.py`.
+
+`check_and_fire(entities, tile_map, rooms, panel_x, panel_y, tick)` uses `get_room_for_region()` (O(1) accurate lookup) not the bbox approximation.
 
 ## World coordinate system (Stage 3, Phase 3.2+)
 

@@ -3,6 +3,7 @@ from Mechanics.world.simulation_clock import SimulationClock
 from Mechanics.world.resource_state import ResourceState
 from Mechanics.world.goblin_threat import GoblinThreat
 from Mechanics.world.town import Town
+from Mechanics.world.zone_events import ZoneTracker
 
 
 class WorldSim:
@@ -21,6 +22,7 @@ class WorldSim:
         self.resources = ResourceState(sources)
         self.threat = GoblinThreat()
         self.town = Town()
+        self.zone_tracker = ZoneTracker()
         self._last_logged_tick: int = -1
 
     def tick(self, dt: float, living_npc_count: int,

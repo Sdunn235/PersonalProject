@@ -28,6 +28,7 @@ from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
 from Mechanics.ai.proximity import update_proximity_fear
+from Mechanics.ai.npc_logger import log_spatial_zone
 
 COMBAT_TRIGGER_DIST = settings.TILE_SIZE * 1.2
 
@@ -92,6 +93,7 @@ def main():
           f"Threat={world_sim.threat.threat_level:.0f} | "
           f"Town={world_sim.town.state.value}")
     print("[MAP] Heartbeat-2 active | River barrier, region zones, bridge crossings")
+    world_sim.zone_tracker.subscribe(log_spatial_zone)
     print("[H4] Goblin behavior active | Hunger-driven threat, patrol/raid states, proximity fear")
     finite_sources = [s for s in sources if s.is_finite]
     print(f"[H5] Resource economy active | {len(finite_sources)} finite sources: "
@@ -242,6 +244,18 @@ def main():
             sim_ticks = world_sim.tick(dt, living_count, avg_goblin_hunger)
             if sim_ticks > 0 and world_sim.clock.tick_count % 30 == 0:
                 print(world_sim.status_line())
+
+            # Phase 3.3: zone crossing detection (player + all living NPCs)
+            if sim_ticks > 0:
+                _zone_entities = (
+                    [e for e, _, _ in npc_list if e.entity_id not in defeated_npcs]
+                    + [player]
+                )
+                world_sim.zone_tracker.check_and_fire(
+                    _zone_entities, tile_map, ctx.rooms,
+                    ctx.current_panel[0], ctx.current_panel[1],
+                    world_sim.clock.tick_count,
+                )
 
             # Phase 1.5: periodic autosave
             if (sim_ticks > 0

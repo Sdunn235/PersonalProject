@@ -1,7 +1,13 @@
-# npc_logger.py — Observer for zone changes and tick logging
+# npc_logger.py — Observer for need zone transitions, spatial zone crossings, and tick logging
 from __future__ import annotations
 from Mechanics.needs.need import Need, NeedZone
 import settings
+
+
+def log_spatial_zone(event) -> None:
+    """ZoneTracker subscriber — prints [ZONE] on room entry."""
+    room_name = event.to_room.name if event.to_room else "Unknown"
+    print(f"[ZONE] {event.entity_name} entered {room_name} (tick {event.tick})")
 
 
 class NeedZoneLogger:
