@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-07-06 (Stage 3 Phase 3.0 COMPLETE — rooms/panels addendum + terminology map)
+# Session State — Last updated: 2026-07-06 (Stage 3 Phase 3.1 COMPLETE — room data layer)
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 IN PROGRESS
 
@@ -9,7 +9,7 @@
 | Phase | Commit | Description | Status |
 |-------|--------|-------------|--------|
 | Phase 3.0 | C0021 | Rooms/Panels addendum + terminology map §7 + session_state update (doc-only) | COMPLETE |
-| Phase 3.1 | — | `Mechanics/world/rooms.py` — RoomType, RoomDefinition, RoomRegistry; `Mechanics/data/rooms.json` | NEXT |
+| Phase 3.1 | C0022 | `Mechanics/world/rooms.py` — RoomType, RoomDefinition, RoomRegistry; `Mechanics/data/rooms.json` | COMPLETE |
 | Phase 3.2 | — | `Mechanics/world/world_coord.py` — WorldPos, PanelEdge, PanelLoader stub; m0006 panel coords migration | — |
 | Phase 3.3 | — | `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker; console [ZONE] logs | — |
 | Phase 3.4 | — | Observation panel ZONE section + HUD zone flash | — |

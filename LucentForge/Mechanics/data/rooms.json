@@ -1,0 +1,92 @@
+[
+  {
+    "id":          "panel00_forest",
+    "name":        "Wild Forest",
+    "room_type":   "WILDERNESS",
+    "description": "Dense woodland west of the river, untamed and resource-rich but dangerous at night.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [0, 0, 5, 17],
+    "region_tag":  "forest"
+  },
+  {
+    "id":          "panel00_town_center",
+    "name":        "Town Center",
+    "room_type":   "SETTLEMENT",
+    "description": "The heart of the settlement, where trade and daily life converge.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [10, 7, 13, 9],
+    "region_tag":  "town_center"
+  },
+  {
+    "id":          "panel00_town_outskirts",
+    "name":        "Town Outskirts",
+    "room_type":   "SETTLEMENT",
+    "description": "The eastern fringe of civilized territory, sparsely settled but patrolled.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [8, 0, 17, 17],
+    "region_tag":  "town_outskirts"
+  },
+  {
+    "id":          "panel00_homes",
+    "name":        "Homes",
+    "room_type":   "SETTLEMENT",
+    "description": "Residential area near the town center where settlers sleep and recover.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [10, 10, 13, 12],
+    "region_tag":  "homes"
+  },
+  {
+    "id":          "panel00_farm",
+    "name":        "Farm",
+    "room_type":   "FARM",
+    "description": "Cultivated fields in the northeast corner, primary food production for the settlement.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [13, 2, 16, 5],
+    "region_tag":  "farm"
+  },
+  {
+    "id":          "panel00_storage",
+    "name":        "Storage",
+    "room_type":   "STORAGE",
+    "description": "Silo and stockpile zone at the edge of town center, reserve supplies not yet distributed.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [11, 8, 12, 9],
+    "region_tag":  "storage"
+  },
+  {
+    "id":          "panel00_goblin_camp",
+    "name":        "Goblin Camp",
+    "room_type":   "GOBLIN_TERRITORY",
+    "description": "A makeshift camp in the southern forest clearing, claimed by the goblin faction.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [2, 13, 3, 14],
+    "region_tag":  "goblin_camp"
+  },
+  {
+    "id":          "panel00_river",
+    "name":        "River",
+    "room_type":   "RIVER",
+    "description": "A swift-running river dividing wild and civilized territory, impassable except at the bridges.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [4, 0, 7, 17],
+    "region_tag":  "river"
+  },
+  {
+    "id":          "panel00_bridge",
+    "name":        "Bridge",
+    "room_type":   "BRIDGE",
+    "description": "River crossings — contested neutral ground where the two factions sometimes meet.",
+    "panel_x":     0,
+    "panel_y":     0,
+    "tile_bounds": [4, 4, 6, 12],
+    "region_tag":  "bridge"
+  }
+]

@@ -21,6 +21,7 @@ data/
   models.py        — Typed dataclasses (AbilityDef, ItemDef, EntityDef)
   *.json           — Canonical seed content (entities, abilities, items, needs, sources, chests)
   chests.json      — Stage 2 chest seed definitions (3 chests: supply, forest_cache, goblin_hoard)
+  rooms.json       — Stage 3 room definitions (9 rooms for Panel(0,0)); loaded by RoomRegistry (Phase 3.1)
   lucentforge.db   — Runtime SQLite store (GITIGNORED; rebuilt from JSON by migration 0001)
 ```
 

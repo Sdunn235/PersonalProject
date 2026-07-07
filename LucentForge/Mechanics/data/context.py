@@ -32,6 +32,10 @@ class GameContext:
         self._chests = SqliteDao(self._db, "chest_content")
         self._save_manager = SaveManager(self._db)
         self._item_repo = ItemRepository(self._items)
+        # Deferred import — Mechanics.world.__init__ pulls tile_map which
+        # would create a circular dependency if imported at module level.
+        from Mechanics.world.rooms import RoomRegistry
+        self._rooms = RoomRegistry.from_json(os.path.join(data_dir, "rooms.json"))
 
     @property
     def db(self) -> Database:
@@ -68,6 +72,10 @@ class GameContext:
     @property
     def chests(self) -> SqliteDao:
         return self._chests
+
+    @property
+    def rooms(self):
+        return self._rooms
 
     def reload(self) -> None:
         self._entities.reload()
