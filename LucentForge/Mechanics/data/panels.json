@@ -1,0 +1,14 @@
+[
+  {
+    "id": "panel_0_0",
+    "name": "Starting Area",
+    "panel_x": 0,
+    "panel_y": 0,
+    "edges": {
+      "NORTH": null,
+      "SOUTH": null,
+      "EAST":  null,
+      "WEST":  null
+    }
+  }
+]

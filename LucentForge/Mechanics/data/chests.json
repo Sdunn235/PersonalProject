@@ -1,6 +1,8 @@
 [
   {
     "id": "town_supply_chest",
+    "panel_x": 0,
+    "panel_y": 0,
     "col": 11,
     "row": 8,
     "locked": false,
@@ -16,6 +18,8 @@
   },
   {
     "id": "forest_cache",
+    "panel_x": 0,
+    "panel_y": 0,
     "col": 2,
     "row": 4,
     "locked": true,
@@ -32,6 +36,8 @@
   },
   {
     "id": "goblin_hoard",
+    "panel_x": 0,
+    "panel_y": 0,
     "col": 2,
     "row": 14,
     "locked": true,

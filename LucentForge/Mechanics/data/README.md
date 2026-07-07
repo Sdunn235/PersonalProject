@@ -13,6 +13,7 @@ data/
     m0003_items_table.py      — relational items schema (Stage 2, Phase 2.2)
     m0004_bag_column.py       — bag JSON column + lockpick seed (Stage 2, Phase 2.3)
     m0005_chests.py           — chest_content + chest_state tables (Stage 2, Phase 2.7)
+    m0006_panel_coords.py     — additive panel_x/panel_y columns on entity_state + source_state; chests re-seeded with panel coords (Stage 3, Phase 3.2)
   save_manager.py  — SaveManager: snapshot() + restore() for world runtime state
   context.py       — GameContext: owns Database, 5 SqliteDao instances, and SaveManager
   dao.py           — Dao (JSON, legacy/fallback) + SqliteDao (LINQ-style query API over a table)
@@ -22,6 +23,7 @@ data/
   *.json           — Canonical seed content (entities, abilities, items, needs, sources, chests)
   chests.json      — Stage 2 chest seed definitions (3 chests: supply, forest_cache, goblin_hoard)
   rooms.json       — Stage 3 room definitions (9 rooms for Panel(0,0)); loaded by RoomRegistry (Phase 3.1)
+  panels.json      — Stage 3 panel registry (Panel(0,0) = Starting Area, 4 null edges); loaded by PanelLoader (Phase 3.2)
   lucentforge.db   — Runtime SQLite store (GITIGNORED; rebuilt from JSON by migration 0001)
 ```
 
