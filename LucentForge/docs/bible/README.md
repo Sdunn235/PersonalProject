@@ -15,15 +15,21 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 | `heartbeat_convergence_vision.md` | Arc vision — Heartbeat arc design + Claude/GPT Caelum alignment analysis | Historical design record |
 | `lucentforge_terminology_map_v_1.md` | Three-way term reconciliation — Bible / TheForge C# / LucentForge Python | Cite before every TheForge import |
 | `lucentforge_items_addendum_v_1.md` | Stage 2 items doctrine — behavioral rules for items, slots, containers, economy | Cite alongside Foundation §sections for Stage 2 work |
+| `lucentforge_rooms_panels_addendum_v1.md` | Stage 3 doctrine — Room/Panel/ZoneCrossing architecture, Zelda world model, TheForge Room reconciliation | Cite alongside Foundation for all Stage 3+ room/panel/zone work |
 
 ---
 
 ## How to Use
 
-**Before implementing a Stage 2+ feature:**
+**Before implementing a Stage 2 feature:**
 1. Check `lucentforge_terminology_map_v_1.md` — confirm the field/enum name is reconciled
 2. Check `lucentforge_items_addendum_v_1.md` (§A1–A8) — confirm behavioral doctrine is satisfied
 3. Check `lucentforge_simulation_foundation_v_1.md` (the specific §section) — confirm the implementation is in service of the foundation's laws
+
+**Before implementing a Stage 3+ feature:**
+1. Check `lucentforge_terminology_map_v_1.md` §7 — confirm room/panel/zone term is reconciled
+2. Check `lucentforge_rooms_panels_addendum_v1.md` (§R1–§R8) — confirm behavioral doctrine is satisfied
+3. Check `lucentforge_simulation_foundation_v_1.md` as above
 
 **Citing sections:** Use `§X.X` notation for Foundation sections, `§AX` notation for addendum sections.
 Example: "Carry capacity is a §4.1 (Physique) constraint governed by the §A2 formula."
@@ -41,4 +47,5 @@ Example: "Carry capacity is a §4.1 (Physique) constraint governed by the §A2 f
 |---|---|---|
 | Stage 1 (SQLite) | §2.2 (simulation state), §10.2 (equipment threshold) | None |
 | Stage 2 (Items/Equipment) | §4.1, §6.6, §7, §10.2, §12.2, §15, §18 | `lucentforge_terminology_map_v_1.md`, `lucentforge_items_addendum_v_1.md` |
-| Stage 3+ | TBD | TBD |
+| Stage 3 (Rooms as Zones) | §R1–§R8 (rooms_panels_addendum), §7 (terminology_map §7) | `lucentforge_rooms_panels_addendum_v1.md`, terminology_map §7 |
+| Stage 4+ | TBD | TBD |

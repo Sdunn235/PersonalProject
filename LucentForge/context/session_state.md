@@ -1,4 +1,43 @@
-# Session State — Last updated: 2026-07-06 (Stage 2 Phase 2.8 COMPLETE — Stage 2 arc closed, C0020)
+# Session State — Last updated: 2026-07-06 (Stage 3 Phase 3.0 COMPLETE — rooms/panels addendum + terminology map)
+
+## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 IN PROGRESS
+
+### Stage 3 Summary (Rooms as Zones / Multi-Panel World)
+
+**Approved plan:** `C:\Users\Shawn\.claude\plans\caelum-session-start-date-groovy-bunny.md`
+
+| Phase | Commit | Description | Status |
+|-------|--------|-------------|--------|
+| Phase 3.0 | C0021 | Rooms/Panels addendum + terminology map §7 + session_state update (doc-only) | COMPLETE |
+| Phase 3.1 | — | `Mechanics/world/rooms.py` — RoomType, RoomDefinition, RoomRegistry; `Mechanics/data/rooms.json` | NEXT |
+| Phase 3.2 | — | `Mechanics/world/world_coord.py` — WorldPos, PanelEdge, PanelLoader stub; m0006 panel coords migration | — |
+| Phase 3.3 | — | `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker; console [ZONE] logs | — |
+| Phase 3.4 | — | Observation panel ZONE section + HUD zone flash | — |
+| Phase 3.5 | — | `Mechanics/ai/zone_ai.py` — ZoneAIResponder; zone-triggered chemical injection | — |
+| Phase 3.6 | — | PanelLoader architecture stub; edge detection in main.py; panels.json | — |
+| Phase 3.7 | — | Stage 3 closeout — docs, smoke suite, full regression | — |
+
+**Stage 3 key decisions:**
+- Zelda pre-N64 model: current 18×18 map = Panel(0,0); world expands by walking off panel edges (same scale everywhere)
+- Stage 3 = architecture only — no new panel content; PanelLoader.can_transition() returns False
+- m0006 is additive (ALTER TABLE ADD COLUMN panel_x/panel_y DEFAULT 0) — no delete-DB needed
+- World-global coordinates: `WorldPos(panel_x, panel_y, col, row)` for all content
+- Entry/exit output: console [ZONE] + observation panel + HUD flash + light AI response (progressive phases 3.3–3.5)
+- TheForge Room-as-Container (floor loot) → Stage 4+; Room.Description → Stage 5+
+
+**Stage 3 new files (planned):**
+- `Mechanics/world/rooms.py` — RoomType enum, RoomDefinition dataclass, RoomRegistry
+- `Mechanics/data/rooms.json` — 9 room definitions for Panel(0,0)
+- `Mechanics/world/world_coord.py` — WorldPos dataclass, PanelEdge enum, PanelLoader stub
+- `Mechanics/data/panels.json` — panel registry seed (Panel(0,0), 4 null edges)
+- `Mechanics/data/migrations/m0006_panel_coords.py` — additive column adds
+- `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker
+- `Mechanics/ai/zone_ai.py` — ZoneAIResponder
+- `scratchpad/run_stage3_tests.py` — Stage 3 smoke suite
+
+**Stage 3 new bible docs (Phase 3.0, C0021):**
+- `docs/bible/lucentforge_rooms_panels_addendum_v1.md` — §R1–§R8 (Room/Panel/ZoneCrossing doctrine)
+- `docs/bible/lucentforge_terminology_map_v_1.md` §7 — Stage 3 term reconciliation (Panel, Room, RoomType, WorldPos, PanelEdge, ZoneCrossing, ZoneTracker, PanelLoader)
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE
 

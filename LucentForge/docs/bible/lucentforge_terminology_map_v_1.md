@@ -261,7 +261,66 @@ When a future stage imports a new TheForge concept:
 1. Add a row to the relevant table above (or add a new section).
 2. Record: Bible term (or "silent") | TheForge name | Python today | Stage N decision.
 3. If bible is silent and a new name is invented, add an entry to Section 5 flagging it.
-4. The addendum (`lucentforge_items_addendum_v_1.md`) may need a new section if the concept
-   has behavioral doctrine attached.
+4. The addendum (`lucentforge_items_addendum_v_1.md` or `lucentforge_rooms_panels_addendum_v1.md`) may
+   need a new section if the concept has behavioral doctrine attached.
 
 This map is the reference for all reconciliation discussions. Keep it current.
+
+---
+
+## Section 7 — Stage 3 Terms (Rooms / Panels / World Coordinates)
+
+**Created:** Stage 3.0 | **Authority:** `lucentforge_rooms_panels_addendum_v1.md`
+
+Three authorities for Stage 3 reconciliation:
+
+1. **The Foundation** (`lucentforge_simulation_foundation_v_1.md`) — naming and semantics
+2. **TheForge C#** (`ConsoleRpgEntities/Models/Containers/Room.cs`, `Models/Containers/Door.cs`) — structural blueprint
+3. **LucentForge Python** (`Mechanics/world/`) — live implementation
+
+### 7.1 World Coordinate Terms
+
+| Bible | TheForge C# | LucentForge Python | Stage 3 decision |
+|---|---|---|---|
+| — | `Room.GridX: int?`, `Room.GridY: int?` | `panel_x: int`, `panel_y: int` | **`panel_x/panel_y`** — LucentForge uses panel grid coordinates, not room-graph indices. Semantically equivalent: GridX/GridY addressed a room in a discrete graph; panel_x/panel_y address a 18×18 tile map in a continuous grid. |
+| — | — | `WorldPos(panel_x, panel_y, col, row)` | **New canonical type** — four-component world locator. All Stage 3+ content that needs a world location uses `WorldPos`. Not in TheForge (TheForge rooms are discrete, not tile-grid). |
+| — | `Door.RoomAId, Door.RoomBId` | `PanelEdge.NORTH/SOUTH/EAST/WEST` | **`PanelEdge`** — TheForge's bidirectional Door is a graph edge between rooms; LucentForge's PanelEdge is a directional exit from a panel. Semantically: both describe how to traverse from one location to another. TheForge: per-door wiring. LucentForge: per-panel directional stub. |
+
+### 7.2 Room / Zone Terms
+
+| Bible | TheForge C# | LucentForge Python | Stage 3 decision |
+|---|---|---|---|
+| — | `Room.Name: string` | `RoomDefinition.name: str` | **`name`** — unchanged. Display name of the zone. |
+| — | `Room.Description: string` | `RoomDefinition.description: str` | **`description`** — field seeded in Stage 3 data layer. Not rendered until Stage 5 (dialogue arc). |
+| — | No RoomType enum in TheForge | `RoomType(enum.Enum)` | **`RoomType`** — new invention. TheForge rooms are typed by name only; LucentForge adds semantic type enum. Values: `WILDERNESS, SETTLEMENT, GOBLIN_TERRITORY, BRIDGE, FARM, STORAGE, RIVER`. See `lucentforge_rooms_panels_addendum_v1.md §R3`. |
+| — | `Room.GridX/GridY` → grid coordinates | `tile_bounds: tuple[int,int,int,int]` | **`tile_bounds = (col_min, row_min, col_max, row_max)`** — how a Room maps to tiles in its panel. TheForge has no equivalent (discrete rooms, not tile grids). |
+
+### 7.3 Zone Crossing / Event Terms
+
+| Bible | TheForge C# | LucentForge Python | Stage 3 decision |
+|---|---|---|---|
+| — | No event system in TheForge | `ZoneCrossingEvent` dataclass | **`ZoneCrossingEvent`** — new invention. Fires when entity's `current_room` changes. See `lucentforge_rooms_panels_addendum_v1.md §R4`. |
+| — | — | `ZoneTracker` | **`ZoneTracker`** — Observer implementation. Holds `_current_rooms: dict[str, RoomDefinition | None]` per entity name. Edge-triggered: fires once on change, not every tick. |
+
+### 7.4 Panel Terms
+
+| Bible | TheForge C# | LucentForge Python | Stage 3 decision |
+|---|---|---|---|
+| — | `Room` is a discrete container | `Panel(panel_x, panel_y)` = 18×18 tile map | **`Panel`** — LucentForge's world unit. Not a direct TheForge equivalent. TheForge rooms are discrete containers with items/NPCs; LucentForge panels are tile maps at world-grid scale. |
+| — | `Door → Room navigation` | `PanelLoader.can_transition(...)` | **`PanelLoader`** — stub in Stage 3. TheForge: Door.RoomAId/RoomBId links rooms. LucentForge: PanelLoader checks adjacency graph (`panels.json`) and loads adjacent panels. Architecture only in Stage 3 — no transitions fire. |
+
+### 7.5 Region → Room Mapping (Panel(0,0))
+
+| Python region string | Room ID | RoomType | Notes |
+|---|---|---|---|
+| `forest` | `panel00_forest` | `WILDERNESS` | |
+| `town_center` | `panel00_town_center` | `SETTLEMENT` | |
+| `town_outskirts` | `panel00_town_outskirts` | `SETTLEMENT` | |
+| `homes` | `panel00_homes` | `SETTLEMENT` | |
+| `farm` | `panel00_farm` | `FARM` | |
+| `storage` | `panel00_storage` | `STORAGE` | |
+| `goblin_camp` | `panel00_goblin_camp` | `GOBLIN_TERRITORY` | |
+| `river` | `panel00_river` | `RIVER` | |
+| `bridge` | `panel00_bridge` | `BRIDGE` | |
+
+Region strings are `TileMap.get_region(col, row)` return values. They do not change in Stage 3 — Rooms are built on top of them, not replacing them.
