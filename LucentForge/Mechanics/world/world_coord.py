@@ -71,6 +71,19 @@ class PanelLoader:
             return False
         return getattr(cfg, edge.value.lower()) is not None
 
+    def load_panel(self, panel_x: int, panel_y: int) -> "PanelConfig | None":
+        """Return the PanelConfig for this coordinate, or None if not yet defined.
+
+        # Background simulation model (Stage 3.5+):
+        # SimulationScope.ACTIVE  — sprites rendered + full tick + needs processed.
+        # SimulationScope.BACKGROUND — tick-only, no sprite group, reduced fidelity.
+        # On transition: new panel loads into BACKGROUND; promoted to ACTIVE when
+        # the player crosses the edge. Adjacent panels stay BACKGROUND until promoted.
+        # Stage 3 ships ACTIVE scope only — stub returns None for all coords
+        # beyond Panel(0,0).
+        """
+        return self._panels.get((panel_x, panel_y))
+
     def get_adjacent_panel(
         self, panel_x: int, panel_y: int, edge: PanelEdge
     ) -> "PanelConfig | None":

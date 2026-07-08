@@ -20,6 +20,7 @@ from Mechanics.renderer.pause_menu import run_pause_menu
 from Mechanics.entities.factory import create_player, create_all_npcs, get_sprite_path
 from Mechanics.needs.needs_system import apply_health_drain, apply_regen, update_needs
 from Mechanics.world.tile_map import TileMap
+from Mechanics.world.world_coord import PanelEdge
 from Mechanics.ai.player import PlayerController
 from Mechanics.renderer.sprite import EntitySprite
 from Mechanics.renderer.hud import draw_hud
@@ -172,6 +173,7 @@ def main():
     in_combat       = False
     COMBAT_COOLDOWN = 4.0
     _paused_quit    = False
+    _last_at_edge: PanelEdge | None = None   # Phase 3.6: edge-triggered panel detection
 
     while running:
         dt = clock.tick(settings.FPS) / 1000.0
@@ -200,6 +202,7 @@ def main():
                         chest_reg = create_chest_registry(ctx)
                         tile_map.place_chests(chest_reg)
                         _register_zone_subscribers()
+                        _last_at_edge = None
                         _hud_subjects = [(player, None, "Player")] + [
                             (npc, ctrl, None) for npc, ctrl, _ in npc_list
                         ]
@@ -341,6 +344,25 @@ def main():
             apply_health_drain(player_needs, player, dt)
             apply_regen(player_needs, player, dt)
             sprite_group.update()
+
+            # Phase 3.6: panel edge detection — fires once per edge entry (edge-triggered)
+            _pcol = int(player.x // settings.TILE_SIZE)
+            _prow = int(player.y // settings.TILE_SIZE)
+            _edge_now: PanelEdge | None = None
+            if _prow <= 0:
+                _edge_now = PanelEdge.NORTH
+            elif _prow >= settings.ROWS - 1:
+                _edge_now = PanelEdge.SOUTH
+            elif _pcol <= 0:
+                _edge_now = PanelEdge.WEST
+            elif _pcol >= settings.COLS - 1:
+                _edge_now = PanelEdge.EAST
+            if _edge_now is not None and _edge_now is not _last_at_edge:
+                _px, _py = ctx.current_panel
+                if not ctx.panel_loader.can_transition(_px, _py, _edge_now):
+                    print(f"[PANEL] Player at {_edge_now.value.lower()} edge of "
+                          f"Panel({_px},{_py}) — no adjacent panel defined.")
+            _last_at_edge = _edge_now
 
             now = pygame.time.get_ticks() / 1000.0
             for npc_entity, _, npc_sprite in npc_list:

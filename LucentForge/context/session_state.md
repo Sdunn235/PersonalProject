@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-07-06 (Stage 3 Phase 3.3 COMPLETE — zone crossing Observer)
+# Session State — Last updated: 2026-07-07 (Stage 3 Phase 3.6 COMPLETE — PanelLoader.load_panel + edge detection)
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 IN PROGRESS
 
@@ -14,7 +14,7 @@
 | Phase 3.3 | C0024 | `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker Observer; WorldSim owns zone_tracker; npc_logger.log_spatial_zone subscriber; main.py check_and_fire in game loop | COMPLETE |
 | Phase 3.4 | C0025 | `settings.py` ZONE_LABEL_DURATION; O-panel ZONE section (player + per-NPC room); HUD room-name flash subscriber; main.py zone_flash countdown | COMPLETE |
 | Phase 3.5 | C0026 | `Mechanics/ai/zone_ai.py` ZoneAIResponder (anger nudge: goblin→civilized; fear: human→goblin_territory); main.py `_register_zone_subscribers()` helper (fixes New-Game tracker re-subscribe gap; wires log_spatial_zone + flash + zone_ai) | COMPLETE |
-| Phase 3.6 | — | PanelLoader architecture stub; edge detection in main.py; panels.json | — |
+| Phase 3.6 | C0027 | `world_coord.py` PanelLoader.load_panel() + background-sim blueprint comment; main.py edge detection (edge-triggered, fires once per edge entry; logs [PANEL] when no adjacent panel); `_last_at_edge` reset on New Game | COMPLETE |
 | Phase 3.7 | — | Stage 3 closeout — docs, smoke suite, full regression | — |
 
 **Stage 3 key decisions:**
