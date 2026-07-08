@@ -1,8 +1,8 @@
-# Session State — Last updated: 2026-07-07 (Stage 3 Phase 3.6 COMPLETE — PanelLoader.load_panel + edge detection)
+# Session State — Last updated: 2026-07-07 (Stage 3 COMPLETE — C0021–C0028, rooms-as-zones / multi-panel world architecture)
 
-## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 IN PROGRESS
+## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 COMPLETE
 
-### Stage 3 Summary (Rooms as Zones / Multi-Panel World)
+### Stage 3 Summary (Rooms as Zones / Multi-Panel World) — COMPLETE C0021–C0028
 
 **Approved plan:** `C:\Users\Shawn\.claude\plans\caelum-session-start-date-groovy-bunny.md`
 
@@ -15,7 +15,7 @@
 | Phase 3.4 | C0025 | `settings.py` ZONE_LABEL_DURATION; O-panel ZONE section (player + per-NPC room); HUD room-name flash subscriber; main.py zone_flash countdown | COMPLETE |
 | Phase 3.5 | C0026 | `Mechanics/ai/zone_ai.py` ZoneAIResponder (anger nudge: goblin→civilized; fear: human→goblin_territory); main.py `_register_zone_subscribers()` helper (fixes New-Game tracker re-subscribe gap; wires log_spatial_zone + flash + zone_ai) | COMPLETE |
 | Phase 3.6 | C0027 | `world_coord.py` PanelLoader.load_panel() + background-sim blueprint comment; main.py edge detection (edge-triggered, fires once per edge entry; logs [PANEL] when no adjacent panel); `_last_at_edge` reset on New Game | COMPLETE |
-| Phase 3.7 | — | Stage 3 closeout — docs, smoke suite, full regression | — |
+| Phase 3.7 | C0028 | Stage 3 closeout — README audit (`Mechanics/world/`, `Mechanics/ai/` created, `docs/bible/` current); Stage 3 consolidated smoke runner `scratchpad/run_stage3_tests.py` (6/6 PASS); 36k-tick + headless regression CLEAN | COMPLETE |
 
 **Stage 3 key decisions:**
 - Zelda pre-N64 model: current 18×18 map = Panel(0,0); world expands by walking off panel edges (same scale everywhere)

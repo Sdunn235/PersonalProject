@@ -46,9 +46,19 @@ WorldSim ticks drive the simulation; `tile_map.py` owns the spatial grid.
 
 **Edge-triggered** — no event on first call (cache init); no event while entity stays in same room; fires once per boundary crossing.
 
-`world_sim.zone_tracker` — `ZoneTracker` instance owned by `WorldSim`, subscribed by `npc_logger.log_spatial_zone` in `main.py`.
+`world_sim.zone_tracker` — `ZoneTracker` instance owned by `WorldSim`.
 
 `check_and_fire(entities, tile_map, rooms, panel_x, panel_y, tick)` uses `get_room_for_region()` (O(1) accurate lookup) not the bbox approximation.
+
+**Registered subscribers (wired in `main.py._register_zone_subscribers()`):**
+
+| Subscriber | Module | Purpose |
+|---|---|---|
+| `log_spatial_zone` | `Mechanics/ai/npc_logger.py` | `[ZONE] EntityName entered RoomName (tick N)` console log |
+| `_on_player_zone_cross` | `main.py` closure | Starts HUD room-name flash (`zone_flash` countdown) |
+| `_zone_ai_event` | `main.py` closure → `ZoneAIResponder` | Zone-entry chemical injection — goblin anger / human fear |
+
+`_register_zone_subscribers()` re-wires all three on startup and on New Game (fresh `WorldSim` creates a new empty `ZoneTracker`).
 
 ## World coordinate system (Stage 3, Phase 3.2+)
 
@@ -59,12 +69,17 @@ WorldSim ticks drive the simulation; `tile_map.py` owns the spatial grid.
 | `WorldPos(panel_x, panel_y, col, row)` | Fully-qualified tile address in the multi-panel world |
 | `PanelEdge` | Transition direction enum: `NORTH`, `SOUTH`, `EAST`, `WEST` |
 | `PanelConfig` | Panel definition (id, name, panel_x, panel_y, edge adjacency) |
-| `PanelLoader` | Panel registry; `can_transition()` / `get_adjacent_panel()` stubs returning False/None in Stage 3 |
+| `PanelLoader` | Panel registry; `can_transition()` / `get_adjacent_panel()` / `load_panel()` stubs |
 
 `ctx.panel_loader` — `PanelLoader` instance (loaded from `Mechanics/data/panels.json`) owned by `GameContext`.
 `ctx.current_panel` — `(panel_x, panel_y)` tuple tracking the active panel (always `(0, 0)` in Stage 3).
 
-**Transition stub:** `PanelLoader.can_transition()` always returns `False`; `get_adjacent_panel()` always returns `None`. Panel(0,0) defines four `null` edges in `panels.json`. Stage 3.5+ wires real transitions.
+**Stage 3 stub behavior:**
+- `PanelLoader.can_transition()` — always `False`; Panel(0,0) has four null edges in `panels.json`.
+- `PanelLoader.get_adjacent_panel()` — always `None`.
+- `PanelLoader.load_panel(px, py)` — returns the `PanelConfig` if defined, `None` for undefined coords. Contains background-simulation blueprint comment (Stage 3.5+: `SimulationScope.ACTIVE` vs `SimulationScope.BACKGROUND`).
+
+**Edge detection (Phase 3.6):** `main.py` checks player tile position each non-combat frame. When the player enters an edge tile (col 0/17 or row 0/17), calls `can_transition()` once (edge-triggered via `_last_at_edge` identity check). Currently always logs `[PANEL] Player at EDGE edge of Panel(0,0) — no adjacent panel defined.` No transition fires. `_last_at_edge` reset on New Game.
 
 ## Room system (Stage 3, Phase 3.1+)
 
