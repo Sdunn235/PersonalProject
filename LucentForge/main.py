@@ -29,6 +29,7 @@ from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
 from Mechanics.ai.proximity import update_proximity_fear
 from Mechanics.ai.npc_logger import log_spatial_zone
+from Mechanics.ai.zone_ai import ZoneAIResponder
 
 COMBAT_TRIGGER_DIST = settings.TILE_SIZE * 1.2
 
@@ -93,8 +94,6 @@ def main():
           f"Threat={world_sim.threat.threat_level:.0f} | "
           f"Town={world_sim.town.state.value}")
     print("[MAP] Heartbeat-2 active | River barrier, region zones, bridge crossings")
-    world_sim.zone_tracker.subscribe(log_spatial_zone)
-
     # Phase 3.4: player room-name flash — fires when player crosses a room boundary.
     # zone_flash[0] = (room_name, frames_remaining) | None
     zone_flash: list = [None]
@@ -104,7 +103,29 @@ def main():
             room_name = event.to_room.name if event.to_room else "Unknown"
             zone_flash[0] = (room_name, settings.ZONE_LABEL_DURATION)
 
-    world_sim.zone_tracker.subscribe(_on_player_zone_cross)
+    # Phase 3.5: zone-entry AI behavioral triggers.
+    zone_ai = ZoneAIResponder()
+
+    def _zone_ai_event(event) -> None:
+        entity = ctrl = None
+        for npc, c, _ in npc_list:
+            if npc.name == event.entity_name and npc.entity_id not in defeated_npcs:
+                entity, ctrl = npc, c
+                break
+        if entity is None and player.name == event.entity_name:
+            entity, ctrl = player, player_controller
+        if entity is not None and ctrl is not None:
+            zone_ai.on_zone_cross(event, entity, ctrl)
+
+    def _register_zone_subscribers() -> None:
+        """Re-subscribe all ZoneTracker observers on the current world_sim.zone_tracker.
+        Called at startup and on New Game so a fresh tracker gets all callbacks."""
+        zone_flash[0] = None
+        world_sim.zone_tracker.subscribe(log_spatial_zone)
+        world_sim.zone_tracker.subscribe(_on_player_zone_cross)
+        world_sim.zone_tracker.subscribe(_zone_ai_event)
+
+    _register_zone_subscribers()
 
     print("[H4] Goblin behavior active | Hunger-driven threat, patrol/raid states, proximity fear")
     finite_sources = [s for s in sources if s.is_finite]
@@ -178,6 +199,7 @@ def main():
                         inv_svc, equip_svc = create_item_services(ctx)
                         chest_reg = create_chest_registry(ctx)
                         tile_map.place_chests(chest_reg)
+                        _register_zone_subscribers()
                         _hud_subjects = [(player, None, "Player")] + [
                             (npc, ctrl, None) for npc, ctrl, _ in npc_list
                         ]

@@ -13,7 +13,7 @@
 | Phase 3.2 | C0023 | `Mechanics/world/world_coord.py` — WorldPos, PanelEdge, PanelConfig, PanelLoader stub; panels.json; m0006 additive migration (panel_x/panel_y on entity_state + source_state + chests.json) | COMPLETE |
 | Phase 3.3 | C0024 | `Mechanics/world/zone_events.py` — ZoneCrossingEvent, ZoneTracker Observer; WorldSim owns zone_tracker; npc_logger.log_spatial_zone subscriber; main.py check_and_fire in game loop | COMPLETE |
 | Phase 3.4 | C0025 | `settings.py` ZONE_LABEL_DURATION; O-panel ZONE section (player + per-NPC room); HUD room-name flash subscriber; main.py zone_flash countdown | COMPLETE |
-| Phase 3.5 | — | `Mechanics/ai/zone_ai.py` — ZoneAIResponder; zone-triggered chemical injection | — |
+| Phase 3.5 | C0026 | `Mechanics/ai/zone_ai.py` ZoneAIResponder (anger nudge: goblin→civilized; fear: human→goblin_territory); main.py `_register_zone_subscribers()` helper (fixes New-Game tracker re-subscribe gap; wires log_spatial_zone + flash + zone_ai) | COMPLETE |
 | Phase 3.6 | — | PanelLoader architecture stub; edge detection in main.py; panels.json | — |
 | Phase 3.7 | — | Stage 3 closeout — docs, smoke suite, full regression | — |
 
