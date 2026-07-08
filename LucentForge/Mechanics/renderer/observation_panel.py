@@ -1,7 +1,8 @@
 # observation_panel.py — Heartbeat-6 world-overview panel.
 # Rendered in the free left margin (the per-entity HUD owns the right margin).
 # Shows: WORLD (day/town/food/threat), SOURCES (finite stock bars), NPCS
-# (per-character state + priority need + target). Toggled by the 'O' key.
+# (per-character state + priority need + target), ZONE (current room per
+# entity from ZoneTracker). Toggled by the 'O' key.
 from __future__ import annotations
 import pygame
 import settings
@@ -13,7 +14,7 @@ _LINE = 16
 
 
 def draw_observation_panel(surface, world_sim, sources, npc_list,
-                           defeated, font) -> None:
+                           defeated, font, player=None) -> None:
     px = settings.OBS_PANEL_X
     pw = settings.OBS_PANEL_W
     bar_w = pw - 2 * _PAD
@@ -22,7 +23,8 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
     living = [(n, c) for n, c, _ in npc_list if n.entity_id not in defeated]
     finite = [s for s in sources if s.is_finite]
 
-    n_lines = 6 + 1 + 2 * len(finite) + 1 + len(living) + 2
+    n_zone = 2 + len(living)   # ZONE header + player row + one row per living NPC
+    n_lines = 6 + 1 + 2 * len(finite) + 1 + len(living) + n_zone + 2
     panel_h = min(n_lines * _LINE + _PAD * 2, settings.WINDOW_H - 20)
 
     panel = pygame.Surface((pw, panel_h), pygame.SRCALPHA)
@@ -77,6 +79,16 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
         surface.blit(font.render(f"{need_str} >{target[:5]}", True, need_color),
                      (x + 96, y))
         y += _LINE
+
+    # --- ZONE ---
+    line("- ZONE -", settings.OBS_HEADER_COLOR)
+    tracker = world_sim.zone_tracker
+    if player is not None:
+        room = tracker._current_rooms.get(player.name)
+        line(f"You: {room.name[:18] if room else '---'}")
+    for npc, _ in living:
+        room = tracker._current_rooms.get(npc.name)
+        line(f"{npc.name[:8]}: {room.name[:10] if room else '?'}")
 
     # --- Footer ---
     y += 4

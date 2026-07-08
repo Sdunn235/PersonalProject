@@ -220,6 +220,7 @@ OBS_PANEL_BG       = (18, 18, 24, 200)   # translucent dark background
 OBS_HEADER_COLOR   = (200, 200, 230)
 OBS_LABEL_COLOR    = (175, 175, 190)
 OBS_HINT_COLOR     = (100, 100, 120)
+ZONE_LABEL_DURATION = 90   # frames the room-name flash persists (~1.5 s at 60 fps)
 
 # Town state -> panel color
 TOWN_STATE_COLORS  = {

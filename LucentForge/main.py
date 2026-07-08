@@ -94,6 +94,18 @@ def main():
           f"Town={world_sim.town.state.value}")
     print("[MAP] Heartbeat-2 active | River barrier, region zones, bridge crossings")
     world_sim.zone_tracker.subscribe(log_spatial_zone)
+
+    # Phase 3.4: player room-name flash — fires when player crosses a room boundary.
+    # zone_flash[0] = (room_name, frames_remaining) | None
+    zone_flash: list = [None]
+
+    def _on_player_zone_cross(event) -> None:
+        if event.entity_name == player.name:
+            room_name = event.to_room.name if event.to_room else "Unknown"
+            zone_flash[0] = (room_name, settings.ZONE_LABEL_DURATION)
+
+    world_sim.zone_tracker.subscribe(_on_player_zone_cross)
+
     print("[H4] Goblin behavior active | Hunger-driven threat, patrol/raid states, proximity fear")
     finite_sources = [s for s in sources if s.is_finite]
     print(f"[H5] Resource economy active | {len(finite_sources)} finite sources: "
@@ -373,7 +385,16 @@ def main():
         # Heartbeat-6: world-overview observation panel (left margin)
         if obs_visible:
             draw_observation_panel(screen, world_sim, sources, npc_list,
-                                   defeated_npcs, font)
+                                   defeated_npcs, font, player=player)
+
+        # Phase 3.4: zone-crossing room-name flash (centered above tile map)
+        if zone_flash[0] is not None:
+            flash_name, flash_frames = zone_flash[0]
+            flash_surf = font.render(f"[ {flash_name} ]", True, (220, 210, 255))
+            flash_x = settings.LEVEL_X + (settings.LEVEL_W - flash_surf.get_width()) // 2
+            flash_y = settings.LEVEL_Y - 18
+            screen.blit(flash_surf, (flash_x, flash_y))
+            zone_flash[0] = (flash_name, flash_frames - 1) if flash_frames > 1 else None
 
         # Level border outline
         pygame.draw.rect(screen, (80, 80, 100),
