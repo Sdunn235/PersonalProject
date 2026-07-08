@@ -42,7 +42,7 @@ NPC decision loop, behavioral strategies, chemical/need response, proximity effe
 | Non-goblin (human, player) enters `GOBLIN_TERRITORY` | `fear` nudge +0.20 via `chemicals.add_fear()` |
 | All other crossings | No effect |
 
-`getattr(entity, "subtype", None)` — player entity may not have `subtype`; `None` is treated as non-goblin (correct: player gets fear on goblin_camp entry).
+`getattr(entity, "subtype", None)` — player entity may not have `subtype`; `None` treated as non-goblin. `PlayerController` has no `brain` — the method returns early before any chemical call. Zone feedback for the player is the HUD room-name flash, not chemical injection.
 
 `to_room=None` (crossing out-of-bounds) — silently returns. No injection on unknown destination.
 

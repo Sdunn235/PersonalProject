@@ -23,6 +23,8 @@ class ZoneAIResponder:
         room = event.to_room
         if room is None:
             return
+        if not hasattr(ctrl, "brain"):
+            return
         rt  = room.room_type
         sub = getattr(entity, "subtype", None)
 

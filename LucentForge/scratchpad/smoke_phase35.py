@@ -132,13 +132,19 @@ check("human -> GOBLIN_TERRITORY: fear approx right",
 check("human -> GOBLIN_TERRITORY: anger unchanged",
       human_ctrl.brain.chemicals.get("anger") == 0.0)
 
-# Player (subtype=None) entering goblin camp also triggers fear
-player     = MockEntity("Player", "p01", subtype=None)
-player_ctrl = MockCtrl()
+# Player uses PlayerController which has no brain — guard returns early, no crash
+class MockPlayerCtrl:
+    pass  # no brain attribute — mirrors real PlayerController
+
+player      = MockEntity("Player", "p01", subtype=None)
+player_ctrl = MockPlayerCtrl()
 evt_player_camp = MockEvent("Player", None, MockRoom("Goblin Camp", RoomType.GOBLIN_TERRITORY))
-responder.on_zone_cross(evt_player_camp, player, player_ctrl)
-check("player (subtype=None) -> GOBLIN_TERRITORY: fear bumped",
-      player_ctrl.brain.chemicals.get("fear") > 0.0)
+_raised = False
+try:
+    responder.on_zone_cross(evt_player_camp, player, player_ctrl)
+except AttributeError:
+    _raised = True
+check("player (no brain) -> GOBLIN_TERRITORY: no AttributeError (guard returns early)", not _raised)
 
 # ── Group 5: Human in non-goblin territory -> no effect ─────────────────────
 print("\n[5] Human in non-goblin territory")
