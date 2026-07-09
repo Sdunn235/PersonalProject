@@ -50,7 +50,7 @@ mechanics this stage.
 | Reflexes | `Stats.DEX` | Wired |
 | Luck | `Stats.LCK` | Wired |
 | Intellect | `Stats.MAG` + **Byte** pool capacity | Wired (new) |
-| Constitution | `Stats.DEF`, `Stats.RES` | Wired (new) |
+| Constitution | `Stats.DEF` | Wired (new) |
 | Intuition | **Bit** pool capacity + §12.2 trap perception (§M8) | Wired (new) |
 | Linguistic | — | **Inert** — defined, no mechanic until Stage 5+ |
 
@@ -62,12 +62,18 @@ derive_stats() maps:
     Reflexes     → DEX
     Luck         → LCK
     Intellect    → MAG            (+ Byte capacity, see §M3)
-    Constitution → DEF, RES
+    Constitution → DEF
     Intuition    → (Bit capacity, trap perception — not a combat Stat)
     Linguistic   → (inert)
 ```
+**RES is not attribute-derived this stage.** Today's data has DEF and RES independent per entity, and
+RES (elemental resistance) belongs to the deferred §7 per-element resist model. It is carried as a
+pass-through `resist` value on the entity (`Attributes.to_stats(resist=…)`) until §7 lands.
+
 Attributes are authored per-entity in `entities.json` and are **static** this stage (no XP/growth —
-progression is Stage 5+, §M9). Persistence: migration **m0007**.
+progression is Stage 5+, §M9). Because nothing mutates them at runtime, they are **not persisted** and
+need no migration — the factory rebuilds them from JSON on load. Persistence arrives with the mutable
+affinity modifier layer (§M5, migration m0009).
 
 ---
 

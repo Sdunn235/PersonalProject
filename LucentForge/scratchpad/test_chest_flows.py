@@ -24,11 +24,23 @@ class _Stats:
     LCK = 3
     MAG = 0
 
+class _Attrs:
+    # Phase 4.1: chest_menu now reads player.attributes. reflexes=5 mirrors the
+    # old stats.DEX=5 so lockpick check outcomes are unchanged.
+    physique = 5
+    reflexes = 5
+    constitution = 5
+    intellect = 0
+    intuition = 5
+    linguistic = 5
+    luck = 3
+
 class _Player:
     entity_id = "player"
     hp = 50
     max_hp = 50
     stats = _Stats()
+    attributes = _Attrs()
 
 class _Item:
     def __init__(self, id_, name, weight=1):

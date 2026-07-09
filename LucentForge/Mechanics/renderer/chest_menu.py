@@ -89,7 +89,7 @@ def _execute(action: str, chest, player, inv_svc, item_repo,
         check = OutcomeCheck(
             base_value=settings.LOCKPICK_BASE_VALUE,
             difficulty=chest.lock_dc,
-            attributes=attribute_term(player.stats, "reflexes"),
+            attributes=attribute_term(player.attributes, "reflexes"),
         )
         result = resolver.resolve(check)
 
@@ -124,7 +124,7 @@ def _execute(action: str, chest, player, inv_svc, item_repo,
         check = OutcomeCheck(
             base_value=0,
             difficulty=settings.TRAP_DISARM_DC,
-            attributes=attribute_term(player.stats, "reflexes"),
+            attributes=attribute_term(player.attributes, "reflexes"),
         )
         result = resolver.resolve(check)
         if result.success:

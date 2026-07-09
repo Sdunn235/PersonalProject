@@ -5,21 +5,39 @@ from __future__ import annotations
 import settings
 from Mechanics.data.context import GameContext
 from Mechanics.entities.stats import Stats
+from Mechanics.entities.attributes import Attributes
 from Mechanics.entities.traits import Traits
 from Mechanics.ai.npc import NPC
 
 
-def _build_stats(data: dict) -> Stats:
-    """Build a Stats dataclass from a JSON stats sub-object."""
+def _build_attributes(data: dict) -> Attributes:
+    """Build the primary Attributes layer from a JSON `attributes` sub-object.
+
+    Back-compat: if an entity still authors a legacy `stats` block instead of
+    `attributes`, derive attributes from it via the §M2 mapping so old data loads.
+    """
+    if "attributes" in data:
+        return Attributes.from_dict(data["attributes"])
     s = data.get("stats", {})
-    return Stats(
-        STR=s.get("STR", 10),
-        MAG=s.get("MAG", 0),
-        LCK=s.get("LCK", 5),
-        DEF=s.get("DEF", 5),
-        RES=s.get("RES", 0),
-        DEX=s.get("DEX", 5),
+    return Attributes(
+        physique=s.get("STR", 10),
+        reflexes=s.get("DEX", 5),
+        luck=s.get("LCK", 5),
+        intellect=s.get("MAG", 0),
+        constitution=s.get("DEF", 5),
     )
+
+
+def _resist_value(data: dict) -> int:
+    """Pass-through elemental resistance (RES) — not attribute-derived until §7."""
+    if "resist" in data:
+        return data["resist"]
+    return data.get("stats", {}).get("RES", 0)
+
+
+def _build_stats(data: dict) -> Stats:
+    """Derive the combat-facing Stats from the primary attribute layer (§M2)."""
+    return _build_attributes(data).to_stats(resist=_resist_value(data))
 
 
 def _build_traits(data: dict) -> Traits:
@@ -58,6 +76,7 @@ def create_entity(ctx: GameContext, entity_id: str) -> NPC | None:
         entity_id=data["id"],
         name=data["name"],
         subtype=data.get("subtype", ""),
+        attributes=_build_attributes(data),
         stats=_build_stats(data),
         traits=_build_traits(data),
         hp=data.get("hp", 100),

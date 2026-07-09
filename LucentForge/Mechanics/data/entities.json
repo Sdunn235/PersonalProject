@@ -8,14 +8,16 @@
     "character_class": "warrior",
     "hp": 100,
     "max_hp": 100,
-    "stats": {
-      "STR": 10,
-      "MAG": 6,
-      "LCK": 5,
-      "DEF": 5,
-      "RES": 0,
-      "DEX": 8
+    "attributes": {
+      "physique": 10,
+      "reflexes": 8,
+      "constitution": 5,
+      "intellect": 6,
+      "intuition": 6,
+      "linguistic": 5,
+      "luck": 5
     },
+    "resist": 0,
     "traits": {
       "curiosity": 0.5,
       "aggression": 0.3,
@@ -66,14 +68,16 @@
     "character_class": "ranger",
     "hp": 80,
     "max_hp": 80,
-    "stats": {
-      "STR": 12,
-      "MAG": 0,
-      "LCK": 5,
-      "DEF": 4,
-      "RES": 0,
-      "DEX": 6
+    "attributes": {
+      "physique": 12,
+      "reflexes": 6,
+      "constitution": 4,
+      "intellect": 0,
+      "intuition": 7,
+      "linguistic": 4,
+      "luck": 5
     },
+    "resist": 0,
     "traits": {
       "curiosity": 0.4,
       "aggression": 0.3,
@@ -116,14 +120,16 @@
     "character_class": "mage",
     "hp": 70,
     "max_hp": 70,
-    "stats": {
-      "STR": 8,
-      "MAG": 14,
-      "LCK": 5,
-      "DEF": 3,
-      "RES": 3,
-      "DEX": 9
+    "attributes": {
+      "physique": 8,
+      "reflexes": 9,
+      "constitution": 3,
+      "intellect": 14,
+      "intuition": 8,
+      "linguistic": 6,
+      "luck": 5
     },
+    "resist": 3,
     "traits": {
       "curiosity": 0.8,
       "aggression": 0.5,
@@ -161,14 +167,16 @@
     "character_class": "fighter",
     "hp": 90,
     "max_hp": 90,
-    "stats": {
-      "STR": 14,
-      "MAG": 0,
-      "LCK": 4,
-      "DEF": 6,
-      "RES": 0,
-      "DEX": 5
+    "attributes": {
+      "physique": 14,
+      "reflexes": 5,
+      "constitution": 6,
+      "intellect": 0,
+      "intuition": 3,
+      "linguistic": 3,
+      "luck": 4
     },
+    "resist": 0,
     "traits": {
       "curiosity": 0.2,
       "aggression": 0.7,
@@ -211,14 +219,16 @@
     "character_class": "mage",
     "hp": 60,
     "max_hp": 60,
-    "stats": {
-      "STR": 6,
-      "MAG": 12,
-      "LCK": 6,
-      "DEF": 3,
-      "RES": 4,
-      "DEX": 10
+    "attributes": {
+      "physique": 6,
+      "reflexes": 10,
+      "constitution": 3,
+      "intellect": 12,
+      "intuition": 7,
+      "linguistic": 5,
+      "luck": 6
     },
+    "resist": 4,
     "traits": {
       "curiosity": 0.7,
       "aggression": 0.4,
@@ -256,14 +266,16 @@
     "character_class": "grunt",
     "hp": 45,
     "max_hp": 45,
-    "stats": {
-      "STR": 8,
-      "MAG": 0,
-      "LCK": 3,
-      "DEF": 2,
-      "RES": 0,
-      "DEX": 6
+    "attributes": {
+      "physique": 8,
+      "reflexes": 6,
+      "constitution": 2,
+      "intellect": 0,
+      "intuition": 4,
+      "linguistic": 2,
+      "luck": 3
     },
+    "resist": 0,
     "traits": {
       "curiosity": 0.3,
       "aggression": 0.8,
@@ -298,14 +310,16 @@
     "character_class": "scout",
     "hp": 55,
     "max_hp": 55,
-    "stats": {
-      "STR": 10,
-      "MAG": 0,
-      "LCK": 5,
-      "DEF": 3,
-      "RES": 0,
-      "DEX": 8
+    "attributes": {
+      "physique": 10,
+      "reflexes": 8,
+      "constitution": 3,
+      "intellect": 0,
+      "intuition": 6,
+      "linguistic": 3,
+      "luck": 5
     },
+    "resist": 0,
     "traits": {
       "curiosity": 0.4,
       "aggression": 0.7,
@@ -340,14 +354,16 @@
     "character_class": "wyrm",
     "hp": 300,
     "max_hp": 300,
-    "stats": {
-      "STR": 22,
-      "MAG": 18,
-      "LCK": 8,
-      "DEF": 12,
-      "RES": 8,
-      "DEX": 6
+    "attributes": {
+      "physique": 22,
+      "reflexes": 6,
+      "constitution": 12,
+      "intellect": 18,
+      "intuition": 10,
+      "linguistic": 8,
+      "luck": 8
     },
+    "resist": 8,
     "traits": {
       "curiosity": 0.1,
       "aggression": 0.9,

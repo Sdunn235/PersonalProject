@@ -31,13 +31,20 @@ class OutcomeResult:
     variance: int
 
 
-def attribute_term(stats, attr_name: str) -> int:
-    """§A5 shim: physique→STR, reflexes→DEX, luck→LCK, intuition→0 until Stage 4."""
+def attribute_term(attributes, attr_name: str) -> int:
+    """§12.2 attribute term for outcome checks (§M2).
+
+    Stage 4: reads real Attributes objects (the shim is retired — see §A5 / §M2).
+    `attributes` is a Mechanics.entities.attributes.Attributes instance.
+    """
     val = {
-        "physique":  stats.STR,
-        "reflexes":  stats.DEX,
-        "luck":      stats.LCK,
-        "intuition": 0,
+        "physique":     attributes.physique,
+        "reflexes":     attributes.reflexes,
+        "constitution": attributes.constitution,
+        "intellect":    attributes.intellect,
+        "intuition":    attributes.intuition,
+        "linguistic":   attributes.linguistic,
+        "luck":         attributes.luck,
     }.get(attr_name.lower(), 0)
     return val * settings.ATTR_SCALE
 

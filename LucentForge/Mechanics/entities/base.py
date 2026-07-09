@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from .stats import Stats
 from .traits import Traits
+from .attributes import Attributes
 
 
 @dataclass
@@ -11,6 +12,10 @@ class Entity(ABC):
     entity_id: str
     name: str
     subtype: str = ""
+    # Attributes are the primary layer (§M2); `stats` is derived from them by the
+    # factory. Both are carried on the entity so combat/overworld code reads `stats`
+    # unchanged while `attributes` powers checks (§12.2) and magic pools (§M3).
+    attributes: Attributes = field(default_factory=Attributes)
     stats: Stats = field(default_factory=Stats)
     traits: Traits = field(default_factory=Traits)
     hp: int = 100
