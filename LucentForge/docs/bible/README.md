@@ -16,6 +16,7 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 | `lucentforge_terminology_map_v_1.md` | Three-way term reconciliation — Bible / TheForge C# / LucentForge Python | Cite before every TheForge import |
 | `lucentforge_items_addendum_v_1.md` | Stage 2 items doctrine — behavioral rules for items, slots, containers, economy | Cite alongside Foundation §sections for Stage 2 work |
 | `lucentforge_rooms_panels_addendum_v1.md` | Stage 3 doctrine — Room/Panel/ZoneCrossing architecture, Zelda world model, TheForge Room reconciliation | Cite alongside Foundation for all Stage 3+ room/panel/zone work |
+| `lucentforge_stats_magic_addendum_v1.md` | Stage 4 doctrine — attribute layer, Bits/Bytes magic, affinity axis + opposition, resonance, Intuition→trap perception | Cite alongside Foundation for all Stage 4+ attribute/magic/affinity work |
 
 ---
 
@@ -30,6 +31,11 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 1. Check `lucentforge_terminology_map_v_1.md` §7 — confirm room/panel/zone term is reconciled
 2. Check `lucentforge_rooms_panels_addendum_v1.md` (§R1–§R8) — confirm behavioral doctrine is satisfied
 3. Check `lucentforge_simulation_foundation_v_1.md` as above
+
+**Before implementing a Stage 4+ feature:**
+1. Check `lucentforge_terminology_map_v_1.md` §1, §2, §8 — confirm attribute/pool/affinity term is reconciled
+2. Check `lucentforge_stats_magic_addendum_v1.md` (§M1–§M9) — confirm behavioral doctrine is satisfied (esp. §M9 deferred list)
+3. Check `lucentforge_simulation_foundation_v_1.md` (§4.1, §5, §6, §7, §11, §12.2) as above
 
 **Citing sections:** Use `§X.X` notation for Foundation sections, `§AX` notation for addendum sections.
 Example: "Carry capacity is a §4.1 (Physique) constraint governed by the §A2 formula."
@@ -48,4 +54,5 @@ Example: "Carry capacity is a §4.1 (Physique) constraint governed by the §A2 f
 | Stage 1 (SQLite) | §2.2 (simulation state), §10.2 (equipment threshold) | None |
 | Stage 2 (Items/Equipment) | §4.1, §6.6, §7, §10.2, §12.2, §15, §18 | `lucentforge_terminology_map_v_1.md`, `lucentforge_items_addendum_v_1.md` |
 | Stage 3 (Rooms as Zones) | §R1–§R8 (rooms_panels_addendum), §7 (terminology_map §7) | `lucentforge_rooms_panels_addendum_v1.md`, terminology_map §7 |
-| Stage 4+ | TBD | TBD |
+| Stage 4 (Attributes / Bits & Bytes / Affinity) | §M1–§M9 (stats_magic_addendum), §8 (terminology_map §8); Foundation §4.1, §5, §6, §7, §11, §12.2 | `lucentforge_stats_magic_addendum_v1.md`, terminology_map §8 |
+| Stage 5+ | TBD | TBD |

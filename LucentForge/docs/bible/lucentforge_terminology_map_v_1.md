@@ -60,6 +60,10 @@ attribute_term(stat, attribute):
 Only `attribute_term` changes when real attribute objects land in Stage 4. All call sites that
 use this shim remain valid — the shim is the extension point, not the callers.
 
+> **Stage 4 update:** Real attribute objects now land. See `lucentforge_stats_magic_addendum_v1.md`
+> §M2 for the layered model and the superseding derive map (Intellect→MAG + Byte capacity;
+> Constitution→DEF/RES; Intuition→Bit capacity + trap perception). Linguistic remains inert.
+
 ---
 
 ## Section 2 — Derived Resources
@@ -77,6 +81,10 @@ They are not primary attributes.
 **`mp` flag:** The Python field `entity.mp` and the `restore_mp` effect key are explicitly
 non-canonical. They are Stage 2 bridge terms only. Stage 4 will split into `bits`/`bytes` pools
 with separate mechanics. Do not deepen any code against `mp` — only add the Stage 2 bridge.
+
+> **Stage 4 update:** The split is now specified. `mp` → `bits` (capacity ← Intuition) + `bytes`
+> (capacity ← Intellect); both pools always present; casting economy and conversion in
+> `lucentforge_stats_magic_addendum_v1.md` §M3–§M4. Migration m0008.
 
 ---
 
@@ -221,6 +229,8 @@ explicitly non-canonical.
 | `HEAL` | `Heal` | Restores HP up to max. |
 | `RESTORE_SP` | `Stamina` | Restores stamina up to max. |
 | `RESTORE_MP` | — (bridge) | Restores magic pool. **Non-canonical — flagged.** TheForge has `BitPool`/`BytePool`; bible uses Bits/Bytes (§6). Stage 4 splits into `RESTORE_BITS` / `RESTORE_BYTES`. |
+| `RESTORE_BITS` | `BitPool` | **Stage 4.** Restores the Bit pool. Replaces `RESTORE_MP` for primal energy. |
+| `RESTORE_BYTES` | `BytePool` | **Stage 4.** Restores the Byte pool. Replaces `RESTORE_MP` for structured energy. |
 
 ### 4.6 TrapType
 
@@ -247,9 +257,9 @@ Do not build new mechanics against them — they will change in the named future
 
 | Current term | Location | Non-canonical because | Reconcile in |
 |---|---|---|---|
-| `mp` | `entity.mp`, `effects.restore_mp`, `Stats.MAG` (partially) | Bible §6 names the two-pool magic system "Bits" and "Bytes." A single `mp` erases that distinction. | Stage 4 (stats/skills/magic) |
+| `mp` | `entity.mp`, `effects.restore_mp`, `Stats.MAG` (partially) | Bible §6 names the two-pool magic system "Bits" and "Bytes." A single `mp` erases that distinction. | **Stage 4 — reconciled** (→ `bits`/`bytes`, addendum §M3) |
 | `cycles` | `entity.cycles`, save state | Pre-bible holdover for Stamina (§5). | Phase 2.3 (rename everywhere) |
-| `RESTORE_MP` | `ConsumableEffect` | TheForge uses `BitPool`/`BytePool`; bible uses Bits/Bytes (§6). `RESTORE_MP` is a bridge. | Stage 4 |
+| `RESTORE_MP` | `ConsumableEffect` | TheForge uses `BitPool`/`BytePool`; bible uses Bits/Bytes (§6). `RESTORE_MP` is a bridge. | **Stage 4 — reconciled** (→ `RESTORE_BITS`/`RESTORE_BYTES`, §4.5) |
 | `magic_power` (plan) | Plan contract only | Replaced by `resonance` (canonical). See §3.3 + addendum §A6. | Already reconciled in Stage 2.0 |
 
 ---
@@ -324,3 +334,30 @@ Three authorities for Stage 3 reconciliation:
 | `bridge` | `panel00_bridge` | `BRIDGE` | |
 
 Region strings are `TileMap.get_region(col, row)` return values. They do not change in Stage 3 — Rooms are built on top of them, not replacing them.
+
+---
+
+## Section 8 — Stage 4 Terms (Attributes / Bits & Bytes / Affinity)
+
+**Created:** Stage 4.0 | **Authority:** `lucentforge_stats_magic_addendum_v1.md`
+
+### 8.1 Attributes & Magic Pools
+
+| Bible | TheForge C# | LucentForge Python | Stage 4 decision |
+|---|---|---|---|
+| §4.1 (7 attributes) | `CoreAttribute` enum | `Attributes` dataclass (7 fields) | **New primary layer.** Authored per-entity; feeds `derive_stats()`. Wired: Physique/Reflexes/Luck/Intellect/Constitution/Intuition. Inert: Linguistic. §M2. |
+| §6.2 Bits | `BitPool` | `entity.bits` / `bits_max` | **Canonical.** Capacity ← Intuition. Primal/direct casting pool. §M3. |
+| §6.3 Bytes | `BytePool` | `entity.bytes` / `bytes_max` | **Canonical.** Capacity ← Intellect. Structured pool; built via conversion. §M3. |
+| §6.4 magic flow | — | `spell.magic_kind: BIT \| BYTE` | **New.** Spell authored as Bit-spell (primal) or Byte-spell (structured composition). §M4. |
+| §6.5 conversion | — | `convert()` action | **New.** Bits→Bytes; reliable OOC, costs a turn in combat. Overburn = disabled hook. §M4. |
+
+### 8.2 Affinity
+
+| Bible | TheForge C# | LucentForge Python | Stage 4 decision |
+|---|---|---|---|
+| §7 (elemental patterns) | — (absent) | `Affinity` enum (6) | **New.** `EARTH/FIRE/AIR/WATER/VOID/LIGHT`. Full §7 pattern-physics deferred. §M5. |
+| — | — | `entity` innate affinity (base + modifier) | **New.** Single innate at birth; **mutable** so spells/events/curses/blessings alter it. §M5. |
+| — | — | `RoomDefinition.affinity`, `affinity_intensity` | **New.** Per-region environment field; amplifies like-affinity casting. Reuses Stage 3 rooms. §M5. |
+| — | — | opposition pairs | **New.** FIRE↔WATER, EARTH↔AIR, LIGHT↔VOID. Weakness/resistance in combat. §M6. |
+
+Weapon `resonance` (§3.3) gains its mechanism in Stage 4: a multiplier on the Byte/MAG outcome (§M7).
