@@ -50,8 +50,10 @@ def _apply_consumable(player, effect, potency: int) -> None:
         player.heal(potency)
     elif effect == ConsumableEffect.RESTORE_SP:
         player.cycles = min(player.max_cycles, player.cycles + potency)
-    elif effect == ConsumableEffect.RESTORE_MP:
-        player.mp = min(player.max_mp, player.mp + potency)
+    elif effect in (ConsumableEffect.RESTORE_MP, ConsumableEffect.RESTORE_BYTES):
+        player.byte_pool = min(player.max_byte_pool, player.byte_pool + potency)
+    elif effect == ConsumableEffect.RESTORE_BITS:
+        player.bit_pool = min(player.max_bit_pool, player.bit_pool + potency)
 
 
 def _action_unequip(eq_cursor: int, entity_id: str, equip_svc, inv_svc) -> None:

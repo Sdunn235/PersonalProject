@@ -9,6 +9,7 @@ from Mechanics.data.migrations.m0003_relational_items import migrate as m0003
 from Mechanics.data.migrations.m0004_bag_column import migrate as m0004
 from Mechanics.data.migrations.m0005_chests import migrate as m0005
 from Mechanics.data.migrations.m0006_panel_coords import migrate as m0006
+from Mechanics.data.migrations.m0007_bit_byte_pools import migrate as m0007
 
 MIGRATIONS = [
     (1, "initial_content",  m0001),
@@ -17,4 +18,5 @@ MIGRATIONS = [
     (4, "bag_column",       m0004),
     (5, "chests",           m0005),
     (6, "panel_coords",     m0006),
+    (7, "bit_byte_pools",   m0007),
 ]

@@ -6,6 +6,7 @@ import settings
 from Mechanics.data.context import GameContext
 from Mechanics.entities.stats import Stats
 from Mechanics.entities.attributes import Attributes
+from Mechanics.entities.derivation import bit_capacity, byte_capacity_parity
 from Mechanics.entities.traits import Traits
 from Mechanics.ai.npc import NPC
 
@@ -72,12 +73,19 @@ def create_entity(ctx: GameContext, entity_id: str) -> NPC | None:
     cycles_data = data.get("cycles", {})
     mp_data = data.get("mp", {})
 
+    attrs = _build_attributes(data)
+    # Bit pool goes live from its formula; Byte pool inherits the authored mp
+    # budget (parity, §M3). Both pools start full.
+    bit_max = bit_capacity(attrs)
+    byte_max = byte_capacity_parity(mp_data.get("max", 50))
+    byte_start = mp_data.get("start", byte_max)
+
     return NPC(
         entity_id=data["id"],
         name=data["name"],
         subtype=data.get("subtype", ""),
-        attributes=_build_attributes(data),
-        stats=_build_stats(data),
+        attributes=attrs,
+        stats=attrs.to_stats(resist=_resist_value(data)),
         traits=_build_traits(data),
         hp=data.get("hp", 100),
         max_hp=data.get("max_hp", 100),
@@ -86,8 +94,10 @@ def create_entity(ctx: GameContext, entity_id: str) -> NPC | None:
         is_enemy=data.get("is_enemy", True),
         cycles=cycles_data.get("start", 100),
         max_cycles=cycles_data.get("max", 100),
-        mp=mp_data.get("start", 50),
-        max_mp=mp_data.get("max", 50),
+        bit_pool=bit_max,
+        max_bit_pool=bit_max,
+        byte_pool=byte_start,
+        max_byte_pool=byte_max,
         equipment=data.get("equipment", {}),
     )
 

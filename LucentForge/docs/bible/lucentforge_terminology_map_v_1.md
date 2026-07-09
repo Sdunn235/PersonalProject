@@ -346,8 +346,9 @@ Region strings are `TileMap.get_region(col, row)` return values. They do not cha
 | Bible | TheForge C# | LucentForge Python | Stage 4 decision |
 |---|---|---|---|
 | §4.1 (7 attributes) | `CoreAttribute` enum | `Attributes` dataclass (7 fields) | **New primary layer.** Authored per-entity; feeds `derive_stats()`. Wired: Physique/Reflexes/Luck/Intellect/Constitution/Intuition. Inert: Linguistic. §M2. |
-| §6.2 Bits | `BitPool` | `entity.bits` / `bits_max` | **Canonical.** Capacity ← Intuition. Primal/direct casting pool. §M3. |
-| §6.3 Bytes | `BytePool` | `entity.bytes` / `bytes_max` | **Canonical.** Capacity ← Intellect. Structured pool; built via conversion. §M3. |
+| §6.2 Bits (pool) | `BitPool` | `entity.bit_pool` / `max_bit_pool` (bp) | **Canonical.** Capacity `Intuition × Constitution`. Primal/direct casting pool. §M3. |
+| §6.3 Bytes (pool) | `BytePool` | `entity.byte_pool` / `max_byte_pool` (bytp) | **Canonical.** Target capacity `Intuition × Constitution × Intellect`; mp-parity in 4.3. §M3. |
+| §M9.1 XP units | — | `attribute_bit` / `attribute_byte` | **Reserved (Stage 5).** Attribute-leveling experience — a *separate ledger* from the spendable pools above. `1 attribute_byte = 8 attribute_bit`. |
 | §6.4 magic flow | — | `spell.magic_kind: BIT \| BYTE` | **New.** Spell authored as Bit-spell (primal) or Byte-spell (structured composition). §M4. |
 | §6.5 conversion | — | `convert()` action | **New.** Bits→Bytes; reliable OOC, costs a turn in combat. Overburn = disabled hook. §M4. |
 

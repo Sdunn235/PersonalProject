@@ -177,6 +177,10 @@ class Consumable(Item):
                 effect_str, potency = "RESTORE_SP", effects["restore_sp"]
             elif effects.get("restore_mp"):
                 effect_str, potency = "RESTORE_MP", effects["restore_mp"]
+            elif effects.get("restore_bits"):
+                effect_str, potency = "RESTORE_BITS", effects["restore_bits"]
+            elif effects.get("restore_bytes"):
+                effect_str, potency = "RESTORE_BYTES", effects["restore_bytes"]
         return cls(
             id=d["id"],
             name=d["name"],

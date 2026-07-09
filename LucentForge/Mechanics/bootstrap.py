@@ -96,8 +96,10 @@ def apply_save(
         npc.y  = edata["y"]
         if hasattr(npc, "cycles"):
             npc.cycles = edata["cycles"]
-        if hasattr(npc, "mp"):
-            npc.mp = edata["mp"]
+        if hasattr(npc, "byte_pool"):
+            npc.byte_pool = edata.get("byte_pool", edata.get("mp", npc.byte_pool))
+            _bp = edata.get("bit_pool")
+            npc.bit_pool = _bp if _bp else npc.max_bit_pool  # legacy save -> full
         if hasattr(npc, "equipment"):
             npc.equipment = edata["equipment"]
 
@@ -135,8 +137,10 @@ def apply_save(
         player.y  = pdata["y"]
         if hasattr(player, "cycles"):
             player.cycles = pdata["cycles"]
-        if hasattr(player, "mp"):
-            player.mp = pdata["mp"]
+        if hasattr(player, "byte_pool"):
+            player.byte_pool = pdata.get("byte_pool", pdata.get("mp", player.byte_pool))
+            _pbp = pdata.get("bit_pool")
+            player.bit_pool = _pbp if _pbp else player.max_bit_pool
 
         needs_map = {n.need_id: n for n in player_needs}
         for need_id, value in pdata["needs"].items():

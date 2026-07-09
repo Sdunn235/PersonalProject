@@ -81,21 +81,44 @@ affinity modifier layer (§M5, migration m0009).
 
 Foundation §5 lists Bits/Bytes as derived resources; §6 defines the magic system. Stage 4 splits the
 Stage 2 bridge field `entity.mp` into **two independent pools**, `bits` and `bytes` (each with a max).
-Persistence: migration **m0008**. The `RESTORE_MP` consumable splits into `RESTORE_BITS` /
+Persistence: migration **m0007**. The `RESTORE_MP` consumable splits into `RESTORE_BITS` /
 `RESTORE_BYTES` (terminology_map §4.5).
 
 **Both pools are always needed.** A caster is never purely one or the other.
 
-| Pool | Nature (§6.2 / §6.3) | Capacity driver |
+| Pool | Nature (§6.2 / §6.3) | Capacity formula |
 |---|---|---|
-| **Bits** | Raw, primal, volatile magical energy. Fast, instinctive, less efficient. | **Intuition** |
-| **Bytes** | Structured constructs formed from Bits. Stable, repeatable, complex. | **Intellect** |
+| **Bits** | Raw, primal, volatile magical energy. Fast, instinctive, less efficient. | `Intuition × Constitution` |
+| **Bytes** | Structured constructs formed from Bits. Stable, repeatable, complex. | `Intuition × Constitution × Intellect` (target) |
+
+**Canonical ratio: 1 Byte = 8 Bits.** The structural anchor of the whole magic system — a Byte is eight
+Bits given structure. It doubles as the **Bits→Bytes conversion ratio (8:1)** for §M4, and (Stage 5) as
+the granularity of attribute XP (§M9.1). The CS metaphor runs the whole way down.
+
+**Capacity is a formula, not a coefficient.** Pool capacities live in a single polymorphic derivation
+layer — no hardcoded numbers baked into call sites — expressed as attribute products so the system stays
+a living, extensible force. Because attributes will eventually grow and ascend (§M9.1), pools must
+**recompute from current attribute values**, never freeze at spawn.
+
+**Stage 4.3 parity note.** The 4.3 split is parity-first: the **Bit** pool goes live with its formula
+(`Intuition × Constitution`); the **Byte** pool stays at mp-parity (`byte_max = old max_mp`) via a legacy
+passthrough strategy so combat magic is unchanged and testable. 4.5 swaps in the real Byte formula,
+**normalizes** the multiplicative growth (a dragon's raw `Int×Con×Intellect` ≈ 2160 — needs a divisor or
+curve), and retunes spell costs.
 
 **Universal pools, emergent Talent.** Every creature is born with an affinity (§M5) and has Bit/Byte
-pools scaled by its attributes — a low-Intuition, low-Intellect brute simply has *tiny* pools.
-**"Talent" is not a gate or a flag**; it is what we call a creature that rolls notably high innate
-magical attributes/affinity strength. The goblin **Hob** is a goblin gifted this way. The biochem
-`Brain` may later *read* gifted-ness to drive behavior — that read is seeded in §M9, not built here.
+pools from its attributes — a low-Intuition, low-Intellect brute simply has *tiny* pools. **"Talent" is
+not a gate or a flag**; it is what we call a creature that rolls notably high innate magical
+attributes/affinity strength. The goblin **Hob** is a goblin gifted this way. The biochem `Brain` may
+later *read* gifted-ness — that read is seeded in §M9, not built here.
+
+**Magic pools vs XP units — naming.** "Bit" and "Byte" are the lore/CS building blocks; two qualified
+uses extend (not replace) them:
+- **Magic pools** (spendable, this stage) — code: `bit_pool` (bp) / `byte_pool` (bytp).
+- **XP units** (attribute leveling, §M9.1, Stage 5) — code: `attribute_bit` / `attribute_byte`.
+
+These are **independent ledgers** sharing only the 1:8 structure. Leveling an attribute accrues
+`attribute_bit`s; it must never drain a caster's `bit_pool`/`byte_pool`.
 
 ---
 
@@ -211,10 +234,53 @@ Captured here so the vision is canon, not chat memory. None of these are built t
 | **Overburn / collapse** | Hook disabled (§M4) | Flip on when combat-pressure risk is designed. |
 | **§7 emergent pattern-physics** | Deferred (§M5) | Hybrid combination, elements-define-behavior, per-element resist matrix. |
 | **Status-effect application** | Deferred | `StatusFlags` stub exists; poison/stun/etc. unapplied. |
-| **Skills & ability progression** | Deferred | XP, learn-by-use, attribute/skill growth (§10). Attributes are static this stage. |
+| **Attribute progression & ascension** | Deferred — designed | Learn-by-use attribute leveling + reincarnation/ascension. Full scheme in §M9.1. Attributes are static through Stage 4. |
+| **Skills & ability progression** | Deferred | XP, learn-by-use, skill/ability growth (§10). |
 | **Birth-generation of affinity** | Deferred (§M5) | Runtime roll from race weights + birth conditions; authored per-entity for now. |
 | **Talent read by the Brain** | Seeded (§M3) | `biochem/brain.py` may later read gifted-ness to drive behavior. |
 | **World-death / durability decay** | Deferred | Traps still clamp to 1 HP. |
+
+### §M9.1 — Attribute Progression & Ascension (Stage 5 design capture)
+
+Deferred to Stage 5, recorded now so it isn't lost. Attributes are **static through all of Stage 4**;
+this describes the future growth model.
+
+**Learn-by-use leveling.** Attributes are individual scores that level by *being used* — like skills,
+abilities, and spells. Any use of an attribute (an attack drawing on Physique, a check drawing on
+Linguistic, etc.) grants **1 `attribute_bit`** of experience toward *that* attribute. XP units are named
+`attribute_bit` / `attribute_byte` to keep them distinct from the spendable magic pools (§M3).
+
+**Cost curve (uses the 1 byte = 8 bits ratio, §M3):**
+
+| Level transition | Cost | In `attribute_bit`s (uses) |
+|---|---|---|
+| 1 → 2 | 1 `attribute_byte` | 8 |
+| 2 → 3 | 2 `attribute_byte` | 16 |
+| 3 → 4 | 4 `attribute_byte` | 32 |
+| L → L+1 | `2^(L-1)` `attribute_byte` | `2^(L-1) × 8` |
+
+The XP counter resets on each level-up. Cost doubles per level, so high attributes are effectively
+unreachable by grinding alone — growth past the early band comes through ascension, not accumulation.
+
+**Cap & reincarnation.** An attribute caps at **255** and stays there. The player may **reincarnate** —
+reset all attributes to 1 — to let attributes **ascend**.
+
+**Ascension multiplier.** Each ascension grants a permanent multiplier applied to the attribute's value
+**before** it feeds any action modifier or pool formula. The ascension multiplier is **fixed** — it does
+*not* alter leveling costs (the cost curve above is invariant across ascensions). Reincarnation is the
+prestige loop; ascension is its reward.
+
+**Implementation note.** This XP ledger is **separate from the magic `bit_pool`/`byte_pool`** (§M3):
+using an attribute accrues `attribute_bit`s without touching the spendable magic pools. Because ascension
+and leveling mutate attribute values at runtime, they must flow through the polymorphic derivation layer
+so pools and action modifiers recompute live — reinforcing "capacity is a formula, not a coefficient" (§M3).
+
+**Living-formula target (also Stage 5).** Action costs/effects are attribute-driven formulas plus
+contextual variables, e.g. a physical action ≈ `Physique ± Reflexes ± variables`, where variables
+include weapon weight/shape (Sword/Axe/Spear/Dagger), attack type (horizontal/vertical/pierce/power/
+quick), reflex-modifier weapons (bows/throwables/rapiers), and Bit/Byte buffs/debuffs. A **Stamina** pool
+of `Physique × Constitution` parallels the magic pools. All of this is why the formula layer is built
+polymorphic and composable from the start (§M3).
 
 ---
 

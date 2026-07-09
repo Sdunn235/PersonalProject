@@ -168,6 +168,11 @@ def _use_item(stack, pf: Fighter, log: list[str]) -> None:
     if item.get("restore_mp", 0) > 0:
         pf.mp = min(pf.max_mp, pf.mp + item["restore_mp"])
         msgs.append(f"restored {item['restore_mp']} MP")
+    # Byte pool = the Fighter's mp during the 4.3 parity phase. Bit-pool restore
+    # has no combat effect yet (bits are latent until 4.5 types Bit-spells).
+    if item.get("restore_bytes", 0) > 0:
+        pf.mp = min(pf.max_mp, pf.mp + item["restore_bytes"])
+        msgs.append(f"restored {item['restore_bytes']} Bytes")
     stack.qty -= 1
     if stack.qty <= 0:
         try:
@@ -190,6 +195,10 @@ def _to_combat_dict(item) -> dict:
             d["restore_sp"] = item.potency
         elif item.effect == ConsumableEffect.RESTORE_MP:
             d["restore_mp"] = item.potency
+        elif item.effect == ConsumableEffect.RESTORE_BYTES:
+            d["restore_bytes"] = item.potency
+        elif item.effect == ConsumableEffect.RESTORE_BITS:
+            d["restore_bits"] = item.potency
     return d
 
 

@@ -39,11 +39,13 @@ class ArmorWeight(IntEnum):
 
 
 class ConsumableEffect(IntEnum):
-    NONE       = 0
-    HEAL       = 1
-    RESTORE_SP = 2
-    RESTORE_MP = 3        # non-canonical bridge term; reconcile Stage 4
-    UNLOCK     = 4        # §A1 capability grant; mechanic deferred to Stage 3
+    NONE          = 0
+    HEAL          = 1
+    RESTORE_SP    = 2
+    RESTORE_MP    = 3     # bridge — restores the Byte pool (§M4); retained for old items
+    UNLOCK        = 4     # §A1 capability grant; mechanic deferred to Stage 3
+    RESTORE_BITS  = 5     # Stage 4 (§M4) — restores the Bit pool
+    RESTORE_BYTES = 6     # Stage 4 (§M4) — restores the Byte pool
 
 
 class TrapType(IntFlag):

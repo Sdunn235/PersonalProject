@@ -456,7 +456,8 @@ def main():
         info_txt = font.render(
             f"Day {day:.2f}   HP {player.hp:.0f}/{player.max_hp}"
             f"   SP {player.cycles}/{player.max_cycles}"
-            f"   MP {player.mp}/{player.max_mp}",
+            f"   BP {player.bit_pool}/{player.max_bit_pool}"
+            f"   BYP {player.byte_pool}/{player.max_byte_pool}",
             True, settings.TEXT_COLOR)
         screen.blit(info_txt, (settings.LEVEL_X, 10))
 

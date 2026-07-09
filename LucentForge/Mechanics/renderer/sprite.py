@@ -91,13 +91,15 @@ class EntitySprite(pygame.sprite.Sprite):
     def draw_overlays(self, surface: pygame.Surface) -> None:
         x = self.entity.x + settings.LEVEL_X
         y = self.entity.y + settings.LEVEL_Y
-        # Three stacked bars: HP (red), SP (green), MP (purple)
+        # Four stacked bars: HP (red), SP (green), Bit (blue), Byte (purple)
         draw_stat_bar(surface, x, y, self.entity.hp,     self.entity.max_hp,
-                      (229, 31, 31),  (60, 20, 20),  offset_y=-22)
+                      (229, 31, 31),  (60, 20, 20),  offset_y=-24)
         draw_stat_bar(surface, x, y, self.entity.cycles, self.entity.max_cycles,
-                      (68, 206, 27),  (30, 60, 30),  offset_y=-18)
-        draw_stat_bar(surface, x, y, self.entity.mp,     self.entity.max_mp,
-                      (130, 60, 200), (50, 20, 70),  offset_y=-14)
+                      (68, 206, 27),  (30, 60, 30),  offset_y=-20)
+        draw_stat_bar(surface, x, y, self.entity.bit_pool,  self.entity.max_bit_pool,
+                      (60, 140, 220), (20, 40, 70),  offset_y=-16)
+        draw_stat_bar(surface, x, y, self.entity.byte_pool, self.entity.max_byte_pool,
+                      (150, 60, 200), (50, 20, 70),  offset_y=-12)
         font = pygame.font.SysFont(None, 14)
         txt = font.render(self.entity.name, True, settings.TEXT_COLOR)
         surface.blit(txt, (x - txt.get_width() // 2, y - 30))

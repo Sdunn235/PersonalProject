@@ -93,9 +93,9 @@ class SaveManager:
                 }
                 conn.execute(
                     "INSERT INTO entity_state "
-                    "(slot_id, entity_id, hp, x, y, cycles, mp, equipment, needs, "
+                    "(slot_id, entity_id, hp, x, y, cycles, mp, bit_pool, byte_pool, equipment, needs, "
                     "chemicals, traits, memory, ai_state, ai_data, bag) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         slot_id,
                         npc.entity_id,
@@ -104,6 +104,8 @@ class SaveManager:
                         npc.y,
                         getattr(npc, "cycles", 0),
                         getattr(npc, "mp", 0),
+                        getattr(npc, "bit_pool", 0),
+                        getattr(npc, "byte_pool", 0),
                         json.dumps((equipment or {}).get(npc.entity_id,
                                    getattr(npc, "equipment", {}))),
                         json.dumps({n.need_id: n.current_value for n in ctrl.needs}),
@@ -121,9 +123,9 @@ class SaveManager:
                         if hasattr(player.traits, "as_dict") else {})
             conn.execute(
                 "INSERT INTO entity_state "
-                "(slot_id, entity_id, hp, x, y, cycles, mp, equipment, needs, "
+                "(slot_id, entity_id, hp, x, y, cycles, mp, bit_pool, byte_pool, equipment, needs, "
                 "chemicals, traits, memory, ai_state, ai_data, bag) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     slot_id,
                     player.entity_id,
@@ -132,6 +134,8 @@ class SaveManager:
                     player.y,
                     getattr(player, "cycles", 0),
                     getattr(player, "mp", 0),
+                    getattr(player, "bit_pool", 0),
+                    getattr(player, "byte_pool", 0),
                     json.dumps((equipment or {}).get(player.entity_id,
                                getattr(player, "equipment", {}))),
                     json.dumps({n.need_id: n.current_value for n in player_needs}),
@@ -221,6 +225,8 @@ class SaveManager:
                     "y":         row["y"],
                     "cycles":    row["cycles"],
                     "mp":        row["mp"],
+                    "bit_pool":  row["bit_pool"],
+                    "byte_pool": row["byte_pool"],
                     "equipment": json.loads(row["equipment"]),
                     "needs":     json.loads(row["needs"]),
                     "chemicals": json.loads(row["chemicals"]),
