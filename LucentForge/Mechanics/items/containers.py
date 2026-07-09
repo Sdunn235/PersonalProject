@@ -78,3 +78,8 @@ class Chest:
     trap_damage:     int        = 0
     is_opened:       bool       = False
     contents:        list       = field(default_factory=list)  # list[ItemStack]
+    # Phase 4.2 (§M8): runtime passive-perception state. `trap_perceived` flips
+    # true when the player's Intuition notices the trap on approach; `perceive_dc`
+    # is an optional per-chest override (0 → use settings.TRAP_PERCEIVE_DC).
+    trap_perceived:  bool       = False
+    perceive_dc:     int        = 0

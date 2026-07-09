@@ -185,11 +185,18 @@ Stage 4 adds its *mechanism*:
 With real Intuition (§M2), the §12.2 **perceive-trap** check finally functions (it was `= 0`, i.e.
 impossible, under the Stage 2 shim — items addendum §A5).
 
-- **Passive reveal on approach.** When an entity nears a trapped tile/container, an Intuition check runs
-  automatically against the trap DC. On success the trap is revealed (highlight + HUD/log hint). No
-  extra input — building Intuition means noticing more.
+- **Passive reveal on approach.** When the player nears a trapped container (within
+  `TRAP_PERCEIVE_RADIUS`), a keen-enough Intuition reveals the trap in advance — a world marker (red
+  `!`) plus a log hint. No extra input — building Intuition means noticing more.
+- **Deterministic danger-sense**, not a per-frame die roll:
+  `TRAP_PERCEIVE_BASE + attribute_term(Intuition) >= perceive DC`. This makes Intuition a clean gate
+  (a high-Intuition build reliably notices; a dull one never does) and avoids random flicker. Implemented
+  in `Mechanics/services/perception.py`; marker in `Mechanics/renderer/trap_overlay.py`.
+- This is an **advance-warning layer** — the chest menu still surfaces the trap on open. Hiding the
+  in-menu disarm option until the trap is perceived (so an unperceived open springs it) is a future
+  enhancement.
 - Reuses the Stage 2 trap DC data and the `MECHANICAL` trap type. `MAGICAL` ward perception remains a
-  later concern.
+  later concern. Perception state is runtime-only (re-perceived on approach after load; not persisted).
 
 ---
 

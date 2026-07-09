@@ -24,7 +24,9 @@ from Mechanics.world.world_coord import PanelEdge
 from Mechanics.ai.player import PlayerController
 from Mechanics.renderer.sprite import EntitySprite
 from Mechanics.renderer.hud import draw_hud
+from Mechanics.renderer.trap_overlay import draw_trap_markers
 from Mechanics.renderer.health_bar import draw_stat_bar
+from Mechanics.services.perception import perceive_traps
 from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
@@ -345,6 +347,10 @@ def main():
             apply_regen(player_needs, player, dt)
             sprite_group.update()
 
+            # Phase 4.2: passive Intuition trap perception (§M8)
+            for _hint in perceive_traps(player, chest_reg):
+                print(_hint)
+
             # Phase 3.6: panel edge detection — fires once per edge entry (edge-triggered)
             _pcol = int(player.x // settings.TILE_SIZE)
             _prow = int(player.y // settings.TILE_SIZE)
@@ -391,6 +397,7 @@ def main():
         # Draw
         screen.fill(settings.BG_COLOR)
         tile_map.draw(screen)
+        draw_trap_markers(screen, chest_reg, font)  # Phase 4.2 (§M8)
 
         # Zone labels already rendered by tile_map.draw(); skip source labels
         # that duplicate a zone label (FARM overlaps "Farm" zone).

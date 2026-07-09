@@ -264,3 +264,9 @@ LOCKPICK_BASE_VALUE   = 5    # base score for lockpick checks (no skill until St
 # Bible ref: lucentforge_items_addendum_v_1.md §12.2
 # =============================================================================
 TRAP_DISARM_DC        = 5    # difficulty class for trap disarm attempts
+
+# Phase 4.2 — passive Intuition trap perception (§M8). Deterministic danger-sense:
+# TRAP_PERCEIVE_BASE + Intuition >= perceive DC reveals a nearby trap in advance.
+TRAP_PERCEIVE_BASE    = 4    # base score for passive trap perception
+TRAP_PERCEIVE_DC      = 10   # Intuition threshold to notice a trap (player Intuition 6 -> clears)
+TRAP_PERCEIVE_RADIUS  = 3    # tiles (Manhattan) within which perception runs
