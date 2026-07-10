@@ -27,6 +27,7 @@ from Mechanics.renderer.hud import draw_hud
 from Mechanics.renderer.trap_overlay import draw_trap_markers
 from Mechanics.renderer.health_bar import draw_stat_bar
 from Mechanics.services.perception import perceive_traps
+from Mechanics.combat.casting import convert_amount
 from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
@@ -263,6 +264,15 @@ def main():
                         run_chest_menu(screen, clock, font, _adj_chest, player,
                                        inv_svc, equip_svc, ctx.item_repo,
                                        OutcomeResolver())
+                elif event.key == pygame.K_c:
+                    # Phase 4.5b: reliable out-of-combat Bits->Bytes conversion (§M4).
+                    # Rest structures all available Bits into Bytes (fills the Byte pool).
+                    _b, _byt, _g = convert_amount(player.bit_pool, player.byte_pool,
+                                                  player.max_byte_pool, player.bit_pool)
+                    if _g > 0:
+                        player.bit_pool, player.byte_pool = _b, _byt
+                        print(f"[CONVERT] {_g * 8} Bits -> {_g} Bytes  "
+                              f"(BP {_b}/{player.max_bit_pool}, BYP {_byt}/{player.max_byte_pool})")
 
         if not in_combat:
             # --- World simulation tick ---

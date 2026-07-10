@@ -5,6 +5,22 @@
 # times a per-pool knob. One dial per pool, not per-spell tuning (§M4 / formulas).
 from __future__ import annotations
 import settings
+from Mechanics.entities.derivation import BITS_PER_BYTE
+
+
+def convert_amount(bits: int, bytes_cur: int, bytes_max: int,
+                   rate_bits: int) -> tuple[int, int, int]:
+    """Convert up to rate_bits Bits into Bytes at the canonical 8:1 (§M4, §M6.5).
+
+    Capped by available Bits and remaining Byte headroom. Returns
+    (bits_after, bytes_after, bytes_gained). Deterministic this stage — overburn
+    (risky in-combat conversion) is a disabled hook (4.6+/Stage 5).
+    """
+    byte_room   = max(0, bytes_max - bytes_cur)
+    convertible = min(rate_bits, bits, byte_room * BITS_PER_BYTE)
+    gained      = convertible // BITS_PER_BYTE
+    spent       = gained * BITS_PER_BYTE
+    return bits - spent, bytes_cur + gained, gained
 
 
 def spell_pool_and_cost(ability: dict) -> tuple[str, int]:

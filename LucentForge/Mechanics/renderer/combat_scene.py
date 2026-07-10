@@ -8,7 +8,7 @@ import settings
 from Mechanics.data.context import GameContext
 from Mechanics.combat.combat import take_turn
 from Mechanics.combat.fighter import build_fighter
-from Mechanics.combat.casting import spell_pool_and_cost
+from Mechanics.combat.casting import spell_pool_and_cost, convert_amount
 from Mechanics.combat.rng import SimpleRng
 from Mechanics.combat.ability_sets import get_abilities, get_basic_attack
 from Mechanics.combat.spell_sets import get_spells
@@ -47,6 +47,7 @@ _MAIN_OPTIONS = [
     {"id": "_attack",    "name": "Attack",    "kind": "action_attack"},
     {"id": "_abilities", "name": "Abilities", "kind": "action_submenu", "submenu": "abilities"},
     {"id": "_spells",    "name": "Spells",    "kind": "action_submenu", "submenu": "spells"},
+    {"id": "_convert",   "name": "Convert",   "kind": "action_convert"},
     {"id": "_backpack",  "name": "Backpack",  "kind": "action_submenu", "submenu": "backpack"},
     {"id": "_flee",      "name": "Flee",      "kind": "flee"},
 ]
@@ -409,6 +410,19 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
                             else:
                                 log.append("Not enough SP to attack!")
 
+                        elif chosen["kind"] == "action_convert":
+                            b, byt, gained = convert_amount(
+                                player_fighter.bits, player_fighter.mp,
+                                player_fighter.max_mp, settings.CONVERT_RATE_BITS)
+                            if gained > 0:
+                                player_fighter.bits = b
+                                player_fighter.mp   = byt
+                                log.append(f"You structure {gained * 8} Bits into "
+                                           f"{gained} Byte{'s' if gained != 1 else ''}.")
+                                waiting_for_input = False   # conversion spends the turn
+                            else:
+                                log.append("Nothing to convert (no Bits, or Bytes full).")
+
                         elif chosen["kind"] == "action_submenu":
                             menu.state      = chosen["submenu"]
                             menu.sub_cursor = 0
@@ -634,6 +648,9 @@ def _draw_main_menu(screen, panel_x, panel_y, panel_w, item_h,
                 affordable = bool(pf.bag)
             else:
                 affordable = True
+        elif opt["kind"] == "action_convert":
+            cost_str   = f"  (BP {pf.bits})"
+            affordable = pf.bits >= 8 and pf.mp < pf.max_mp
         else:  # flee
             cost_str  = ""
             affordable = True

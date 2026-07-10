@@ -136,9 +136,14 @@ two archetypes:
 Each spell is authored with `magic_kind: BIT | BYTE` (`abilities.json`) and costs from the matching
 pool.
 
-**Conversion & storage (§6.5, §6.6):**
-- **Convert** turns Bits into Bytes. Reliable when out of combat; costs a turn under combat pressure.
-- **Internal Byte storage** lets a caster bank Bytes for later. Built this stage.
+**Conversion & storage (§6.5, §6.6) — LIVE (4.5b):**
+- **Convert** turns Bits into Bytes at the canonical **8:1** (`convert_amount()`), capped by available
+  Bits and Byte headroom. In combat it's a **Convert menu action that spends the turn** (a fixed chunk of
+  `CONVERT_RATE_BITS`); out of combat it's **free** (the `C` key structures all available Bits to Bytes).
+- **Regen flip (§M4):** Bits regen freely each combat turn (`BIT_REGEN_PER_TURN`); the **Byte pool no
+  longer passively regens** — it is refilled only by conversion or items. This is the bible model, landed
+  together with conversion so casters never hit a Byte-sustain gap without a way to refill.
+- **Internal Byte storage** — the Byte pool itself is the banked store; built this stage.
 - **Overburn / collapse** (interrupted or overloaded conversion causing backlash) is coded as a
   **present-but-disabled hook** — the code path exists; the risk is off this stage.
 - **External focus storage** (a staff/tome/crystal holding Bytes so the caster doesn't have to) is

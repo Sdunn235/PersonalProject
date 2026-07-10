@@ -21,7 +21,8 @@ CYCLE_MAX_DEFAULT    = 100
 CYCLE_REGEN_PER_TURN = 5
 
 MP_MAX_DEFAULT    = 50
-MP_REGEN_PER_TURN = 3
+MP_REGEN_PER_TURN = 3      # legacy (Byte pool no longer passively regens, §M4)
+BIT_REGEN_PER_TURN = 4     # Bits regen freely each turn (§M4); Bytes are convert-only
 
 CRIT_MULTIPLIER   = 1.5
 CRIT_CAP          = 60.0
