@@ -357,8 +357,9 @@ Region strings are `TileMap.get_region(col, row)` return values. They do not cha
 | Bible | TheForge C# | LucentForge Python | Stage 4 decision |
 |---|---|---|---|
 | §7 (elemental patterns) | — (absent) | `Affinity` enum (6) | **New.** `EARTH/FIRE/AIR/WATER/VOID/LIGHT`. Full §7 pattern-physics deferred. §M5. |
-| — | — | `entity` innate affinity (base + modifier) | **New.** Single innate at birth; **mutable** so spells/events/curses/blessings alter it. §M5. |
-| — | — | `RoomDefinition.affinity`, `affinity_intensity` | **New.** Per-region environment field; amplifies like-affinity casting. Reuses Stage 3 rooms. §M5. |
+| — | — | `entity.affinity: AffinityState` (innate + granted + suppressed) | **New (4.4).** Set-based grant/suppress; `effective() = ({innate}\|granted)-suppressed`. Single innate at birth, mutable/plural via mods. Timed expiry seeded. §M5. |
+| — | — | `RoomDefinition.affinity: Affinity\|None`, `affinity_intensity: float` | **New (4.4).** Per-region environment field; `None` = neutral. Amplifies like-affinity casting (4.6). Reuses Stage 3 rooms. §M5. |
+| §M6 opposition | — | `affinity.opposite(el)` | **New (4.4).** fire↔water, earth↔air, light↔void — data authority; combat consumes it in 4.6. |
 | — | — | opposition pairs | **New.** FIRE↔WATER, EARTH↔AIR, LIGHT↔VOID. Weakness/resistance in combat. §M6. |
 
 Weapon `resonance` (§3.3) gains its mechanism in Stage 4: a multiplier on the Byte/MAG outcome (§M7).

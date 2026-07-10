@@ -6,9 +6,16 @@ import settings
 from Mechanics.data.context import GameContext
 from Mechanics.entities.stats import Stats
 from Mechanics.entities.attributes import Attributes
+from Mechanics.entities.affinity import Affinity, AffinityState
 from Mechanics.entities.derivation import bit_capacity, byte_capacity_parity
 from Mechanics.entities.traits import Traits
 from Mechanics.ai.npc import NPC
+
+
+def _build_affinity(data: dict) -> AffinityState:
+    """Build the innate AffinityState from the JSON `affinity` element name (§M5).
+    Defaults to EARTH if unspecified; grant/suppress mods start empty."""
+    return AffinityState(innate=Affinity(data.get("affinity", "EARTH")))
 
 
 def _build_attributes(data: dict) -> Attributes:
@@ -87,6 +94,7 @@ def create_entity(ctx: GameContext, entity_id: str) -> NPC | None:
         attributes=attrs,
         stats=attrs.to_stats(resist=_resist_value(data)),
         traits=_build_traits(data),
+        affinity=_build_affinity(data),
         hp=data.get("hp", 100),
         max_hp=data.get("max_hp", 100),
         x=x,

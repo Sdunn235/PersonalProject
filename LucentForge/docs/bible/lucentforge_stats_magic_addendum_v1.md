@@ -157,13 +157,23 @@ pattern-physics (hybrid combination, elements-define-behavior) deferred (§M9).
   innate color). Some affinities are rarer; some races/creature-types skew toward certain ones; the
   circumstances of birth/creation nudge the roll (birth-generation itself is deferred — affinities are
   authored per-entity this stage).
-- **Affinity is mutable.** Stored as a **base innate value + a modifier layer** (mirroring `Traits` and
-  the `Effect` system) so spells, events, curses, and blessings can temporarily or permanently add,
-  remove, or change affinities. It is never a fixed immutable field.
-- **Environment affinity.** Each region/room carries an affinity element + intensity
-  (`RoomDefinition.affinity`, `affinity_intensity`), reusing the Stage 3 rooms/zone system. A saturated
-  area amplifies like-affinity casting. Ties into the world-geography track. Persistence: migration
-  **m0009**.
+- **Affinity is mutable — `AffinityState`** (`Mechanics/entities/affinity.py`, Phase 4.4). A set-based
+  grant/suppress model: `innate: Affinity` + `granted: set` + `suppressed: set`, with
+  `effective() = ({innate} | granted) - suppressed`. So spells/events/curses/blessings can add
+  (`grant`), remove even the innate (`suppress`), or change affinities — and affinities can become
+  **plural**. Permanent grant/suppress is live; **timed/temporary modifiers are a seeded hook** (add an
+  expiry-tracked variant when the first temporary effect lands, 4.6+/Stage 5).
+- **Environment affinity.** Each region/room carries an optional affinity element + intensity
+  (`RoomDefinition.affinity: Affinity | None`, `affinity_intensity: float`), reusing the Stage 3
+  rooms/zone system. `None` = elementally neutral (town/bridge). A saturated area amplifies like-affinity
+  casting (consumed by §M6 combat in 4.6). Ties into the world-geography track.
+- **Persistence deferral (Phase 4.4).** Like the attribute layer (§M2), affinity is **authored/static**
+  this stage: innate is rebuilt from `entities.json`, and `granted`/`suppressed` are empty until a
+  mechanic writes them (no curse/blessing exists until 4.6+). So **no migration in 4.4** — persistence
+  (an `entity_state` affinity column, `AffinityState.as_dict`/`from_dict` ready) lands with the first
+  modifier writer.
+- **Opposition data authority.** The pairs `fire↔water, earth↔air, light↔void` live in
+  `affinity.py::opposite()` — defined in 4.4, consumed by §M6 combat in 4.6.
 
 ---
 

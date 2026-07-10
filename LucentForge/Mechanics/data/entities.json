@@ -2,6 +2,7 @@
   {
     "id": "player",
     "name": "Player",
+    "affinity": "LIGHT",
     "type": "player",
     "subtype": "human",
     "level": 5,
@@ -62,6 +63,7 @@
   {
     "id": "npc_01",
     "name": "Alder",
+    "affinity": "AIR",
     "type": "npc",
     "subtype": "human",
     "level": 3,
@@ -114,6 +116,7 @@
   {
     "id": "npc_02",
     "name": "Sylva",
+    "affinity": "WATER",
     "type": "npc",
     "subtype": "human",
     "level": 4,
@@ -161,6 +164,7 @@
   {
     "id": "npc_03",
     "name": "Grom",
+    "affinity": "EARTH",
     "type": "npc",
     "subtype": "human",
     "level": 4,
@@ -213,6 +217,7 @@
   {
     "id": "npc_04",
     "name": "Elara",
+    "affinity": "AIR",
     "type": "npc",
     "subtype": "human",
     "level": 3,
@@ -260,6 +265,7 @@
   {
     "id": "goblin_01",
     "name": "Gruk",
+    "affinity": "EARTH",
     "type": "npc",
     "subtype": "goblin",
     "level": 1,
@@ -304,6 +310,7 @@
   {
     "id": "goblin_02",
     "name": "Skrix",
+    "affinity": "EARTH",
     "type": "npc",
     "subtype": "goblin",
     "level": 2,
@@ -348,6 +355,7 @@
   {
     "id": "dragon_01",
     "name": "Ignarix",
+    "affinity": "FIRE",
     "type": "npc",
     "subtype": "dragon",
     "level": 10,

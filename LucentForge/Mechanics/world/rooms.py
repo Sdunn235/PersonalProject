@@ -8,6 +8,8 @@ import enum
 import json
 from dataclasses import dataclass
 
+from Mechanics.entities.affinity import Affinity
+
 
 class RoomType(enum.Enum):
     WILDERNESS       = "WILDERNESS"
@@ -29,6 +31,10 @@ class RoomDefinition:
     panel_y:     int
     tile_bounds: tuple[int, int, int, int]  # col_min, row_min, col_max, row_max
     region_tag:  str                         # matches tile_map.get_region() output
+    # Environment affinity field (§M5): None = elementally neutral. Intensity 0..1
+    # scales the like-affinity casting bonus (consumed by affinity combat in 4.6).
+    affinity:           Affinity | None = None
+    affinity_intensity: float = 0.0
 
 
 class RoomRegistry:
@@ -62,6 +68,8 @@ class RoomRegistry:
                 panel_y=entry["panel_y"],
                 tile_bounds=tuple(entry["tile_bounds"]),
                 region_tag=entry["region_tag"],
+                affinity=(Affinity(entry["affinity"]) if entry.get("affinity") else None),
+                affinity_intensity=entry.get("affinity_intensity", 0.0),
             )
             registry._rooms.append(room)
             registry._by_id[room.id] = room
