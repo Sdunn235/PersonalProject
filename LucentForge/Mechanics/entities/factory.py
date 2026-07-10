@@ -7,7 +7,7 @@ from Mechanics.data.context import GameContext
 from Mechanics.entities.stats import Stats
 from Mechanics.entities.attributes import Attributes
 from Mechanics.entities.affinity import Affinity, AffinityState
-from Mechanics.entities.derivation import bit_capacity, byte_capacity_parity
+from Mechanics.entities.derivation import bit_capacity, byte_capacity
 from Mechanics.entities.traits import Traits
 from Mechanics.ai.npc import NPC
 
@@ -78,14 +78,13 @@ def create_entity(ctx: GameContext, entity_id: str) -> NPC | None:
 
     x, y = _spawn_position(data)
     cycles_data = data.get("cycles", {})
-    mp_data = data.get("mp", {})
 
     attrs = _build_attributes(data)
-    # Bit pool goes live from its formula; Byte pool inherits the authored mp
-    # budget (parity, §M3). Both pools start full.
+    # Both pools now attribute-derived (§M4, 4.5): Bit = Intuition x Constitution,
+    # Byte = (Intuition x Constitution x Intellect) / 8. Both start full.
     bit_max = bit_capacity(attrs)
-    byte_max = byte_capacity_parity(mp_data.get("max", 50))
-    byte_start = mp_data.get("start", byte_max)
+    byte_max = byte_capacity(attrs)
+    byte_start = byte_max
 
     return NPC(
         entity_id=data["id"],

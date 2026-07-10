@@ -45,12 +45,13 @@ for e in everyone:
     check(f"{e.entity_id}: bit_pool max == Int*Con ({want})",
           e.max_bit_pool == want and e.bit_pool == want, f"got {e.max_bit_pool}")
 
-print("\n[3] Byte pool = mp-parity (unchanged budgets)")
-EXPECTED_BYTE = {"player": 50, "npc_01": 50, "npc_02": 50, "npc_03": 50,
-                 "npc_04": 50, "goblin_01": 0, "goblin_02": 0, "dragon_01": 80}
+print("\n[3] Byte pool = (Int x Con x Intellect) / 8 formula (LIVE since 4.5)")
+# NOTE: 4.3 held Byte at mp-parity; 4.5 activated the formula (intentional rebalance).
+from Mechanics.entities.derivation import byte_capacity as _bcap  # noqa: E402
 for e in everyone:
-    check(f"{e.entity_id}: byte max == old mp ({EXPECTED_BYTE[e.entity_id]})",
-          e.max_byte_pool == EXPECTED_BYTE[e.entity_id], f"got {e.max_byte_pool}")
+    want = _bcap(e.attributes)
+    check(f"{e.entity_id}: byte max == formula ({want})",
+          e.max_byte_pool == want, f"got {e.max_byte_pool}")
 
 print("\n[4] mp compat property aliases the Byte pool")
 check("player.mp == byte_pool", player.mp == player.byte_pool)

@@ -8,6 +8,7 @@ import settings
 from Mechanics.data.context import GameContext
 from Mechanics.combat.combat import take_turn
 from Mechanics.combat.fighter import build_fighter
+from Mechanics.combat.casting import spell_pool_and_cost
 from Mechanics.combat.rng import SimpleRng
 from Mechanics.combat.ability_sets import get_abilities, get_basic_attack
 from Mechanics.combat.spell_sets import get_spells
@@ -103,12 +104,29 @@ def _draw_stamina_bar(surf: pygame.Surface, x: int, y: int,
 
 def _draw_mp_bar(surf: pygame.Surface, x: int, y: int,
                  mp: int, max_mp: int, font: pygame.font.Font):
+    """Byte pool bar (§M4)."""
     ratio = mp / max(1, max_mp)
     fill  = int(BAR_W * ratio)
     pygame.draw.rect(surf, MP_EMPTY,  (x, y, BAR_W, BAR_H))
     pygame.draw.rect(surf, MP_PURPLE, (x, y, fill,  BAR_H))
     pygame.draw.rect(surf, BORDER_COLOR, (x, y, BAR_W, BAR_H), 1)
-    txt = font.render(f"MP  {mp}/{max_mp}", True, TEXT_WHITE)
+    txt = font.render(f"BYP {mp}/{max_mp}", True, TEXT_WHITE)
+    surf.blit(txt, (x + 4, y + (BAR_H - txt.get_height()) // 2))
+
+
+_BIT_BLUE  = (60, 140, 220)
+_BIT_EMPTY = (20, 40, 70)
+
+
+def _draw_bit_bar(surf: pygame.Surface, x: int, y: int,
+                  bits: int, max_bits: int, font: pygame.font.Font):
+    """Bit pool bar (§M4)."""
+    ratio = bits / max(1, max_bits)
+    fill  = int(BAR_W * ratio)
+    pygame.draw.rect(surf, _BIT_EMPTY, (x, y, BAR_W, BAR_H))
+    pygame.draw.rect(surf, _BIT_BLUE,  (x, y, fill,  BAR_H))
+    pygame.draw.rect(surf, BORDER_COLOR, (x, y, BAR_W, BAR_H), 1)
+    txt = font.render(f"BP  {bits}/{max_bits}", True, TEXT_WHITE)
     surf.blit(txt, (x + 4, y + (BAR_H - txt.get_height()) // 2))
 
 
@@ -247,8 +265,10 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
         is_enemy   = False,
         cycles     = player_entity.cycles,
         max_cycles = player_entity.max_cycles,
-        mp         = player_entity.mp,
-        max_mp     = player_entity.max_mp,
+        mp         = player_entity.byte_pool,
+        max_mp     = player_entity.max_byte_pool,
+        bits       = player_entity.bit_pool,
+        max_bits   = player_entity.max_bit_pool,
     )
     npc_fighter = build_fighter(
         name       = npc_entity.name,
@@ -258,8 +278,10 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
         is_enemy   = True,
         cycles     = npc_entity.cycles,
         max_cycles = npc_entity.max_cycles,
-        mp         = npc_entity.mp,
-        max_mp     = npc_entity.max_mp,
+        mp         = npc_entity.byte_pool,
+        max_mp     = npc_entity.max_byte_pool,
+        bits       = npc_entity.bit_pool,
+        max_bits   = npc_entity.max_bit_pool,
     )
 
     # Attach ability sets
@@ -335,12 +357,14 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
     waiting_for_input = True
 
     def _sync_entities_and_return(outcome: str) -> str:
-        player_entity.hp     = float(player_fighter.hp)
-        player_entity.cycles = player_fighter.cycles
-        player_entity.mp     = player_fighter.mp
-        npc_entity.hp        = float(npc_fighter.hp)
-        npc_entity.cycles    = npc_fighter.cycles
-        npc_entity.mp        = npc_fighter.mp
+        player_entity.hp        = float(player_fighter.hp)
+        player_entity.cycles    = player_fighter.cycles
+        player_entity.byte_pool = player_fighter.mp
+        player_entity.bit_pool  = player_fighter.bits
+        npc_entity.hp           = float(npc_fighter.hp)
+        npc_entity.cycles       = npc_fighter.cycles
+        npc_entity.byte_pool    = npc_fighter.mp
+        npc_entity.bit_pool     = npc_fighter.bits
         if inv_svc:
             _flush_combat_bag(player_fighter.bag, inv_svc, player_entity.entity_id)
             _flush_combat_bag(npc_fighter.bag, inv_svc, npc_entity.entity_id)
@@ -414,14 +438,17 @@ def run_combat(screen: pygame.Surface, clock: pygame.time.Clock,
                                 log.append(f"Not enough SP for {ab['name']}!")
                         elif row["kind"] == "spell":
                             sp = row["spell"]
-                            if player_fighter.mp >= sp.get("cost_mp", 0):
+                            _pool, _cost = spell_pool_and_cost(sp)
+                            _have = player_fighter.bits if _pool == "bit" else player_fighter.mp
+                            if _have >= _cost:
                                 res = take_turn(player_fighter, npc_fighter, rng,
                                                 forced_ability=sp)
                                 log.append(_result_to_log(res, "You", npc_entity.name))
                                 waiting_for_input = False
                                 menu.state = "main"
                             else:
-                                log.append(f"Not enough MP for {sp['name']}!")
+                                _label = "Bits" if _pool == "bit" else "Bytes"
+                                log.append(f"Not enough {_label} for {sp['name']}!")
                         elif row["kind"] == "use_item":
                             _use_item(row["stack"], player_fighter, log)
                             waiting_for_input = False
@@ -521,12 +548,17 @@ def _draw_combat(screen, W, H,
     _draw_stamina_bar(screen, player_x, sp_y, pf.cycles, pf.max_cycles, ui_font)
     _draw_stamina_bar(screen, npc_x,    sp_y, nf.cycles, nf.max_cycles, ui_font)
 
-    # --- MP bars (y=192) ---
-    mp_y = sp_y + BAR_H + 4
+    # --- Bit pool bars ---
+    bp_y = sp_y + BAR_H + 4
+    _draw_bit_bar(screen, player_x, bp_y, pf.bits, pf.max_bits, ui_font)
+    _draw_bit_bar(screen, npc_x,    bp_y, nf.bits, nf.max_bits, ui_font)
+
+    # --- Byte pool bars ---
+    mp_y = bp_y + BAR_H + 4
     _draw_mp_bar(screen, player_x, mp_y, pf.mp, pf.max_mp, ui_font)
     _draw_mp_bar(screen, npc_x,    mp_y, nf.mp, nf.max_mp, ui_font)
 
-    # --- Battle log panel (y~214) ---
+    # --- Battle log panel ---
     log_y = mp_y + BAR_H + 14
     log_h = LOG_LINES * 19 + 14
     log_rect = pygame.Rect(20, log_y, W - 40, log_h)
@@ -594,8 +626,9 @@ def _draw_main_menu(screen, panel_x, panel_y, panel_w, item_h,
                 affordable = any_ability_affordable
             elif sub == "spells":
                 affordable = any(
-                    pf.mp >= sp.get("cost_mp", 0)
+                    (pf.bits if pool == "bit" else pf.mp) >= cost
                     for sp in (pf.spells or [])
+                    for pool, cost in (spell_pool_and_cost(sp),)
                 )
             elif sub == "backpack":
                 affordable = bool(pf.bag)
@@ -640,9 +673,10 @@ def _draw_sub_menu(screen, panel_x, panel_y, panel_w, item_h,
             label = menu_font.render(f"  {row['label']}{cost_str}", True, text_color)
         elif row["kind"] == "spell":
             sp       = row["spell"]
-            cost_mp  = sp.get("cost_mp", 0)
-            cost_str = f"  (MP: {cost_mp})" if cost_mp > 0 else ""
-            affordable = pf.mp >= cost_mp
+            _pool, _cost = spell_pool_and_cost(sp)
+            _plabel  = "BP" if _pool == "bit" else "BYP"
+            cost_str = f"  ({_plabel}: {_cost})" if _cost > 0 else ""
+            affordable = (pf.bits if _pool == "bit" else pf.mp) >= _cost
             text_color = MENU_HL_TEXT if is_sel else (TEXT_WHITE if affordable else TEXT_DIM)
             label = menu_font.render(f"  {row['label']}{cost_str}", True, text_color)
         else:

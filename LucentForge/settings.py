@@ -270,3 +270,13 @@ TRAP_DISARM_DC        = 5    # difficulty class for trap disarm attempts
 TRAP_PERCEIVE_BASE    = 4    # base score for passive trap perception
 TRAP_PERCEIVE_DC      = 10   # Intuition threshold to notice a trap (player Intuition 6 -> clears)
 TRAP_PERCEIVE_RADIUS  = 3    # tiles (Manhattan) within which perception runs
+
+# =============================================================================
+# PHASE 4.5 — Bit/Byte casting economy (§M4)
+# Spell costs are formula-derived from power: one tuning knob per pool, not
+# per-spell hand-tuning. Heals use amount_pct * HEAL_POWER_SCALE as pseudo-power.
+# =============================================================================
+BIT_COST_PER_POWER   = 5     # bit-spell cost = round(power * this)
+BYTE_COST_PER_POWER  = 3     # byte-spell cost = round(pseudo_power * this)
+HEAL_POWER_SCALE     = 10    # heal amount_pct -> pseudo-power for cost derivation
+CONVERT_RATE_BITS    = 16    # Bits consumed per Convert action (-> /8 Bytes), Phase 4.5b

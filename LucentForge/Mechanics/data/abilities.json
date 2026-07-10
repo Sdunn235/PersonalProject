@@ -133,9 +133,9 @@
     "name": "Fireball",
     "kind": "attack",
     "category": "spell",
+    "magic_kind": "BIT",
     "power": 1.4,
     "cost_cycles": 0,
-    "cost_mp": 15,
     "element": "fire",
     "stat": "MAG",
     "description": "Hurls a ball of flame."
@@ -145,9 +145,9 @@
     "name": "Ice Shard",
     "kind": "attack",
     "category": "spell",
+    "magic_kind": "BIT",
     "power": 1.2,
     "cost_cycles": 0,
-    "cost_mp": 10,
     "element": "ice",
     "stat": "MAG",
     "description": "A fast shard of razor ice."
@@ -157,9 +157,9 @@
     "name": "Lightning",
     "kind": "attack",
     "category": "spell",
+    "magic_kind": "BIT",
     "power": 1.6,
     "cost_cycles": 0,
-    "cost_mp": 20,
     "element": "lightning",
     "stat": "MAG",
     "description": "Calls down a bolt of lightning."
@@ -169,9 +169,9 @@
     "name": "Heal Light",
     "kind": "heal",
     "category": "spell",
+    "magic_kind": "BYTE",
     "amount_pct": 0.20,
     "cost_cycles": 0,
-    "cost_mp": 12,
     "element": "holy",
     "stat": "MAG",
     "description": "A soft glow that mends wounds."

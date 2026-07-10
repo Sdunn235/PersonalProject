@@ -39,8 +39,10 @@ class CombatState:
     max_hp: int = 0
     cycles: int = rules.CYCLE_MAX_DEFAULT
     max_cycles: int = rules.CYCLE_MAX_DEFAULT
-    mp: int = 0
+    mp: int = 0          # Byte pool in combat (§M4). Bit pool is `bits` below.
     max_mp: int = 0
+    bits: int = 0        # Bit pool (§M4, 4.5) — Bit-spells spend from here.
+    max_bits: int = 0
     cooldowns: dict = field(default_factory=dict)
     heals_used: int = 0
     effects: list[Effect] = field(default_factory=list)
@@ -115,6 +117,14 @@ class Fighter:
     @max_mp.setter
     def max_mp(self, v): self.state.max_mp = v
     @property
+    def bits(self) -> int: return self.state.bits
+    @bits.setter
+    def bits(self, v): self.state.bits = v
+    @property
+    def max_bits(self) -> int: return self.state.max_bits
+    @max_bits.setter
+    def max_bits(self, v): self.state.max_bits = v
+    @property
     def cooldowns(self) -> dict: return self.state.cooldowns
     @property
     def heals_used(self) -> int: return self.state.heals_used
@@ -140,6 +150,7 @@ def build_fighter(name: str, hp: int, stats: Stats, *,
                   is_enemy: bool = False, max_hp: int = 0,
                   cycles: int = 0, max_cycles: int = 0,
                   mp: int = 0, max_mp: int = 0,
+                  bits: int = 0, max_bits: int = 0,
                   resistances: dict | None = None) -> Fighter:
     """Factory function to build a Fighter from flat parameters."""
     return Fighter(
@@ -153,6 +164,7 @@ def build_fighter(name: str, hp: int, stats: Stats, *,
             cycles=cycles or rules.CYCLE_MAX_DEFAULT,
             max_cycles=max_cycles or rules.CYCLE_MAX_DEFAULT,
             mp=mp, max_mp=max_mp,
+            bits=bits, max_bits=max_bits,
         ),
         stats=stats,
     )

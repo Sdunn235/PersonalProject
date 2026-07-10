@@ -1,20 +1,29 @@
 # ability_resolver.py — Cost checking and ability dispatch
 from __future__ import annotations
 from Mechanics.combat import rules
+from Mechanics.combat.casting import spell_pool_and_cost
 
 
 class AbilityResolver:
     """Validates ability costs and resolves heal abilities."""
 
     def validate_and_pay(self, att, ability: dict) -> dict:
-        """Check if fighter can afford the ability. Pay costs or fallback to basic."""
+        """Check if fighter can afford the ability. Pay costs or fallback to basic.
+
+        Stamina (cost_cycles) is unchanged; magic cost now routes to the right pool
+        (§M4): Bit-spells spend `att.bits`, Byte-spells spend `att.mp` (Byte pool).
+        """
         cost_sp = int(ability.get("cost_cycles", 0))
-        cost_mp = int(ability.get("cost_mp", 0))
-        if cost_sp > att.cycles or cost_mp > att.mp:
+        pool, cost_mag = spell_pool_and_cost(ability)
+        have_mag = att.bits if pool == "bit" else att.mp
+        if cost_sp > att.cycles or cost_mag > have_mag:
             return {"id": "_basic", "name": "Basic", "kind": "attack",
-                    "power": 1.0, "cost_cycles": 0, "cost_mp": 0}
+                    "power": 1.0, "cost_cycles": 0}
         att.cycles -= cost_sp
-        att.mp -= cost_mp
+        if pool == "bit":
+            att.bits -= cost_mag
+        else:
+            att.mp -= cost_mag
         return ability
 
     def resolve_heal(self, att, ability: dict) -> int:

@@ -1,12 +1,14 @@
 # action_selector.py — Choose what a fighter does on their turn
 from __future__ import annotations
 from Mechanics.combat import rules
+from Mechanics.combat.casting import spell_pool_and_cost
 
 
 def _can_pay(att, ability: dict) -> bool:
     sp_ok = att.cycles >= int(ability.get("cost_cycles", 0))
-    mp_ok = att.mp >= int(ability.get("cost_mp", 0))
-    return sp_ok and mp_ok
+    pool, cost_mag = spell_pool_and_cost(ability)
+    mag_ok = (att.bits if pool == "bit" else att.mp) >= cost_mag
+    return sp_ok and mag_ok
 
 
 def _should_heal(hp, max_hp, heal_amount, is_enemy=False):

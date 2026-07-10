@@ -100,11 +100,12 @@ layer — no hardcoded numbers baked into call sites — expressed as attribute 
 a living, extensible force. Because attributes will eventually grow and ascend (§M9.1), pools must
 **recompute from current attribute values**, never freeze at spawn.
 
-**Stage 4.3 parity note.** The 4.3 split is parity-first: the **Bit** pool goes live with its formula
-(`Intuition × Constitution`); the **Byte** pool stays at mp-parity (`byte_max = old max_mp`) via a legacy
-passthrough strategy so combat magic is unchanged and testable. 4.5 swaps in the real Byte formula,
-**normalizes** the multiplicative growth (a dragon's raw `Int×Con×Intellect` ≈ 2160 — needs a divisor or
-curve), and retunes spell costs.
+**Byte normalization (LIVE 4.5a).** The Byte pool max = `(Intuition × Constitution × Intellect) / 8` —
+the triple product is total structured *bit-equivalent* capacity, divided by the canonical **1 Byte = 8
+Bits** ratio (no arbitrary constant). Results: player 22, Sylva 42, Elara 31, dragon 270, and **goblins 0**
+(Intellect 0 → pure Bit-casters, on-theme). This intentionally retired the 4.3 mp-parity (the deferred
+rebalance). Spell costs are **formula-derived** from power (§M4): `bit_cost = round(power × K_bit)`,
+`byte_cost = round(pseudo_power × K_byte)` (heals use `amount_pct × HEAL_POWER_SCALE`), knobs in settings.
 
 **Universal pools, emergent Talent.** Every creature is born with an affinity (§M5) and has Bit/Byte
 pools from its attributes — a low-Intuition, low-Intellect brute simply has *tiny* pools. **"Talent" is
