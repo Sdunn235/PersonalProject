@@ -16,6 +16,10 @@ class Chemicals:
         self._levels["fear"] = 0.0
         self._levels["anger"] = 0.0
         self._levels["loneliness"] = 0.0
+        # Affinity comfort chemicals (biochem/affinity addendum §B4) — written by the
+        # affinity comfort emitter; decay naturally like the other reactive chemicals.
+        self._levels["comfort"] = 0.0
+        self._levels["stress"] = 0.0
 
     def get(self, key: str) -> float:
         return self._levels.get(key, 0.0)
@@ -40,7 +44,8 @@ class Chemicals:
 
         # Natural decay for reactive chemicals
         for key, decay_mult in [("pain", 1.0), ("fear", 1.0),
-                                ("anger", 0.5), ("loneliness", 0.3)]:
+                                ("anger", 0.5), ("loneliness", 0.3),
+                                ("comfort", 0.7), ("stress", 0.7)]:
             val = self.get(key)
             if val > 0:
                 self.set(key, max(0.0, val - self._DECAY * decay_mult))

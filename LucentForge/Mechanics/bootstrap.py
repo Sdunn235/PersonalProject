@@ -176,7 +176,7 @@ def create_npc_controller(npc, ctx: GameContext,
     else:
         behavior = HumanBehavior()
     return NPCController(npc, needs, brain, sources, tile_map,
-                          behavior=behavior)
+                          behavior=behavior, rooms=ctx.rooms)
 
 
 def create_item_services(ctx: GameContext):

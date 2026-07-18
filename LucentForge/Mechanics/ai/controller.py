@@ -5,6 +5,7 @@ from Mechanics.needs.need import Need
 from Mechanics.needs.needs_system import update_needs
 from Mechanics.needs.need_source import NeedSource
 from Mechanics.biochem.brain import Brain
+from Mechanics.biochem.emitter import AffinityComfortEmitter
 from Mechanics.world.tile_map import TileMap
 from Mechanics.ai.memory import Memory
 from Mechanics.ai.npc_logger import NeedZoneLogger
@@ -19,12 +20,20 @@ from Mechanics.ai.states.raiding import RaidingState
 class NPCController:
     def __init__(self, npc, needs: list[Need], brain: Brain,
                  sources: list[NeedSource], tile_map: TileMap,
-                 behavior: BehaviorStrategy | None = None):
+                 behavior: BehaviorStrategy | None = None,
+                 rooms=None):
         self.npc = npc
         self.needs = needs
         self.brain = brain
         self.sources = sources
         self.tile_map = tile_map
+
+        # Affinity comfort emitter (biochem/affinity addendum §B4). `rooms` is a
+        # RoomRegistry used to resolve the entity's current region each tick. When
+        # None (or entity/region neutral), the emitter is a no-op.
+        self.rooms = rooms
+        self._affinity_emitter = AffinityComfortEmitter()
+        self.affinity_comfort: float = 0.0  # last comfort score, for observability
 
         self.target_source: NeedSource | None = None
         self.path: list[tuple[int, int]] = []
@@ -56,6 +65,17 @@ class NPCController:
         self._current_state = self._states["IDLE"]
         self.state: str = "IDLE"
 
+    def _current_room(self):
+        """Resolve the RoomDefinition the NPC currently occupies (or None if neutral/
+        unavailable). Uses tile_map region tags → RoomRegistry, same path as ZoneTracker."""
+        if self.rooms is None:
+            return None
+        col, row = self.tile_map.world_to_grid(self.npc.x, self.npc.y)
+        region = self.tile_map.get_region(col, row)
+        panel_x = getattr(self.npc, "panel_x", 0)
+        panel_y = getattr(self.npc, "panel_y", 0)
+        return self.rooms.get_room_for_region(panel_x, panel_y, region)
+
     def _set_state(self, name: str) -> None:
         self.state = name
         self._current_state = self._states[name]
@@ -80,6 +100,10 @@ class NPCController:
         # 2. Update biochem + trait decay
         self.brain.tick(self.needs)
         self.brain.traits.decay_toward_neutral()
+
+        # 2b. Affinity comfort emitter — sample current region, write comfort/stress
+        self.affinity_comfort = self._affinity_emitter.emit(
+            self.brain.chemicals, self.npc, self._current_room())
 
         # 3. Log zone transitions
         self._logger.check_zone_changes(self.needs)

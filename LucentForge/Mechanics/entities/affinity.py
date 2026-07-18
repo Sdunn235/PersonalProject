@@ -102,6 +102,41 @@ def adjacent_primals(primal: Affinity) -> frozenset[Affinity]:
     return frozenset(neighbors)
 
 
+# The eight lattice positions in clockwise ring order (Grace §2.1). The enum is
+# already declared in this order, so index == ring position.
+_RING: list[Affinity] = list(Affinity)
+
+
+def lattice_distance(a: Affinity, b: Affinity) -> int:
+    """Shortest step-distance between two affinities on the 8-position Grace ring.
+
+    Returns 0..4 (0 iff a == b, 4 = directly across). Symmetric. This is the Grace
+    §16.3 `lattice_distance` — built now that affinity comfort needs it. Behavior is
+    derived from relationship *type* (ring distance), not a hardcoded opposite (§12.2).
+    """
+    i, j = _RING.index(a), _RING.index(b)
+    d = abs(i - j)
+    return min(d, len(_RING) - d)
+
+
+# Ring-distance → comfort scalar (§B3 of the biochem/affinity addendum).
+_RING_COMFORT: dict[int, float] = {0: 1.0, 1: 0.5, 2: 0.2, 3: -0.4, 4: -0.8}
+
+
+def comfort_score(effective: "frozenset[Affinity]",
+                  region: Affinity | None, intensity: float) -> float:
+    """Affinity comfort in [-1, +1] for an entity standing in a region's field.
+
+    The best (most comfortable) pairing across the entity's `effective` affinities and
+    the `region` affinity, by lattice distance (§B3), scaled by region `intensity`.
+    Neutral entity (empty effective set) or neutral region (None) or zero intensity → 0.0.
+    """
+    if region is None or not effective or intensity <= 0.0:
+        return 0.0
+    best = max(_RING_COMFORT[lattice_distance(aff, region)] for aff in effective)
+    return best * intensity
+
+
 @dataclass
 class AffinityState:
     """An entity's affinity attunement (§M5, the Grace).

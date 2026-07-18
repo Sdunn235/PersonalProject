@@ -19,6 +19,7 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 | `lucentforge_stats_magic_addendum_v1.md` | Stage 4 doctrine — attribute layer, Bits/Bytes magic, affinity axis, resonance, Intuition→trap perception. **§M5–§M6 revised by the Grace (2026-07-18): 8-affinity lattice, no opposition matrix.** | Cite alongside Foundation for all Stage 4+ attribute/magic/affinity work |
 | `lucentforge_cosmology_foundation_v1_derived_revision.md` | **The Grace — cosmology.** Light/Dark as ontological states (Creation/absence), the Veil, the Source, the Gift. Supersedes Foundation §7 Light/Void. | Primary cosmology authority (Grace Migration Arc) |
 | `lucentforge_affinity_grace_foundation_v1_derived_revision.md` | **The Grace — affinities.** 8-affinity lattice (4 Primal + 4 Derived), lattice relationships, resonance, environments, beings, migration doctrine. Supersedes the 6-element model. | Primary affinity authority (Grace Migration Arc) |
+| `lucentforge_biochem_affinity_addendum_v1.md` | **Affinity Behavioral Loop doctrine** — Creatures-style emitter/receptor biochem; lattice-tiered affinity comfort → chemicals → drive urgency → behavior + region learning. Reactions + genetics deferred. | Cite for affinity-behavioral / biochem work |
 
 Source drawing: `docs/bible/affinity_grace/` (`affinity_grace.png` / `.jpeg`) — canonical visual reference, by Shawn.
 

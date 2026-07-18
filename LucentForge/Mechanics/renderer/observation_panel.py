@@ -80,15 +80,22 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
                      (x + 96, y))
         y += _LINE
 
-    # --- ZONE ---
-    line("- ZONE -", settings.OBS_HEADER_COLOR)
+    # --- ZONE + AFFINITY COMFORT ---
+    line("- ZONE (comfort) -", settings.OBS_HEADER_COLOR)
     tracker = world_sim.zone_tracker
     if player is not None:
         room = tracker._current_rooms.get(player.name)
         line(f"You: {room.name[:18] if room else '---'}")
-    for npc, _ in living:
+    for npc, ctrl in living:
         room = tracker._current_rooms.get(npc.name)
-        line(f"{npc.name[:8]}: {room.name[:10] if room else '?'}")
+        c = getattr(ctrl, "affinity_comfort", 0.0)
+        c_color = (settings.COLOR_FINE if c > 0.05
+                   else settings.COLOR_CRITICAL if c < -0.05
+                   else settings.OBS_LABEL_COLOR)
+        surface.blit(font.render(f"{npc.name[:8]}: {room.name[:7] if room else '?'}",
+                                 True, settings.OBS_LABEL_COLOR), (x, y))
+        surface.blit(font.render(f"{c:+.1f}", True, c_color), (x + 108, y))
+        y += _LINE
 
     # --- Footer ---
     y += 4

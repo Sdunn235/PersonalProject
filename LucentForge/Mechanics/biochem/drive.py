@@ -12,9 +12,14 @@ class Drive:
     base_weight: float = 1.0
 
     def compute_urgency(self, chemicals, traits) -> float:
-        """Return urgency 0.0-1.0 for this drive given current chemical levels."""
+        """Return urgency 0.0-1.0 for this drive given current chemical levels.
+
+        Affinity `stress` joins pain+fear in the fearfulness multiplier (biochem/affinity
+        addendum §B4) — a stressed entity acts more urgently. Additive: stress=0 is a no-op.
+        """
         raw = chemicals.get(self.chemical)
-        threat_mod = 1.0 + traits.fearfulness * (chemicals.get("pain") + chemicals.get("fear"))
+        threat_mod = 1.0 + traits.fearfulness * (
+            chemicals.get("pain") + chemicals.get("fear") + chemicals.get("stress"))
         return min(1.0, raw * self.base_weight * threat_mod)
 
     @staticmethod
