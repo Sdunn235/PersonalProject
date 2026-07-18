@@ -1,8 +1,8 @@
-# Session State — Last updated: 2026-07-18 (Grace Migration Arc IN PROGRESS — affinity re-foundation; code at Stage 4.5b / C0036)
+# Session State — Last updated: 2026-07-18 (Grace Migration Arc COMPLETE — affinity re-foundation; C0037–C0039)
 
 > **Source-of-truth note.** This file drifted (was frozen at Stage 3 while code reached Stage 4.5b). Corrected 2026-07-18 during the Grace Migration Arc. Always cross-check `git log` before trusting a stage claim here.
 
-## Grace Migration Arc (affinity re-foundation) — IN PROGRESS (2026-07-18)
+## Grace Migration Arc (affinity re-foundation) — COMPLETE (2026-07-18, C0037–C0039)
 
 **Trigger:** GPT Caelum reworked the affinity cosmology into **the Grace** (two canon drafts + source drawing in `docs/bible/`). It supersedes the six-element model Stage 4.4 (C0034) shipped.
 
@@ -13,10 +13,11 @@
 
 | Phase | Commit | Description | Status |
 |-------|--------|-------------|--------|
-| G.0 | C0037 | Doc sync — session_state de-stale, Grace docs indexed, addendum §M5–M6 / Foundation §7 / terminology §8.2 revised | IN PROGRESS |
-| G.1 | C0038 | `affinity.py` — 8-value enum, lattice API, `innate: Affinity\|None`, `OntologicalTrait`; base/factory consumers | PENDING |
-| G.2 | C0039 | Data re-authoring — player LIGHT→null+LIGHT_TOUCHED; retire `smoke_phase44.py` | PENDING |
-| G.3 | C0040 | `run_grace_tests.py` (§18 doctrine) + regression + closeout | PENDING |
+| G.0 | C0037 | Doc sync — session_state de-stale, Grace docs indexed, addendum §M5–M6 / Foundation §7 / terminology §8.2 revised | COMPLETE |
+| G.1+G.2 | C0038 | `affinity.py` — 8-value enum, lattice API, `innate: Affinity\|None`, `OntologicalTrait`; base/factory consumers; player LIGHT→null+LIGHT_TOUCHED; retire `smoke_phase44.py` (merged — enum+data atomic for runnability) | COMPLETE |
+| G.3 | C0039 | `scratchpad/run_grace_tests.py` (§18 doctrine, 20 checks) + regression (Stage 3 6/6, attr+combat parity) + closeout | COMPLETE |
+
+**Verification:** `run_grace_tests.py` 20/20; Stage 3 smoke 6/6; attribute + combat parity green; all 8 entities build (player neutral+LIGHT_TOUCHED). Live `py main.py` spot-check pending Shawn (window blocks headless).
 
 **Plan:** `C:\Users\Shawn\.claude\plans\using-caelums-frameworks-prepare-lovely-crown.md`
 
