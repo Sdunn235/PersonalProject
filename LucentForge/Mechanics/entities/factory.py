@@ -6,16 +6,26 @@ import settings
 from Mechanics.data.context import GameContext
 from Mechanics.entities.stats import Stats
 from Mechanics.entities.attributes import Attributes
-from Mechanics.entities.affinity import Affinity, AffinityState
+from Mechanics.entities.affinity import Affinity, AffinityState, OntologicalTrait
 from Mechanics.entities.derivation import bit_capacity, byte_capacity
 from Mechanics.entities.traits import Traits
 from Mechanics.ai.npc import NPC
 
 
 def _build_affinity(data: dict) -> AffinityState:
-    """Build the innate AffinityState from the JSON `affinity` element name (§M5).
-    Defaults to EARTH if unspecified; grant/suppress mods start empty."""
-    return AffinityState(innate=Affinity(data.get("affinity", "EARTH")))
+    """Build the innate AffinityState from the JSON `affinity` name (§M5, the Grace).
+
+    `affinity` may be an 8-lattice affinity name, or null/omitted → neutral (innate=None,
+    a legal state). An optional `cosmological_trait` (e.g. "LIGHT_TOUCHED") is carried as a
+    separate ontological marker (Grace §16.2). grant/suppress mods start empty.
+    Legacy LIGHT/VOID strings raise ValueError here — no silent remap (Grace §17).
+    """
+    affinity_name = data.get("affinity")
+    trait_name = data.get("cosmological_trait")
+    return AffinityState(
+        innate=(Affinity(affinity_name) if affinity_name is not None else None),
+        trait=(OntologicalTrait(trait_name) if trait_name is not None else None),
+    )
 
 
 def _build_attributes(data: dict) -> Attributes:

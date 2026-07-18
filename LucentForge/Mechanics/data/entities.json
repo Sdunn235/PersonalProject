@@ -2,7 +2,8 @@
   {
     "id": "player",
     "name": "Player",
-    "affinity": "LIGHT",
+    "affinity": null,
+    "cosmological_trait": "LIGHT_TOUCHED",
     "type": "player",
     "subtype": "human",
     "level": 5,

@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from .stats import Stats
 from .traits import Traits
 from .attributes import Attributes
-from .affinity import Affinity, AffinityState
+from .affinity import AffinityState
 
 
 @dataclass
@@ -19,8 +19,10 @@ class Entity(ABC):
     attributes: Attributes = field(default_factory=Attributes)
     stats: Stats = field(default_factory=Stats)
     traits: Traits = field(default_factory=Traits)
-    # Innate elemental affinity, mutable via grant/suppress (§M5).
-    affinity: AffinityState = field(default_factory=lambda: AffinityState(innate=Affinity.EARTH))
+    # Innate affinity (the Grace lattice), mutable via grant/suppress (§M5).
+    # Default is neutral/unaligned (innate=None) — a legal state; entities author their
+    # affinity in entities.json.
+    affinity: AffinityState = field(default_factory=AffinityState)
     hp: int = 100
     max_hp: int = 100
 
