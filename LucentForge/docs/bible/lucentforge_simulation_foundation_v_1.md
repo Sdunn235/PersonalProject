@@ -155,21 +155,29 @@ Some locations contain elevated ambient Bits and/or pattern bias. These areas af
 
 ---
 
-# 7. Elemental Pattern Model
+# 7. Affinity Pattern Model (superseded by the Grace)
 
-Traditional elements exist in Lucent Forge, but not as primitive magical substances. They are emergent patterns of structured magic.
+> **Canon update (Grace Migration Arc, 2026-07-18).** The original §7 named six elements — Fire, Water, Earth, Air, **Light**, and **Void/Darkness** — as emergent patterns of structured magic. That model is **superseded** by the Grace cosmology. Light and Dark are no longer elements; they are the two **ontological states** (Creation / absence). The affinity system is now an **eight-affinity lattice**: four Primal and four Derived. See the canonical drafts:
+> - `docs/bible/lucentforge_cosmology_foundation_v1_derived_revision.md` — Light/Dark, the Veil, the Source, the Gift
+> - `docs/bible/lucentforge_affinity_grace_foundation_v1_derived_revision.md` — the eight affinities
 
-Examples:
-- Fire = energetic dispersal pattern
-- Water = continuity and flow pattern
-- Earth = density and stability pattern
-- Air = motion and propagation pattern
-- Light = coherence and ordered structure
-- Void / Darkness = collapse, entropy, corruption, silence, absence of structure
+Affinities exist within Creation, but not as primitive magical substances. They are emergent patterns of structured magic — how magic *behaves* rather than what it fundamentally *is*.
 
-Elements define how magic behaves rather than what magic fundamentally is.
+**Four Primal affinities:**
+- Fire = energetic release, transformation, acceleration pattern
+- Air = motion, propagation, exchange pattern
+- Water = continuity, flow, adaptation pattern
+- Earth = density, stability, boundary pattern
 
-Hybrid effects are formed through combined patterns rather than needing separate foundational elements for every blend.
+**Four Derived affinities** (emergent between two adjacent primals — *derived, not superior*):
+- Plasma = Fire + Air
+- Colloidal Dispersion = Air + Water
+- Non-Newtonian = Water + Earth
+- Bingham Placidity = Earth + Fire
+
+**Light and Dark are NOT affinities.** Light is all of Creation together (presence, the totality of affinity); Dark is the absence of created affinity and structure. Neither is a moral alignment. A neutral region simply lacks a dominant affinity — it is not Dark.
+
+Hybrid effects arise as Derived states where two primal behaviors coexist stably — not by inventing a new foundational element for every blend. Plural primal presence does **not** automatically mean a Derived affinity has emerged.
 
 ---
 

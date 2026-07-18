@@ -352,14 +352,18 @@ Region strings are `TileMap.get_region(col, row)` return values. They do not cha
 | §6.4 magic flow | — | `spell.magic_kind: BIT \| BYTE` | **New.** Spell authored as Bit-spell (primal) or Byte-spell (structured composition). §M4. |
 | §6.5 conversion | — | `convert()` action | **New.** Bits→Bytes; reliable OOC, costs a turn in combat. Overburn = disabled hook. §M4. |
 
-### 8.2 Affinity
+### 8.2 Affinity — the Grace lattice (revised, Grace Migration Arc 2026-07-18)
 
-| Bible | TheForge C# | LucentForge Python | Stage 4 decision |
+> **Supersedes the original 4.4 six-element table.** The Grace cosmology replaces `EARTH/FIRE/AIR/WATER/VOID/LIGHT` with an **eight-affinity lattice** (4 Primal + 4 Derived). **`Affinity.LIGHT` and `Affinity.VOID` are LEGACY** — removed from the enum; Light/Dark are ontological states, not affinities. Canon: `lucentforge_affinity_grace_foundation_v1_derived_revision.md`, `lucentforge_cosmology_foundation_v1_derived_revision.md`.
+
+| Bible | TheForge C# | LucentForge Python | Grace decision |
 |---|---|---|---|
-| §7 (elemental patterns) | — (absent) | `Affinity` enum (6) | **New.** `EARTH/FIRE/AIR/WATER/VOID/LIGHT`. Full §7 pattern-physics deferred. §M5. |
-| — | — | `entity.affinity: AffinityState` (innate + granted + suppressed) | **New (4.4).** Set-based grant/suppress; `effective() = ({innate}\|granted)-suppressed`. Single innate at birth, mutable/plural via mods. Timed expiry seeded. §M5. |
-| — | — | `RoomDefinition.affinity: Affinity\|None`, `affinity_intensity: float` | **New (4.4).** Per-region environment field; `None` = neutral. Amplifies like-affinity casting (4.6). Reuses Stage 3 rooms. §M5. |
-| §M6 opposition | — | `affinity.opposite(el)` | **New (4.4).** fire↔water, earth↔air, light↔void — data authority; combat consumes it in 4.6. |
-| — | — | opposition pairs | **New.** FIRE↔WATER, EARTH↔AIR, LIGHT↔VOID. Weakness/resistance in combat. §M6. |
+| Grace §2–§5 (8 affinities) | — (absent) | `Affinity` enum (8) | **Revised.** Primal: `FIRE/AIR/WATER/EARTH`. Derived: `PLASMA/COLLOIDAL_DISPERSION/NON_NEWTONIAN/BINGHAM_PLACIDITY`. `BINGHAM_PLACIDITY` is the final code term (Grace §20.3); `NON_NEWTONIAN` canonical (§20.2). Emergent pattern-physics still deferred. §M5. |
+| — | — | `Affinity.LIGHT`, `Affinity.VOID` | **LEGACY.** Removed. Light/Dark are ontological states (Creation/absence), not affinities. Old saves/JSON with these strings fail visibly (no silent remap). |
+| — | — | `AffinityState.innate: Affinity \| None` | **Revised (Grace).** `None` = neutral/unaligned — now a legal state (answers Grace open-Q §21.2 "yes"). Set-based grant/suppress unchanged; `effective() = ({innate}\|granted)-suppressed`. Derived affinities **may be innate** (§21.1). §M5. |
+| — | — | `OntologicalTrait` enum (`LIGHT_TOUCHED`) | **New (Grace).** Minimal marker kept *separate* from `Affinity` (Grace §16.2). Player carries it — the sole ex-`LIGHT` entity, re-authored as neutral affinity + Light-touched. Not the full Creation/Unmade ontology. |
+| — | — | `RoomDefinition.affinity: Affinity\|None`, `affinity_intensity: float` | **Unchanged shape (4.4).** Per-region field; `None` = neutral (not Dark). Existing `EARTH`/`WATER` room fields are valid primals. §M5. |
+| Grace §16.3 lattice | — | `is_primal / is_derived / adjacent_primals / derived_between / parents_of` | **New (Grace).** Replaces `opposite()` as the relationship authority. `opposite()` retired (no production caller). `lattice_distance()` deferred until needed. |
+| ~~§M6 opposition~~ | — | ~~`affinity.opposite(el)`~~ | **Retired.** The three-pair opposition matrix (incl. `LIGHT↔VOID`) is not final doctrine (Grace §12). Combat behavior derives from lattice relationship type, deferred until the data model is stable. |
 
 Weapon `resonance` (§3.3) gains its mechanism in Stage 4: a multiplier on the Byte/MAG outcome (§M7).

@@ -151,56 +151,77 @@ pool.
 
 ---
 
-## §M5 — Affinity Axis
+## §M5 — Affinity Axis (revised: the Grace lattice)
 
-Reality is structured information; elements are patterns of it (§7). Stage 4 brings in the **affinity
+> **Superseded doctrine notice (Grace Migration Arc, 2026-07-18).** The original §M5 defined six
+> elements (`EARTH, FIRE, AIR, WATER, VOID, LIGHT`) with a three-pair opposition matrix. The **Grace**
+> replaces that with an eight-affinity lattice and removes Light/Void as affinities. Canon:
+> `lucentforge_affinity_grace_foundation_v1_derived_revision.md` +
+> `lucentforge_cosmology_foundation_v1_derived_revision.md`. This section now describes the revised model;
+> the old six-element/opposition text is retired.
+
+Reality is structured information; affinities are patterns of it (§7). Stage 4 brings in the **affinity
 axis** — the tag layer that makes Bits/Bytes feel alive — while leaving the heavy §7 emergent
-pattern-physics (hybrid combination, elements-define-behavior) deferred (§M9).
+pattern-physics (Derived *emergence conditions*, elements-define-behavior) deferred (§M9).
 
-**Six elements:** `EARTH, FIRE, AIR, WATER, VOID, LIGHT`.
+**Eight affinities — four Primal + four Derived:**
 
-- **Innate creature affinity.** Every creature is *born* with a **single** affinity (Chrono Cross–style
-  innate color). Some affinities are rarer; some races/creature-types skew toward certain ones; the
-  circumstances of birth/creation nudge the roll (birth-generation itself is deferred — affinities are
-  authored per-entity this stage).
-- **Affinity is mutable — `AffinityState`** (`Mechanics/entities/affinity.py`, Phase 4.4). A set-based
-  grant/suppress model: `innate: Affinity` + `granted: set` + `suppressed: set`, with
-  `effective() = ({innate} | granted) - suppressed`. So spells/events/curses/blessings can add
-  (`grant`), remove even the innate (`suppress`), or change affinities — and affinities can become
-  **plural**. Permanent grant/suppress is live; **timed/temporary modifiers are a seeded hook** (add an
-  expiry-tracked variant when the first temporary effect lands, 4.6+/Stage 5).
-- **Environment affinity.** Each region/room carries an optional affinity element + intensity
+| Primal A | Primal B | Derived |
+|---|---|---|
+| Fire | Air | Plasma |
+| Air | Water | Colloidal Dispersion |
+| Water | Earth | Non-Newtonian |
+| Earth | Fire | Bingham Placidity |
+
+Code enum: `FIRE, PLASMA, AIR, COLLOIDAL_DISPERSION, WATER, NON_NEWTONIAN, EARTH, BINGHAM_PLACIDITY`
+(Grace §16.1). **Derived means emergent combination, not superiority.** **Light and Dark are ontological
+states, not affinities** (Creation / absence) — absent from the enum. A neutral region is *not* Dark.
+
+- **Innate creature affinity.** Every creature *may* be born with a **single** innate affinity (Primal or
+  Derived — Derived-innate is allowed, Grace §21.1). `innate` may also be **`None`** = neutral/unaligned,
+  now a legal state (Grace open-Q §21.2 answered "yes"). Birth-generation of affinity is still deferred —
+  affinities are authored per-entity this stage.
+- **Affinity is mutable — `AffinityState`** (`Mechanics/entities/affinity.py`). A set-based grant/suppress
+  model: `innate: Affinity | None` + `granted: set` + `suppressed: set`, with
+  `effective() = ({innate} | granted) - suppressed`. So spells/events/curses/blessings can add (`grant`),
+  remove even the innate (`suppress`), or change affinities — affinities can become **plural**. Permanent
+  grant/suppress is live; **timed/temporary modifiers are a seeded hook** (4.6+/Stage 5).
+  **Plural effective primals do NOT auto-collapse into a Derived** — Derived *emergence* is its own
+  deferred mechanic (Grace §6.3).
+- **Ontological trait (separate from affinity).** A minimal `OntologicalTrait` enum (`LIGHT_TOUCHED`)
+  carries rare cosmological markers *outside* the `Affinity` enum (Grace §16.2). The player is
+  re-authored as neutral affinity (`innate=None`) + `LIGHT_TOUCHED` — the sole ex-`LIGHT` entity. This is
+  a marker, not the full Creation/Unmade ontology (which stays deferred).
+- **Environment affinity.** Each region/room carries an optional affinity + intensity
   (`RoomDefinition.affinity: Affinity | None`, `affinity_intensity: float`), reusing the Stage 3
-  rooms/zone system. `None` = elementally neutral (town/bridge). A saturated area amplifies like-affinity
-  casting (consumed by §M6 combat in 4.6). Ties into the world-geography track.
-- **Persistence deferral (Phase 4.4).** Like the attribute layer (§M2), affinity is **authored/static**
-  this stage: innate is rebuilt from `entities.json`, and `granted`/`suppressed` are empty until a
-  mechanic writes them (no curse/blessing exists until 4.6+). So **no migration in 4.4** — persistence
-  (an `entity_state` affinity column, `AffinityState.as_dict`/`from_dict` ready) lands with the first
-  modifier writer.
-- **Opposition data authority.** The pairs `fire↔water, earth↔air, light↔void` live in
-  `affinity.py::opposite()` — defined in 4.4, consumed by §M6 combat in 4.6.
+  rooms/zone system. `None` = neutral (town/bridge), *not* Dark. A saturated area amplifies like-affinity
+  casting (consumed by deferred combat). Ties into the world-geography track.
+- **Persistence deferral.** Like the attribute layer (§M2), affinity is **authored/static** this stage:
+  innate is rebuilt from `entities.json`, and `granted`/`suppressed` are empty until a mechanic writes
+  them. So **no save migration** — persistence (an `entity_state` affinity column,
+  `AffinityState.as_dict`/`from_dict` round-tripping `None`) lands with the first modifier writer.
+- **Relationship authority = the lattice API** (Grace §16.3), replacing `opposite()`:
+  `is_primal(a)`, `is_derived(a)`, `adjacent_primals(a)`, `derived_between(primal_a, primal_b)`,
+  `parents_of(derived)`. `lattice_distance()` deferred until a caller needs it.
 
 ---
 
-## §M6 — Affinity in Combat
+## §M6 — Affinity in Combat (deferred until the lattice is stable)
 
-Two-directional this stage (both the bonus *and* the penalty), unlike the minimal one-directional start:
+> **Retired: the old opposition matrix.** The three pairs `FIRE↔WATER, EARTH↔AIR, LIGHT↔VOID` are **not
+> final doctrine** (Grace §12.1). Light↔Void is void outright (Light/Dark aren't affinities). The remaining
+> primal tensions are **contextual, not a Pokémon-style weakness chart** (Grace §12.3, §13.1).
 
-- **Like-affinity amplification.** When the caster's affinity, the spell's element, and/or the current
-  region's affinity align, casting is amplified (scaled by region `affinity_intensity`). This is where
-  the druid archetype shines in a saturated zone.
-- **Opposition matrix.** Opposing elements create weakness/resistance. The three pairs:
+Combat is **one consequence** of affinity, not its purpose (Grace §13). This stage ships **no** affinity
+combat. When it lands, behavior must **derive from lattice relationship type** (adjacency, derived-bridge,
+shared parent, separation) rather than a single hardcoded `opposite()` function, and should express
+*behavior* (force transmission, persistence, terrain, threshold effects) over flat ± percentages.
 
-  | Pair | |
-  |---|---|
-  | FIRE | ↔ WATER |
-  | EARTH | ↔ AIR |
-  | LIGHT | ↔ VOID |
+- **Like-affinity amplification** (future): when caster affinity, spell affinity, and region affinity
+  align, casting is amplified (scaled by region `affinity_intensity`) — the druid-in-a-saturated-zone case.
+- **Opposition/tension** (future): derived from lattice geometry + intensity + context, not a fixed table.
 
-  Casting your opposite element is weakened; being struck by your opposite is worse.
-
-Resolved in `damage_resolver.py`, reading the active room's affinity field.
+To be resolved in `damage_resolver.py` reading the active room's affinity field — deferred (§M9).
 
 ---
 
@@ -249,6 +270,9 @@ Captured here so the vision is canon, not chat memory. None of these are built t
 | **External focus storage** | Seeded (§M4) | Focus resonance = pool-path (§A6); a focus banks Bytes externally. |
 | **Overburn / collapse** | Hook disabled (§M4) | Flip on when combat-pressure risk is designed. |
 | **§7 emergent pattern-physics** | Deferred (§M5) | Hybrid combination, elements-define-behavior, per-element resist matrix. |
+| **Affinity combat behavior** | Deferred (§M6) | Like-affinity amplification + lattice-derived tension in `damage_resolver.py`. Held until the Grace lattice data model is stable (Grace §23.9). No flat weakness chart. |
+| **Derived affinity emergence** | Deferred (§M5) | Conditions under which plural primals produce a Derived state/affinity (Grace §6.3–§6.4). Plural primals do NOT auto-derive. |
+| **Full Creation/Unmade ontology** | Deferred (Grace §16.2) | Beyond the minimal `OntologicalTrait` marker; the Veil, Source, Dark-as-absence as live mechanics. |
 | **Status-effect application** | Deferred | `StatusFlags` stub exists; poison/stun/etc. unapplied. |
 | **Attribute progression & ascension** | Deferred — designed | Learn-by-use attribute leveling + reincarnation/ascension. Full scheme in §M9.1. Attributes are static through Stage 4. |
 | **Skills & ability progression** | Deferred | XP, learn-by-use, skill/ability growth (§10). |

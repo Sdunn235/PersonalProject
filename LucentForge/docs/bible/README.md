@@ -16,7 +16,13 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 | `lucentforge_terminology_map_v_1.md` | Three-way term reconciliation — Bible / TheForge C# / LucentForge Python | Cite before every TheForge import |
 | `lucentforge_items_addendum_v_1.md` | Stage 2 items doctrine — behavioral rules for items, slots, containers, economy | Cite alongside Foundation §sections for Stage 2 work |
 | `lucentforge_rooms_panels_addendum_v1.md` | Stage 3 doctrine — Room/Panel/ZoneCrossing architecture, Zelda world model, TheForge Room reconciliation | Cite alongside Foundation for all Stage 3+ room/panel/zone work |
-| `lucentforge_stats_magic_addendum_v1.md` | Stage 4 doctrine — attribute layer, Bits/Bytes magic, affinity axis + opposition, resonance, Intuition→trap perception | Cite alongside Foundation for all Stage 4+ attribute/magic/affinity work |
+| `lucentforge_stats_magic_addendum_v1.md` | Stage 4 doctrine — attribute layer, Bits/Bytes magic, affinity axis, resonance, Intuition→trap perception. **§M5–§M6 revised by the Grace (2026-07-18): 8-affinity lattice, no opposition matrix.** | Cite alongside Foundation for all Stage 4+ attribute/magic/affinity work |
+| `lucentforge_cosmology_foundation_v1_derived_revision.md` | **The Grace — cosmology.** Light/Dark as ontological states (Creation/absence), the Veil, the Source, the Gift. Supersedes Foundation §7 Light/Void. | Primary cosmology authority (Grace Migration Arc) |
+| `lucentforge_affinity_grace_foundation_v1_derived_revision.md` | **The Grace — affinities.** 8-affinity lattice (4 Primal + 4 Derived), lattice relationships, resonance, environments, beings, migration doctrine. Supersedes the 6-element model. | Primary affinity authority (Grace Migration Arc) |
+
+Source drawing: `docs/bible/affinity_grace/` (`affinity_grace.png` / `.jpeg`) — canonical visual reference, by Shawn.
+
+> **The Grace supersedes the six-element affinity model** (`EARTH/FIRE/AIR/WATER/VOID/LIGHT` + Light↔Void opposition) that Stage 4.4 shipped. Light and Dark are ontological states, not affinities. Affinity is now an eight-position lattice. `stats_magic_addendum` §M5–§M6, Foundation §7, and terminology_map §8.2 are revised to match.
 
 ---
 
@@ -55,4 +61,5 @@ Example: "Carry capacity is a §4.1 (Physique) constraint governed by the §A2 f
 | Stage 2 (Items/Equipment) | §4.1, §6.6, §7, §10.2, §12.2, §15, §18 | `lucentforge_terminology_map_v_1.md`, `lucentforge_items_addendum_v_1.md` |
 | Stage 3 (Rooms as Zones) | §R1–§R8 (rooms_panels_addendum), §7 (terminology_map §7) | `lucentforge_rooms_panels_addendum_v1.md`, terminology_map §7 |
 | Stage 4 (Attributes / Bits & Bytes / Affinity) | §M1–§M9 (stats_magic_addendum), §8 (terminology_map §8); Foundation §4.1, §5, §6, §7, §11, §12.2 | `lucentforge_stats_magic_addendum_v1.md`, terminology_map §8 |
+| Grace Migration Arc (affinity re-foundation) | Grace cosmology + affinity drafts; addendum §M5–§M6 (revised), Foundation §7 (revised), terminology_map §8.2 (revised) | `lucentforge_cosmology_foundation_v1_derived_revision.md`, `lucentforge_affinity_grace_foundation_v1_derived_revision.md` |
 | Stage 5+ | TBD | TBD |

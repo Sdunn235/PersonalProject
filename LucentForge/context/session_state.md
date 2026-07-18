@@ -1,4 +1,40 @@
-# Session State — Last updated: 2026-07-07 (Stage 3 COMPLETE — C0021–C0028, rooms-as-zones / multi-panel world architecture)
+# Session State — Last updated: 2026-07-18 (Grace Migration Arc IN PROGRESS — affinity re-foundation; code at Stage 4.5b / C0036)
+
+> **Source-of-truth note.** This file drifted (was frozen at Stage 3 while code reached Stage 4.5b). Corrected 2026-07-18 during the Grace Migration Arc. Always cross-check `git log` before trusting a stage claim here.
+
+## Grace Migration Arc (affinity re-foundation) — IN PROGRESS (2026-07-18)
+
+**Trigger:** GPT Caelum reworked the affinity cosmology into **the Grace** (two canon drafts + source drawing in `docs/bible/`). It supersedes the six-element model Stage 4.4 (C0034) shipped.
+
+- **Old (was implemented):** 6 affinities `EARTH/FIRE/AIR/WATER/VOID/LIGHT`; opposition pairs incl. `LIGHT↔VOID`.
+- **New (canon):** 8 affinities — Primal `FIRE/AIR/WATER/EARTH` + Derived `PLASMA/COLLOIDAL_DISPERSION/NON_NEWTONIAN/BINGHAM_PLACIDITY`. Light/Dark = ontological states, NOT affinities. `opposite()` retired for a lattice API.
+
+**Approved decisions:** player Light → neutral affinity (`innate=None`) + `LIGHT_TOUCHED` ontological trait (sole ex-LIGHT entity); scope = docs + minimal code migration; `BINGHAM_PLACIDITY`/`NON_NEWTONIAN` final code terms; Derived may be innate. Affinity is **not persisted** (rebuilt from JSON) → no save migration. `opposite()` had zero production callers (only a scratchpad smoke).
+
+| Phase | Commit | Description | Status |
+|-------|--------|-------------|--------|
+| G.0 | C0037 | Doc sync — session_state de-stale, Grace docs indexed, addendum §M5–M6 / Foundation §7 / terminology §8.2 revised | IN PROGRESS |
+| G.1 | C0038 | `affinity.py` — 8-value enum, lattice API, `innate: Affinity\|None`, `OntologicalTrait`; base/factory consumers | PENDING |
+| G.2 | C0039 | Data re-authoring — player LIGHT→null+LIGHT_TOUCHED; retire `smoke_phase44.py` | PENDING |
+| G.3 | C0040 | `run_grace_tests.py` (§18 doctrine) + regression + closeout | PENDING |
+
+**Plan:** `C:\Users\Shawn\.claude\plans\using-caelums-frameworks-prepare-lovely-crown.md`
+
+**Deferred (seams):** §M6 affinity combat, affinity persistence, Derived emergence, affinity→physiology→needs behavioral loop (GPT Priority 3, next arc), `main.py` runtime extraction, SimCore contracts.
+
+## Stage 4 (Attributes / Bits & Bytes / Affinity) — COMPLETE through 4.5b (C0030–C0036)
+
+| Phase | Commit | Description |
+|-------|--------|-------------|
+| 4.0 | C0030 | Stats/Magic design addendum + terminology reconciliation |
+| 4.1 | C0031 | Attribute layer replaces the shim (full 7-attr derivation; combat Stats DERIVED) |
+| 4.2 | C0032 | Intuition trap perception (passive danger-sense, red `!` marker) |
+| 4.3 | C0033 | Bits/Bytes pool split (polymorphic derivation; mp aliases byte_pool; m0007; 4-bar HUD) |
+| 4.4 | C0034 | Affinity model (6-element enum, mutable AffinityState, region field) — **being superseded by the Grace** |
+| 4.5a | C0035 | Bit/Byte casting economy (magic_kind typing, pools, formula costs) |
+| 4.5b | C0036 | Bits→Bytes conversion + regen asymmetry |
+
+**Bible:** Stage 4 doctrine in `docs/bible/lucentforge_stats_magic_addendum_v1.md` (§M1–§M9); affinity now governed by the Grace drafts (see bible README).
 
 ## Forge-Combine Arc (TheForge → LucentForge) — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 COMPLETE
 
@@ -102,7 +138,7 @@ Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-
 - **What is saved**: clock tick/accumulator, threat level/stage, town state, finite source stocks, per-entity hp/x/y/cycles/mp/equipment/needs/traits/chemicals/memory, defeated NPC set, combat cooldowns.
 - **Boundary preserved**: m0001 content tables untouched; JSON stays canonical. Delete `lucentforge.db` → fresh game.
 - **Verified**: 3-test headless smoke suite (`scratchpad/smoke_test.py`) — fresh-seed, round-trip (500 ticks → snapshot → restore → assert), autosave interval. All PASS. Live DB migrated cleanly.
-## Current status: STABLE — Stage 1 COMPLETE, Stage 2 COMPLETE, Stage 3 NEXT (rooms-as-zones)
+## Current status: STABLE — Stages 1–3 COMPLETE, Stage 4 COMPLETE through 4.5b (C0036); Grace Migration Arc IN PROGRESS (see top of file)
 
 ## What works right now
 - `py main.py` (Windows PowerShell) — 1024x768 window, 576x576 level centered with border zones
@@ -295,3 +331,7 @@ Arrow keys = move player; walk into NPC to trigger combat; `Tab` = cycle HUD; `I
 - `docs/bible/heartbeat_convergence_vision.md` — arc vision + alignment analysis
 - `docs/bible/lucentforge_terminology_map_v_1.md` — three-way reconciliation (Bible | TheForge | Python); cite before every Stage 2 import
 - `docs/bible/lucentforge_items_addendum_v_1.md` — Stage 2 items doctrine (§A1–A8); cite alongside Foundation §sections
+- `docs/bible/lucentforge_stats_magic_addendum_v1.md` — Stage 4 doctrine (§M1–§M9); §M5–§M6 revised by the Grace
+- `docs/bible/lucentforge_cosmology_foundation_v1_derived_revision.md` — **the Grace**: Light/Dark ontology, Veil, Source, Gift
+- `docs/bible/lucentforge_affinity_grace_foundation_v1_derived_revision.md` — **the Grace**: 8-affinity lattice, migration doctrine
+- `docs/bible/affinity_grace/` — source drawing (canonical visual reference)
