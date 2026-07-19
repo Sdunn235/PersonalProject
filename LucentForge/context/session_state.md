@@ -1,6 +1,26 @@
-# Session State — Last updated: 2026-07-18 (Grace Migration Arc COMPLETE — affinity re-foundation; C0037–C0039)
+# Session State — Last updated: 2026-07-19 (Affinity Behavioral Loop Phase A + B — affinity now drives behavior; C0040–C0042)
 
 > **Source-of-truth note.** This file drifted (was frozen at Stage 3 while code reached Stage 4.5b). Corrected 2026-07-18 during the Grace Migration Arc. Always cross-check `git log` before trusting a stage claim here.
+
+## Affinity Behavioral Loop (making affinity LIVE) — Phase A + B COMPLETE (C0040–C0042)
+
+**GPT Caelum's "Priority 3" arc — the first behavioral loop that *consumes* affinity.** Design canon: `docs/bible/lucentforge_biochem_affinity_addendum_v1.md` (§B1–B6, Creatures-style emitter/receptor). Commits **local only** (LucentForge push gated on Shawn).
+
+| Phase | Commit | Description | Status |
+|-------|--------|-------------|--------|
+| A | C0040 | `AffinityComfortEmitter` (`biochem/emitter.py`) samples region each tick → `comfort`/`stress` chemicals; `stress` joins drive-urgency multiplier (receptor). Panel + npcs.csv legibility. Additive. | COMPLETE |
+| A-test | C0041 | `scratchpad/run_affinity_behavior_tests.py` §B6.6 full-loop-dynamics (3 checks) committed | COMPLETE |
+| B | C0042 | `Memory` per-region comfort **EMA** (`record_region_comfort`/`best_region`); `IdleState` **comfort-relocate** → new `RELOCATING` state (`ai/states/relocating.py`); `rooms.center_tile()`; settings knobs; panel + npcs.csv legibility; addendum §B4/§B6 + READMEs | COMPLETE |
+
+**Priority order in `idle.py`:** urgent survival need → active RAIDING → **comfort-relocate** → PATROLLING → idle. Relocate outranks aimless patrol but never a raid or a real need. **Fully additive** — below `COMFORT_RELOCATE_STRESS_THRESHOLD` / already content (`COMFORT_CONTENT_THRESHOLD`) / no positively-remembered region → no relocate → byte-identical to pre-Phase-B.
+
+**Why Shawn saw ZONE +0.0 all run (this was the trigger):** the loop *works* — headless probe showed goblins +0.50 in the EARTH camp, dragon +0.10 in the forest at spawn. It reads 0.0 because villagers live on neutral **town** regions (no affinity in `rooms.json`) and goblins/dragon leave their affinity ground immediately. Phase B adds the pull back. **Not a bug — a behavior gap.**
+
+**Verification:** `run_affinity_behavior_tests.py` CLEAN (Phase A 16 + Phase B 5 = 21; incl. EMA-monotonic, best_region, relocate-fires, stress=0 parity). Regression: grace CLEAN, Stage 3 6/6, attribute + combat parity green. Live `py main.py` spot-check pending Shawn (window blocks headless): ZONE panel `O`, drive a goblin out of camp → stress builds → at PASSIVE threat it enters `RELO` and drifts home.
+
+**Deferred / next:** town-region affinity content pass (cheapest visibility win), chemical reactions, heritable genetics (Hob spark), legacy-injector retrofit (proximity/zone_ai → emitters, parity-gated), affinity combat §M6, persistence.
+
+**Plan:** `C:\Users\Shawn\.claude\plans\load-caelums-frameworks-and-peppy-raven.md`
 
 ## Grace Migration Arc (affinity re-foundation) — COMPLETE (2026-07-18, C0037–C0039)
 
