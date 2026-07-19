@@ -17,6 +17,69 @@ class IdleState:
     def enter(self, controller) -> None:
         pass
 
+    def _try_relocate(self, controller) -> bool:
+        """Drift toward the best remembered-comfortable region, if warranted (Phase B).
+
+        Returns True and enters RELOCATING when: sustained stress is high, the entity
+        isn't already content (comfort's dampening role), a positive-comfort region is
+        remembered that beats the current spot by a margin, it isn't already there, and a
+        walkable path exists. Otherwise False (no state change → parity with pre-Phase-B).
+        """
+        if controller.rooms is None:
+            return False
+        stress = controller.brain.chemicals.get("stress")
+        if stress < settings.COMFORT_RELOCATE_STRESS_THRESHOLD:
+            return False
+        # Comfort's dampening/settling role (§B4): a content entity stays put.
+        if controller.affinity_comfort >= settings.COMFORT_CONTENT_THRESHOLD:
+            return False
+        best = controller.memory.best_region()
+        if best is None:
+            return False
+        best_id, best_pref = best
+        if best_pref - controller.affinity_comfort < settings.COMFORT_RELOCATE_MARGIN:
+            return False
+        current = controller._current_room()
+        if current is not None and current.id == best_id:
+            return False  # already on the most comfortable remembered ground
+        path = self._relocate_path(controller, best_id)
+        if not path:
+            return False
+
+        controller.path = path
+        controller.path_index = 0
+        controller.target_source = None
+        controller.relocate_target_region = best_id
+        controller._set_state("RELOCATING")
+        room = controller.rooms.get_by_id(best_id)
+        print(f"[COMFORT] {controller.npc.name} stressed ({stress:.2f}) -> drifting to "
+              f"{room.name if room else best_id} (remembered comfort {best_pref:+.2f})")
+        return True
+
+    def _relocate_path(self, controller, room_id):
+        """BFS to the nearest reachable, unoccupied tile inside the target region."""
+        room = controller.rooms.get_by_id(room_id)
+        if room is None:
+            return None
+        start = controller.tile_map.world_to_grid(controller.npc.x, controller.npc.y)
+        cmin, rmin, cmax, rmax = room.tile_bounds
+        candidates = [
+            (c, r)
+            for c in range(cmin, cmax + 1)
+            for r in range(rmin, rmax + 1)
+            if not controller.tile_map.is_blocked(c, r)
+            and (c, r) not in controller._occupied
+        ]
+        if not candidates:
+            return None
+        candidates.sort(key=lambda t: math.hypot(t[0] - start[0], t[1] - start[1]))
+        for goal in candidates[:8]:  # a few nearest reachable tiles
+            path = bfs_path(controller.tile_map.is_blocked, start, goal,
+                            controller.tile_map.cols, controller.tile_map.rows)
+            if path:
+                return path
+        return None
+
     def update(self, controller, dt: float) -> None:
         # H5: wait cooldown after failing to find a source
         if self._wait_timer > 0:
@@ -27,8 +90,19 @@ class IdleState:
 
         # Behavior strategy override (Heartbeat-4: goblins patrol/raid)
         override = controller.behavior.decide(controller, priority_need)
-        if override and override in ("PATROLLING", "RAIDING"):
-            controller._set_state(override)
+        if override == "RAIDING":
+            controller._set_state("RAIDING")
+            return
+
+        # Comfort-relocate (biochem/affinity addendum §B4, Phase B): a non-urgent,
+        # stressed entity that remembers more comfortable ground drifts toward it.
+        # Outranks patrol/idle-wander, but never an active raid or an urgent survival
+        # need — priority_need is None here means nothing is urgent.
+        if priority_need is None and self._try_relocate(controller):
+            return
+
+        if override == "PATROLLING":
+            controller._set_state("PATROLLING")
             return
 
         if priority_need is None:

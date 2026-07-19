@@ -95,6 +95,19 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
         surface.blit(font.render(f"{npc.name[:8]}: {room.name[:7] if room else '?'}",
                                  True, settings.OBS_LABEL_COLOR), (x, y))
         surface.blit(font.render(f"{c:+.1f}", True, c_color), (x + 108, y))
+        # Phase B legibility: active relocate target (→dest) or best remembered comfort.
+        tgt = getattr(ctrl, "relocate_target_region", None)
+        best = getattr(ctrl, "best_region", None)
+        if tgt:
+            dest = ctrl.rooms.get_by_id(tgt) if getattr(ctrl, "rooms", None) else None
+            suffix, sfx_color = (f">{(dest.name if dest else tgt)[:6]}",
+                                 settings.COLOR_WARNING)
+        elif best:
+            suffix, sfx_color = f"b{best[1]:+.1f}", settings.OBS_HINT_COLOR
+        else:
+            suffix, sfx_color = "", settings.OBS_LABEL_COLOR
+        if suffix:
+            surface.blit(font.render(suffix, True, sfx_color), (x + 140, y))
         y += _LINE
 
     # --- Footer ---

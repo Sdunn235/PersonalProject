@@ -35,7 +35,8 @@ class RunLogger:
         self._npc_w.writerow(["tick", "name", "subtype", "state",
                               "priority_need", "need_value", "zone",
                               "target", "hp",
-                              "room", "aff_score", "comfort", "stress"])
+                              "room", "aff_score", "comfort", "stress",
+                              "best_region", "best_region_pref", "relocating"])
 
         # Accumulated run stats for the summary
         self._samples = 0
@@ -67,6 +68,7 @@ class RunLogger:
             pn = get_priority_need(ctrl.needs)
             target = ctrl.target_source.label if ctrl.target_source else ""
             room = world_sim.zone_tracker._current_rooms.get(npc.name)
+            best = getattr(ctrl, "best_region", None)
             self._npc_w.writerow([
                 tick, npc.name, npc.subtype, ctrl.state,
                 pn.label if pn else "",
@@ -77,6 +79,9 @@ class RunLogger:
                 f"{getattr(ctrl, 'affinity_comfort', 0.0):+.2f}",
                 f"{ctrl.brain.chemicals.get('comfort'):.3f}",
                 f"{ctrl.brain.chemicals.get('stress'):.3f}",
+                best[0] if best else "",
+                f"{best[1]:+.2f}" if best else "",
+                getattr(ctrl, "relocate_target_region", None) or "",
             ])
 
             # Raid count: goblin transition into RAIDING

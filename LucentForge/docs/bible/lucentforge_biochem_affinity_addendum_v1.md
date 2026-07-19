@@ -47,8 +47,12 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 ## §B4 — Physiology (this arc)
 
 - Comfort emits two chemicals: **`comfort`** (positive part of the score) and **`stress`** (negative part). Both decay naturally.
-- **Receptor effect (Phase A):** `stress` joins the drive urgency multiplier alongside pain and fear — a stressed entity acts more urgently and settles less. Additive: with `stress = 0`, behavior is unchanged.
-- **Behavior (Phase B):** sustained `stress` raises a relocate/comfort priority so an entity with no urgent survival need drifts toward remembered-comfortable ground; entities **learn** region comfort (an EMA per region), so two same-affinity beings diverge by lived experience (Grace §14.2). Comfort's dampening/settling role is wired here.
+- **Receptor effect (Phase A — built, C0040):** `stress` joins the drive urgency multiplier alongside pain and fear — a stressed entity acts more urgently and settles less. Additive: with `stress = 0`, behavior is unchanged.
+- **Behavior (Phase B — built, C0042):** sustained `stress` raises a relocate/comfort priority so an entity with no urgent survival need drifts toward remembered-comfortable ground; entities **learn** region comfort (an EMA per region), so two same-affinity beings diverge by lived experience (Grace §14.2).
+  - *Learned memory:* `Memory.record_region_comfort` / `best_region` blend each tick's comfort into a per-region EMA (`settings.MEMORY_EMA_ALPHA`), defaulting to `0.0` (unknown = neutral). `best_region` only returns a **positively** remembered region.
+  - *Relocate drive:* `IdleState` routes a non-urgent, stressed entity toward its best remembered region via a distinct **`RELOCATING`** state (legibility — §B1). It outranks patrol/idle-wander but **never** an active raid or an urgent survival need.
+  - *Comfort's dampening/settling role:* an entity already at/above `settings.COMFORT_CONTENT_THRESHOLD` comfort stays put — comfort suppresses the urge to move.
+  - *Thresholds:* `COMFORT_RELOCATE_STRESS_THRESHOLD`, `COMFORT_RELOCATE_MARGIN`, `COMFORT_CONTENT_THRESHOLD` (settings). Additive: below threshold / already content → no relocate → byte-identical to pre-Phase-B.
 
 ---
 
@@ -67,5 +71,5 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 2. `lattice_distance` is symmetric, in `[0, 4]`, 0 iff equal.
 3. Emitter moves `comfort`/`stress` toward the score-derived target and never leaves `[0, 1]`.
 4. `stress` raising increases drive urgency monotonically; `stress = 0` reproduces pre-arc urgency exactly.
-5. (Phase B) region-comfort memory is an EMA; a comfortable region's preference rises with repeat exposure.
-6. Legibility: comfort/stress and current-region comfort appear in the observation panel and run-logger.
+5. (Phase B — built) region-comfort memory is an EMA; a comfortable region's preference rises with repeat exposure; `best_region` picks the highest positive and is `None` when only neutral/negative regions are known. A stressed, non-urgent entity with a better-remembered region enters `RELOCATING`; with `stress = 0` (or already content) it does not (parity).
+6. Legibility: comfort/stress and current-region comfort appear in the observation panel and run-logger; Phase B adds best-remembered region + active relocate target (panel) and `best_region`/`best_region_pref`/`relocating` columns (npcs.csv).

@@ -167,6 +167,12 @@ TOWN_MIN_POP       = 2      # fewer living NPCs than this → COLLAPSING
 
 # --- NPC Memory ---
 MEMORY_EMA_ALPHA       = 0.3     # exponential moving average weight for new observations
+                                 # (reused for per-region affinity comfort — Phase B)
+
+# --- Affinity comfort relocate (biochem/affinity addendum §B4, Phase B) ---
+COMFORT_RELOCATE_STRESS_THRESHOLD = 0.4  # sustained stress at/above this can trigger a drift
+COMFORT_RELOCATE_MARGIN           = 0.3  # best-remembered comfort must beat current by this
+COMFORT_CONTENT_THRESHOLD         = 0.4  # comfort at/above this dampens the drift (settle, stay)
 
 # --- Source Selection Weights (rebalanced in H5 for stock factor) ---
 SOURCE_DIST_WEIGHT     = 0.4     # weight for distance in source selection

@@ -1,8 +1,9 @@
-# run_affinity_behavior_tests.py — Affinity Behavioral Loop smoke (Phase A).
+# run_affinity_behavior_tests.py — Affinity Behavioral Loop smoke (Phases A + B).
 #
 # Covers the biochem/affinity addendum §B6 testing doctrine: lattice_distance,
-# comfort_score tiers, the emitter, stress->urgency, real-room-data comfort, and the
-# end-to-end controller wiring. Runnable as a subprocess (exits 1 on any failure).
+# comfort_score tiers, the emitter, stress->urgency, real-room-data comfort, end-to-end
+# controller wiring (Phase A), and the learned region-comfort EMA + comfort-relocate
+# drive (Phase B, §B6.5). Runnable as a subprocess (exits 1 on any failure).
 #
 #   py scratchpad/run_affinity_behavior_tests.py
 import os
@@ -68,8 +69,11 @@ class _Stub:
     def __init__(self, aff):
         self.affinity = AffinityState(innate=aff)
 class _Room:
-    def __init__(self, aff, inten):
+    # Mirror the real RoomDefinition fields the controller reads (affinity, intensity,
+    # and id — the controller records region comfort keyed by room.id in Phase B).
+    def __init__(self, aff, inten, room_id="_test_room"):
         self.affinity, self.affinity_intensity = aff, inten
+        self.id = room_id
 
 ch = Chemicals()
 em = AffinityComfortEmitter(comfort_gain=0.5, stress_gain=0.5)
@@ -217,6 +221,87 @@ except Exception as ex:  # noqa: BLE001
     import traceback
     traceback.print_exc()
     check(f"§B6.6 full-loop dynamics (exception: {ex})", False)
+
+# ===========================================================================
+# Phase B — learned region comfort (EMA) + comfort-relocate drive (§B4/§B6.5)
+# ===========================================================================
+print("-" * 64)
+from Mechanics.ai.memory import Memory  # noqa: E402
+
+# §B6.5 (a) — region-comfort memory is an EMA that rises with repeat exposure.
+mem = Memory()
+mem.record_region_comfort("r_warm", 0.1, 0)          # unlucky first read
+prefs = [mem.get_region_preference("r_warm")]
+for t in range(1, 30):
+    mem.record_region_comfort("r_warm", 0.6, t)      # region really is comfortable
+    prefs.append(mem.get_region_preference("r_warm"))
+mono = all(prefs[i] <= prefs[i + 1] + 1e-9 for i in range(len(prefs) - 1))
+check("§B6.5 region-comfort EMA rises monotonically toward the comfort value",
+      mono and prefs[0] == 0.1 and prefs[-1] > 0.55)
+
+# §B6.5 (b) — best_region picks the highest positive; ignores neutral/negative.
+mem.record_region_comfort("r_cold", -0.4, 0)
+mem.record_region_comfort("r_mild", 0.2, 0)
+best = mem.best_region()
+check("§B6.5 best_region returns the highest-comfort region",
+      best is not None and best[0] == "r_warm")
+mem_neg = Memory()
+mem_neg.record_region_comfort("r_neutral", 0.0, 0)
+mem_neg.record_region_comfort("r_bad", -0.5, 0)
+check("§B6.5 best_region is None when only neutral/negative regions are known",
+      mem_neg.best_region() is None)
+
+# §B6.5 (c) — relocate drive fires (and its parity twin doesn't) on a real controller.
+print("-" * 64)
+try:
+    from Mechanics.bootstrap import (create_game_context, create_npc_controller,
+                                     create_world_sim)
+    from Mechanics.entities.factory import create_all_npcs
+    from Mechanics.world.tile_map import TileMap
+
+    tmp_db3 = os.path.join(tempfile.gettempdir(), "lf_relocate.db")
+    if os.path.exists(tmp_db3):
+        try:
+            os.remove(tmp_db3)
+        except OSError:
+            pass
+    ctx3 = create_game_context(db_path=tmp_db3)
+    tmap = TileMap()
+    tmap.load_real_map()
+    sources3 = tmap.get_need_sources()
+    world3 = create_world_sim(sources3)
+    npcs3 = create_all_npcs(ctx3)
+    villager = next(n for n in npcs3 if n.name == "Alder")   # HumanBehavior, neutral spawn
+    ctrl3 = create_npc_controller(villager, ctx3, sources3, tmap, world3)
+
+    comfy_id = "panel00_forest"                              # a region Alder is NOT in
+    for t in range(5):
+        ctrl3.memory.record_region_comfort(comfy_id, 0.5, t)
+
+    # Relocate FIRES: stressed + non-urgent + a better remembered region -> RELOCATING.
+    ctrl3.brain.chemicals.set("stress", 0.6)
+    ctrl3._set_state("IDLE")
+    ctrl3.update(1 / 60)
+    check("§B6.5 stressed idle villager with a remembered-comfortable region relocates",
+          ctrl3.state == "RELOCATING"
+          and ctrl3.relocate_target_region == comfy_id
+          and len(ctrl3.path) > 0)
+
+    # PARITY: stress=0 -> relocate is a no-op -> stays IDLE with no target (pre-Phase-B).
+    ctrl3._set_state("IDLE")
+    ctrl3.path = []
+    ctrl3.relocate_target_region = None
+    ctrl3.brain.chemicals.set("stress", 0.0)
+    ctrl3.update(1 / 60)
+    check("§B6.5 parity: an unstressed villager does not relocate (stays IDLE)",
+          ctrl3.state == "IDLE" and ctrl3.relocate_target_region is None)
+
+    if hasattr(ctx3, "close"):
+        ctx3.close()
+except Exception as ex:  # noqa: BLE001
+    import traceback
+    traceback.print_exc()
+    check(f"§B6.5 relocate drive (exception: {ex})", False)
 
 print("=" * 64)
 if _fails:

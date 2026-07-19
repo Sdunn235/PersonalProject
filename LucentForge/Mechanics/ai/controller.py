@@ -15,6 +15,7 @@ from Mechanics.ai.states.moving import MovingState
 from Mechanics.ai.states.satisfying import SatisfyingState
 from Mechanics.ai.states.patrolling import PatrollingState
 from Mechanics.ai.states.raiding import RaidingState
+from Mechanics.ai.states.relocating import RelocatingState
 
 
 class NPCController:
@@ -34,6 +35,10 @@ class NPCController:
         self.rooms = rooms
         self._affinity_emitter = AffinityComfortEmitter()
         self.affinity_comfort: float = 0.0  # last comfort score, for observability
+        # Learned-comfort relocate (Phase B): best remembered region + active relocate
+        # target, both surfaced in the observation panel / run-logger for legibility.
+        self.best_region: tuple[str, float] | None = None
+        self.relocate_target_region: str | None = None
 
         self.target_source: NeedSource | None = None
         self.path: list[tuple[int, int]] = []
@@ -61,6 +66,7 @@ class NPCController:
             "SATISFYING": SatisfyingState(),
             "PATROLLING": PatrollingState(),
             "RAIDING": RaidingState(),
+            "RELOCATING": RelocatingState(),
         }
         self._current_state = self._states["IDLE"]
         self.state: str = "IDLE"
@@ -101,9 +107,14 @@ class NPCController:
         self.brain.tick(self.needs)
         self.brain.traits.decay_toward_neutral()
 
-        # 2b. Affinity comfort emitter — sample current region, write comfort/stress
+        # 2b. Affinity comfort emitter — sample current region, write comfort/stress,
+        #     and learn this region's comfort (EMA) so lived experience shapes relocation.
+        room = self._current_room()
         self.affinity_comfort = self._affinity_emitter.emit(
-            self.brain.chemicals, self.npc, self._current_room())
+            self.brain.chemicals, self.npc, room)
+        if room is not None:
+            self.memory.record_region_comfort(room.id, self.affinity_comfort, self._tick)
+        self.best_region = self.memory.best_region()
 
         # 3. Log zone transitions
         self._logger.check_zone_changes(self.needs)

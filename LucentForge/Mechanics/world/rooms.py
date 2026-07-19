@@ -111,3 +111,15 @@ class RoomRegistry:
                              region_tag: str) -> RoomDefinition | None:
         """Return room by tile_map region tag. O(1); use this in ZoneTracker."""
         return self._by_region.get((panel_x, panel_y, region_tag))
+
+    def center_tile(self, room_id: str) -> tuple[int, int] | None:
+        """Center (col, row) of a room's tile_bounds — the relocate aim point (Phase B).
+
+        The caller pathfinds toward it (and to the nearest free tile if the exact center
+        is blocked), so an approximate center is fine for the winding river/bridge.
+        """
+        room = self._by_id.get(room_id)
+        if room is None:
+            return None
+        cmin, rmin, cmax, rmax = room.tile_bounds
+        return ((cmin + cmax) // 2, (rmin + rmax) // 2)
