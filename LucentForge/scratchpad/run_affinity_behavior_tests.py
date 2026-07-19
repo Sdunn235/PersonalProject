@@ -152,6 +152,72 @@ except Exception as ex:  # noqa: BLE001
     traceback.print_exc()
     check(f"integration: controller wiring (exception: {ex})", False)
 
+# §B6.6 — full-loop dynamics: comfort accumulates under the REAL ctrl.update() loop
+# (decay-then-emit ordering, needs tick, state machine all live — not a bare emit), and
+# tracks region changes (motion). The pinned _current_room isolates loop dynamics from
+# region resolution, which §B6.5 + the integration block already cover.
+print("-" * 64)
+try:
+    from Mechanics.bootstrap import (create_game_context, create_npc_controller,
+                                     create_world_sim)
+    from Mechanics.needs.need_source import make_default_sources
+    from Mechanics.entities.factory import create_all_npcs
+    from Mechanics.world.tile_map import TileMap
+
+    _GAIN = 0.05                          # AffinityComfortEmitter default comfort_gain
+    _DECAY = Chemicals._DECAY * 0.7       # comfort/stress decay in Chemicals.tick
+
+    def _steady(target):                  # fixed point of decay-then-emit per tick
+        return 0.0 if target <= 0.0 else target - _DECAY * (1.0 / _GAIN - 1.0)
+
+    tmp_db2 = os.path.join(tempfile.gettempdir(), "lf_affinity_fullloop.db")
+    if os.path.exists(tmp_db2):
+        try:
+            os.remove(tmp_db2)
+        except OSError:
+            pass
+    ctx2 = create_game_context(db_path=tmp_db2)
+    sources2 = make_default_sources()
+    world2 = create_world_sim(sources2)
+    npcs2 = create_all_npcs(ctx2)
+    npc2 = next(n for n in npcs2 if n.affinity.effective() == frozenset({A.EARTH}))
+    ctrl2 = create_npc_controller(npc2, ctx2, sources2, TileMap(), world2)
+
+    forest2 = ctx2.rooms.get_by_id("panel00_forest")   # EARTH @ 0.5 — strong match for EARTH
+    river2 = ctx2.rooms.get_by_id("panel00_river")      # WATER @ 0.7 — dist-2, mild + for EARTH
+    # No EARTH-clashing region exists in rooms.json (only EARTH + WATER rooms, which are
+    # lattice-dist 2 apart). Construct one so the true match->clash motion can be asserted.
+    clash2 = _Room(A.AIR, 1.0)                          # dist-4 from EARTH -> score -0.8
+
+    def _drive(room, ticks):
+        ctrl2._current_room = lambda: room              # pin locus; emitter re-samples each tick
+        for _ in range(ticks):
+            ctrl2.update(1 / 60)
+        c = ctrl2.brain.chemicals
+        return c.get("comfort"), c.get("stress")
+
+    # (A) #1 — comfort accumulates in the live loop to the predicted steady state
+    cA, sA = _drive(forest2, 300)
+    check("§B6.6 live ctrl.update() accumulates comfort to predicted steady (match)",
+          abs(cA - _steady(0.5)) < 0.01 and sA < 0.02)
+
+    # (B) #2 — motion from a matching region into a clashing one: comfort falls, stress rises
+    cB, sB = _drive(clash2, 300)
+    check("§B6.6 motion match->clash: comfort falls toward 0 and stress rises",
+          cB < cA and cB < 0.02 and sB > 0.5)
+
+    # (C) real-data region tracking: into the river (mild + for EARTH) — comfort settles low+, stress relaxes
+    cC, sC = _drive(river2, 300)
+    check("§B6.6 motion into milder real region (river): comfort tracks to lower positive, stress relaxes",
+          abs(cC - _steady(0.2 * river2.affinity_intensity)) < 0.02 and cC < cA and sC < 0.05)
+
+    if hasattr(ctx2, "close"):
+        ctx2.close()
+except Exception as ex:  # noqa: BLE001
+    import traceback
+    traceback.print_exc()
+    check(f"§B6.6 full-loop dynamics (exception: {ex})", False)
+
 print("=" * 64)
 if _fails:
     print(f"{len(_fails)} FAIL: " + "; ".join(_fails))
