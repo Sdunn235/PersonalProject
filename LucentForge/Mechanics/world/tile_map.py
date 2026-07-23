@@ -1,6 +1,7 @@
 # tile_map.py — Tile map loader and renderer
 from __future__ import annotations
 import csv
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.needs.need_source import NeedSource

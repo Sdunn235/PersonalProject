@@ -8,6 +8,7 @@ Usage: py scratchpad/test_chest_bfs.py
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+# noinspection PyPackageRequirements
 import pygame
 pygame.init()
 pygame.display.set_mode((1, 1))  # minimal surface needed for TileMap

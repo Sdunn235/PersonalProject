@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath("."))
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
+# noinspection PyPackageRequirements
 import pygame  # noqa: E402
 import settings  # noqa: E402
 from Mechanics.bootstrap import create_game_context  # noqa: E402

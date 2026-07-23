@@ -5,6 +5,7 @@
 #   run_save_menu  — shown on S key; manual slots 1-3 only (slot 0 is system-only)
 from __future__ import annotations
 
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.data.context import GameContext

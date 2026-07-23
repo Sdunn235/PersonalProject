@@ -1,4 +1,5 @@
 # player.py — Keyboard-controlled player entity with tile collision
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.needs.needs_system import fill_need

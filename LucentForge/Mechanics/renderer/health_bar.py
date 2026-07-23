@@ -1,6 +1,7 @@
 # health_bar.py — HP bar drawn above an entity
 # Adapted from Tower Defense health_bar.py
 from __future__ import annotations
+# noinspection PyPackageRequirements
 import pygame
 
 

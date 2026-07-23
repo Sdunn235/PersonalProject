@@ -1,5 +1,6 @@
 """chest_menu.py — Phase 2.7 interactive chest/lock/trap/loot modal (E key)."""
 from __future__ import annotations
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.services.outcome import OutcomeCheck, OutcomeResolver, Degree, attribute_term

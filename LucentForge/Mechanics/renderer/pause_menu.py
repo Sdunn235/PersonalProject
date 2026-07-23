@@ -1,3 +1,4 @@
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.data.context import GameContext

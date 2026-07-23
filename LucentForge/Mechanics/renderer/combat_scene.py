@@ -3,6 +3,7 @@
 from __future__ import annotations
 import os
 from dataclasses import dataclass
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.data.context import GameContext

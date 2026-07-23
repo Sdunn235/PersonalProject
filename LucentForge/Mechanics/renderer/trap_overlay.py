@@ -1,5 +1,6 @@
 # trap_overlay.py — world-space markers for perceived traps (§M8).
 from __future__ import annotations
+# noinspection PyPackageRequirements
 import pygame
 import settings
 

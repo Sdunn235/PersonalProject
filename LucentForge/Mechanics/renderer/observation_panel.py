@@ -4,6 +4,7 @@
 # (per-character state + priority need + target), ZONE (current room per
 # entity from ZoneTracker). Toggled by the 'O' key.
 from __future__ import annotations
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.needs.needs_system import get_priority_need

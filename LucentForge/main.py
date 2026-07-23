@@ -7,6 +7,7 @@ import math
 # Ensure project root is on the path
 sys.path.insert(0, os.path.dirname(__file__))
 
+# noinspection PyPackageRequirements
 import pygame
 import settings
 

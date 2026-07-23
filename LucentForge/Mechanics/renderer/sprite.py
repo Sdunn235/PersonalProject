@@ -3,6 +3,7 @@
 # Sheet layout (all assets in library): 3 cols × 4 rows — down / left / right / up
 from __future__ import annotations
 import os
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.renderer.health_bar import draw_stat_bar

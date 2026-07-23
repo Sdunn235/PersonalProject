@@ -1,5 +1,6 @@
 # hud.py — HUD: shows entity needs panel with 3-zone bars, threshold markers, HP bar, and state
 from __future__ import annotations
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.needs.need import Need, NeedZone

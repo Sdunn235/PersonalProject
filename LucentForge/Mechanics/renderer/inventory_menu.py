@@ -1,4 +1,5 @@
 from __future__ import annotations
+# noinspection PyPackageRequirements
 import pygame
 import settings
 from Mechanics.data.context import GameContext
