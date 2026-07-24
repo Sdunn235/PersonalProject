@@ -19,7 +19,9 @@
     "panel_x":     0,
     "panel_y":     0,
     "tile_bounds": [10, 7, 13, 9],
-    "region_tag":  "town_center"
+    "region_tag":  "town_center",
+    "affinity":    "AIR",
+    "affinity_intensity": 0.4
   },
   {
     "id":          "panel00_town_outskirts",
@@ -39,7 +41,9 @@
     "panel_x":     0,
     "panel_y":     0,
     "tile_bounds": [10, 10, 13, 12],
-    "region_tag":  "homes"
+    "region_tag":  "homes",
+    "affinity":    "EARTH",
+    "affinity_intensity": 0.3
   },
   {
     "id":          "panel00_farm",
@@ -61,7 +65,9 @@
     "panel_x":     0,
     "panel_y":     0,
     "tile_bounds": [11, 8, 12, 9],
-    "region_tag":  "storage"
+    "region_tag":  "storage",
+    "affinity":    "NON_NEWTONIAN",
+    "affinity_intensity": 0.3
   },
   {
     "id":          "panel00_goblin_camp",
@@ -95,6 +101,8 @@
     "panel_x":     0,
     "panel_y":     0,
     "tile_bounds": [4, 4, 6, 12],
-    "region_tag":  "bridge"
+    "region_tag":  "bridge",
+    "affinity":    "WATER",
+    "affinity_intensity": 0.5
   }
 ]
