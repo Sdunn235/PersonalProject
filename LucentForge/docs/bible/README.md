@@ -20,6 +20,7 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 | `lucentforge_cosmology_foundation_v1_derived_revision.md` | **The Grace — cosmology.** Light/Dark as ontological states (Creation/absence), the Veil, the Source, the Gift. Supersedes Foundation §7 Light/Void. | Primary cosmology authority (Grace Migration Arc) |
 | `lucentforge_affinity_grace_foundation_v1_derived_revision.md` | **The Grace — affinities.** 8-affinity lattice (4 Primal + 4 Derived), lattice relationships, resonance, environments, beings, migration doctrine. Supersedes the 6-element model. | Primary affinity authority (Grace Migration Arc) |
 | `lucentforge_biochem_affinity_addendum_v1.md` | **Affinity Behavioral Loop doctrine** — Creatures-style emitter/receptor biochem; lattice-tiered affinity comfort → chemicals → drive urgency → behavior + region learning. Reactions + genetics deferred. | Cite for affinity-behavioral / biochem work |
+| `lucentforge_needs_wants_drives_addendum_v1.md` | **Needs / Wants / Drives implementation bridge** — connects Foundation §9 tiered Needs Model (Tier 1 Survival → Tier 2 Stability → Tier 3 Aspirational) to the drive/chemical architecture; Maslow emergence rule; self-destructive wants model; HP/SP/BP survival floor; recommended implementation sequence for new drives. | Cite when adding any new drive, want, or need-layer interaction |
 
 Source drawing: `docs/bible/affinity_grace/` (`affinity_grace.png` / `.jpeg`) — canonical visual reference, by Shawn.
 
