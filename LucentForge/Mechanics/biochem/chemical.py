@@ -1,6 +1,7 @@
 # chemical.py — Dict-based chemical registry (Creatures-inspired)
 # Extensible: chemicals keyed by need_id string, not hardcoded fields.
 from __future__ import annotations
+import settings
 
 
 class Chemicals:
@@ -20,6 +21,9 @@ class Chemicals:
         # affinity comfort emitter; decay naturally like the other reactive chemicals.
         self._levels["comfort"] = 0.0
         self._levels["stress"] = 0.0
+        # Slow-accumulating strain from sustained hostile-affinity exposure (§B7).
+        # Boosts perceived urgency of survival needs; parity: strain=0 → no effect.
+        self._levels["affinity_strain"] = 0.0
 
     def get(self, key: str) -> float:
         return self._levels.get(key, 0.0)
@@ -45,10 +49,19 @@ class Chemicals:
         # Natural decay for reactive chemicals
         for key, decay_mult in [("pain", 1.0), ("fear", 1.0),
                                 ("anger", 0.5), ("loneliness", 0.3),
-                                ("comfort", 0.7), ("stress", 0.7)]:
+                                ("comfort", 0.7), ("stress", 0.7),
+                                ("affinity_strain", 0.3)]:
             val = self.get(key)
             if val > 0:
                 self.set(key, max(0.0, val - self._DECAY * decay_mult))
+
+        # Affinity strain → perceived need urgency (§B7). Additive: strain=0 → no effect.
+        strain = self.get("affinity_strain")
+        if strain > 0.01:
+            boost = strain * settings.AFFINITY_STRAIN_NEED_BOOST
+            for need in needs:
+                chem_key = getattr(need, "chemical", "") or need.need_id + "_chem"
+                self.set(chem_key, min(1.0, self.get(chem_key) + boost))
 
     def add_pain(self, amount: float) -> None:
         self.set("pain", min(1.0, self.get("pain") + amount))

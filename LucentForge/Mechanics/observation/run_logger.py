@@ -35,7 +35,7 @@ class RunLogger:
         self._npc_w.writerow(["tick", "name", "subtype", "state",
                               "priority_need", "need_value", "zone",
                               "target", "hp",
-                              "room", "aff_score", "comfort", "stress",
+                              "room", "aff_score", "comfort", "stress", "affinity_strain",
                               "best_region", "best_region_pref", "relocating"])
 
         # Accumulated run stats for the summary
@@ -79,6 +79,7 @@ class RunLogger:
                 f"{getattr(ctrl, 'affinity_comfort', 0.0):+.2f}",
                 f"{ctrl.brain.chemicals.get('comfort'):.3f}",
                 f"{ctrl.brain.chemicals.get('stress'):.3f}",
+                f"{ctrl.brain.chemicals.get('affinity_strain'):.3f}",
                 best[0] if best else "",
                 f"{best[1]:+.2f}" if best else "",
                 getattr(ctrl, "relocate_target_region", None) or "",

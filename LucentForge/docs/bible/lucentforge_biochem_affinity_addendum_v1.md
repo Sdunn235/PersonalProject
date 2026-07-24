@@ -65,6 +65,26 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 
 ---
 
+## §B7 — Affinity Strain (sustained need urgency elevation) — Phase C (built, C0046)
+
+**The problem it solves.** Phase A gave instantaneous stress-modulated urgency; Phase B gave relocation preference. Neither answered: what happens to a creature that *stays* in a hostile region against its will — outnumbered, unable to flee, or simply lost? The body is being taxed. Needs should feel more urgent sooner.
+
+**Mechanism.** A third affinity chemical, `affinity_strain`, builds slowly under sustained discomfort and decays slowly when comfort returns.
+
+- **Source:** `AffinityComfortEmitter.emit()` approaches `affinity_strain` toward `max(0, -comfort_score)` each tick at `AFFINITY_STRAIN_GAIN = 0.0003` (167× slower than `stress`'s 0.05 gain). A score of -0.8 with gain 0.0003 reaches ~50% strain after ~60 real seconds.
+- **Decay:** Natural chemical decay in `Chemicals.tick()` at `_DECAY × 0.3` per tick (slower than comfort/stress at 0.7×). Combined with the emitter's own approach-to-zero when score ≥ 0, strain falls off when the entity reaches comfort.
+- **Effect:** When `affinity_strain > 0.01`, `Chemicals.tick()` adds `strain × AFFINITY_STRAIN_NEED_BOOST` to each survival need chemical per tick. The brain reads a slightly elevated need chemical → `Drive.compute_urgency()` computes higher urgency → NPC acts on hunger/thirst/sleep sooner than the raw `current_value` alone would trigger.
+- **Parity invariant:** `affinity_strain = 0` → the boost loop does nothing → behavior is byte-identical to C0044. Fully additive.
+
+**Design intent.** The effect is perceived urgency through the biochem layer, not raw need decay acceleration. The actual `need.current_value` decays at its normal rate; the entity only *feels* the need as more pressing. This matches the lived experience of stress-taxed biology and stays within the existing emitter/receptor abstraction. Physical decay acceleration is a future arc.
+
+**Observability.**
+- ZONE panel (observation_panel.py): when `affinity_strain > 0.01` and no active relocation, the suffix slot shows `s{strain:.2f}` (red). Relocation target always takes priority when RELOCATING.
+- npcs.csv (run_logger.py): `affinity_strain` column added alongside `comfort` and `stress`.
+- Settings knobs: `AFFINITY_STRAIN_GAIN`, `AFFINITY_STRAIN_NEED_BOOST` in settings.py near the existing `COMFORT_*` constants.
+
+---
+
 ## §B6 — Testing Doctrine
 
 1. `comfort_score`: same = +1.0×intensity; ring-distance tiers monotonic; neutral entity or region = 0.0.

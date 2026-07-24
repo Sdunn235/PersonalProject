@@ -278,6 +278,13 @@ try:
     for t in range(5):
         ctrl3.memory.record_region_comfort(comfy_id, 0.5, t)
 
+    # Pin to goblin_camp (EARTH/0.5) so AIR-affinity Alder is uncomfortable
+    # (lattice-dist 3 → score -0.2 < COMFORT_CONTENT_THRESHOLD). Without this,
+    # C0045 made town_center AIR/0.4, making Alder exactly content there (score=+0.4
+    # == threshold), which correctly suppresses relocate but breaks the test.
+    goblin_camp_room = ctx3.rooms.get_by_id("panel00_goblin_camp")
+    ctrl3._current_room = lambda: goblin_camp_room
+
     # Relocate FIRES: stressed + non-urgent + a better remembered region -> RELOCATING.
     ctrl3.brain.chemicals.set("stress", 0.6)
     ctrl3._set_state("IDLE")
@@ -303,8 +310,71 @@ except Exception as ex:  # noqa: BLE001
     traceback.print_exc()
     check(f"§B6.5 relocate drive (exception: {ex})", False)
 
+# ===========================================================================
+# Phase C — affinity_strain → perceived need urgency (§B7)
+# ===========================================================================
+print("-" * 64)
+from Mechanics.needs.need import Need  # noqa: E402
+import settings as _settings           # noqa: E402
+
+# §B7 (a) — strain builds under sustained discomfort; stays 0 under comfort/neutral.
+ch_strain = Chemicals()
+em_strain = AffinityComfortEmitter()
+
+for _ in range(600):
+    em_strain.emit(ch_strain, _Stub(A.FIRE), _Room(A.WATER, 1.0))  # hostile: score=-0.8
+check("§B7 strain builds under sustained discomfort (600 hostile ticks)",
+      ch_strain.get("affinity_strain") > 0.05)
+
+ch_neutral = Chemicals()
+for _ in range(600):
+    em_strain.emit(ch_neutral, _Stub(A.FIRE), _Room(A.FIRE, 1.0))  # comfortable: score=+1.0
+check("§B7 parity: strain stays 0 under comfort (score>=0 -> strain_target=0)",
+      ch_neutral.get("affinity_strain") < 1e-9)
+
+# §B7 (b) — strain decays when entity moves to comfortable region.
+ch_decay = Chemicals()
+for _ in range(2400):
+    em_strain.emit(ch_decay, _Stub(A.FIRE), _Room(A.WATER, 1.0))  # build strain
+strain_peak = ch_decay.get("affinity_strain")
+# Comfortable region: emitter approaches strain_target=0 at gain 0.0003/tick.
+# After 2400 ticks strain drops to ~49% of peak (0.0003 gain × 2400 = -72% via e^-0.72).
+for _ in range(2400):
+    em_strain.emit(ch_decay, _Stub(A.FIRE), _Room(A.FIRE, 1.0))   # now comfortable
+check("§B7 strain decays when entity moves to comfortable region (2400 ticks each)",
+      ch_decay.get("affinity_strain") < strain_peak * 0.7)
+
+# §B7 (c) — need chemical boost under strain; boost=0 when strain=0 (parity).
+class _MockNeed:
+    def __init__(self, nid, val):
+        self.need_id = nid
+        self.current_value = val
+        self.chemical = nid + "_chem"
+    @property
+    def is_urgent(self): return self.current_value < 60
+
+needs_list = [_MockNeed("hunger", 80), _MockNeed("thirst", 80)]
+
+ch_boosted = Chemicals()
+ch_boosted.set("hunger_chem", 0.20)
+ch_boosted.set("thirst_chem", 0.20)
+ch_boosted.set("affinity_strain", 0.50)  # inject strain directly
+ch_boosted.tick(needs_list)
+boost_delta = ch_boosted.get("hunger_chem") - 0.20
+
+ch_parity = Chemicals()
+ch_parity.set("hunger_chem", 0.20)
+ch_parity.set("thirst_chem", 0.20)
+ch_parity.tick(needs_list)  # strain=0 → no boost
+
+check("§B7 strain>0 boosts need chemicals in tick()",
+      boost_delta > 0)
+check("§B7 parity: strain=0 -> no boost -> need chemicals converge same as pre-arc",
+      abs(ch_parity.get("hunger_chem") - ch_boosted.get("hunger_chem")
+          + boost_delta) < 1e-6)
+
 print("=" * 64)
 if _fails:
     print(f"{len(_fails)} FAIL: " + "; ".join(_fails))
     sys.exit(1)
-print("Affinity behavior smoke CLEAN — all §B6 checks pass")
+print("Affinity behavior smoke CLEAN — all §B6+§B7 checks pass")

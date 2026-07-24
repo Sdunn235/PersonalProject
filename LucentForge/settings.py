@@ -174,6 +174,10 @@ COMFORT_RELOCATE_STRESS_THRESHOLD = 0.4  # sustained stress at/above this can tr
 COMFORT_RELOCATE_MARGIN           = 0.3  # best-remembered comfort must beat current by this
 COMFORT_CONTENT_THRESHOLD         = 0.4  # comfort at/above this dampens the drift (settle, stay)
 
+# --- Affinity strain → need urgency (biochem/affinity addendum §B7, Phase C) ---
+AFFINITY_STRAIN_GAIN       = 0.0003  # per-tick approach toward discomfort target (~60s to ~50%)
+AFFINITY_STRAIN_NEED_BOOST = 0.0002  # per unit strain added to each need chemical per tick
+
 # --- Source Selection Weights (rebalanced in H5 for stock factor) ---
 SOURCE_DIST_WEIGHT     = 0.4     # weight for distance in source selection
 SOURCE_MEMORY_WEIGHT   = 0.3     # weight for memory preference in source selection

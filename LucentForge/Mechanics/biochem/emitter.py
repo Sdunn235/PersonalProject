@@ -9,6 +9,7 @@
 # re-expressed as emitters in a later parity-gated phase — do NOT grow a manager forest.
 from __future__ import annotations
 
+import settings
 from Mechanics.entities.affinity import comfort_score
 
 
@@ -41,8 +42,13 @@ class AffinityComfortEmitter:
         else:
             score = comfort_score(entity.affinity.effective(),
                                   room.affinity, room.affinity_intensity)
-        comfort_target = max(0.0, score)   # positive part
-        stress_target = max(0.0, -score)   # negative part
+        comfort_target = max(0.0, score)    # positive part
+        stress_target  = max(0.0, -score)   # negative part
         _approach(chemicals, "comfort", comfort_target, self.comfort_gain)
-        _approach(chemicals, "stress", stress_target, self.stress_gain)
+        _approach(chemicals, "stress",  stress_target,  self.stress_gain)
+        # Affinity strain — slow-building cost of sustained hostile exposure (§B7).
+        # Approaches the same magnitude as stress but 167× slower (0.0003 vs 0.05).
+        # score >= 0 → strain_target = 0 → approach decays existing strain toward 0.
+        strain_target = max(0.0, -score)
+        _approach(chemicals, "affinity_strain", strain_target, settings.AFFINITY_STRAIN_GAIN)
         return score
