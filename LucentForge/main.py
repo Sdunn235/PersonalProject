@@ -442,7 +442,7 @@ def main():
         _e, _ctrl, _lbl = _hud_subjects[hud_index]
         _needs = player_needs if _ctrl is None else _ctrl.needs
         _state = _lbl         if _ctrl is None else _ctrl.state
-        draw_hud(screen, _e, _needs, _state, font)
+        draw_hud(screen, _e, _needs, _state, font, controller=_ctrl)
 
         # Heartbeat-6: world-overview observation panel (left margin)
         if obs_visible:
