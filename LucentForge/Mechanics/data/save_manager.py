@@ -82,14 +82,27 @@ class SaveManager:
             # NPCs
             for ctrl in controllers:
                 npc = ctrl.npc
+                # Nested blob: source-quality memory + learned region-comfort
+                # EMA (biochem/affinity §B4). Legacy saves are the flat sources
+                # dict; bootstrap.apply_save() detects and upgrades them.
                 mem_data = {
-                    label: {
-                        "need_id": sm.need_id,
-                        "visit_count": sm.visit_count,
-                        "avg_satisfaction": sm.avg_satisfaction,
-                        "last_visit_tick": sm.last_visit_tick,
-                    }
-                    for label, sm in ctrl.memory._sources.items()
+                    "sources": {
+                        label: {
+                            "need_id": sm.need_id,
+                            "visit_count": sm.visit_count,
+                            "avg_satisfaction": sm.avg_satisfaction,
+                            "last_visit_tick": sm.last_visit_tick,
+                        }
+                        for label, sm in ctrl.memory._sources.items()
+                    },
+                    "regions": {
+                        rid: {
+                            "avg_comfort": rm.avg_comfort,
+                            "visit_count": rm.visit_count,
+                            "last_visit_tick": rm.last_visit_tick,
+                        }
+                        for rid, rm in ctrl.memory._regions.items()
+                    },
                 }
                 conn.execute(
                     "INSERT INTO entity_state "

@@ -373,8 +373,94 @@ check("§B7 parity: strain=0 -> no boost -> need chemicals converge same as pre-
       abs(ch_parity.get("hunger_chem") - ch_boosted.get("hunger_chem")
           + boost_delta) < 1e-6)
 
+# ===========================================================================
+# Phase D — region-comfort memory persistence across save/load (C0049)
+# Exercises the REAL SaveManager.snapshot()/restore() + apply_save() pipeline,
+# not a replicated blob, so it verifies production serialization end-to-end.
+# ===========================================================================
+print("-" * 64)
+try:
+    from Mechanics.bootstrap import (create_game_context, create_npc_controller,
+                                     create_world_sim, apply_save)
+    from Mechanics.entities.factory import create_all_npcs, create_player
+    from Mechanics.needs.need import make_default_needs
+    from Mechanics.world.tile_map import TileMap
+
+    tmp_db4 = os.path.join(tempfile.gettempdir(), "lf_region_persist.db")
+    if os.path.exists(tmp_db4):
+        try:
+            os.remove(tmp_db4)
+        except OSError:
+            pass
+    ctx4 = create_game_context(db_path=tmp_db4)
+    tmap4 = TileMap()
+    tmap4.load_real_map()
+    sources4 = tmap4.get_need_sources()
+    world4 = create_world_sim(sources4)
+    npcs4 = create_all_npcs(ctx4)
+    villager4 = next(n for n in npcs4 if n.name == "Alder")
+    ctrl4 = create_npc_controller(villager4, ctx4, sources4, tmap4, world4)
+    player4 = create_player(ctx4)
+    player_needs4 = make_default_needs()
+
+    # Seed learned region comfort: forest strongly positive, camp negative.
+    for t in range(3):
+        ctrl4.memory.record_region_comfort("panel00_forest", 0.5, t)
+    ctrl4.memory.record_region_comfort("panel00_goblin_camp", -0.3, 3)
+    pre_best = ctrl4.memory.best_region()
+    pre_forest = ctrl4.memory.get_region_preference("panel00_forest")
+
+    # Snapshot through the real SaveManager, then wipe live region memory to
+    # simulate a fresh load — if restore doesn't repopulate it, asserts fail.
+    ctx4.save_manager.snapshot(
+        world4, sources4, [ctrl4], player4, player_needs4, set(), {})
+    ctrl4.memory._regions.clear()
+    save_data4 = ctx4.save_manager.restore()
+    apply_save(save_data4, world4, sources4, [ctrl4], player4,
+               player_needs4, set(), {})
+
+    post_best = ctrl4.memory.best_region()
+    post_forest = ctrl4.memory.get_region_preference("panel00_forest")
+    check("§D region-comfort EMA survives snapshot/restore round-trip",
+          abs(post_forest - pre_forest) < 1e-9 and post_forest > 0.49)
+    check("§D best_region matches pre/post round-trip (forest)",
+          post_best is not None and pre_best is not None
+          and post_best[0] == pre_best[0] == "panel00_forest"
+          and abs(post_best[1] - pre_best[1]) < 1e-9)
+    check("§D negative region (goblin_camp) restored, excluded from best_region",
+          abs(ctrl4.memory.get_region_preference("panel00_goblin_camp") + 0.3) < 1e-9)
+
+    # Legacy flat blob (pre-C0049) still restores _sources, leaves _regions empty.
+    legacy = {
+        "world": save_data4["world"],
+        "sources": save_data4["sources"],
+        "entities": {
+            eid: {**edata, "memory": {
+                "RIVER": {"need_id": "thirst", "visit_count": 4,
+                          "avg_satisfaction": 0.7, "last_visit_tick": 12}}}
+            for eid, edata in save_data4["entities"].items()
+        },
+        "game": save_data4["game"],
+        "chests": save_data4["chests"],
+    }
+    ctrl4.memory._sources.clear()
+    ctrl4.memory._regions.clear()
+    apply_save(legacy, world4, sources4, [ctrl4], player4,
+               player_needs4, set(), {})
+    check("§D legacy flat memory blob restores _sources, _regions stays empty",
+          "RIVER" in ctrl4.memory._sources
+          and abs(ctrl4.memory.get_source_preference("RIVER") - 0.7) < 1e-9
+          and len(ctrl4.memory._regions) == 0)
+
+    if hasattr(ctx4, "close"):
+        ctx4.close()
+except Exception as ex:  # noqa: BLE001
+    import traceback
+    traceback.print_exc()
+    check(f"§D region persistence (exception: {ex})", False)
+
 print("=" * 64)
 if _fails:
     print(f"{len(_fails)} FAIL: " + "; ".join(_fails))
     sys.exit(1)
-print("Affinity behavior smoke CLEAN — all §B6+§B7 checks pass")
+print("Affinity behavior smoke CLEAN — all §B6+§B7+§D checks pass")

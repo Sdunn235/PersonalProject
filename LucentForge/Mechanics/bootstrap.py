@@ -14,7 +14,7 @@ from Mechanics.world.tile_map import TileMap
 from Mechanics.world.world_sim import WorldSim
 from Mechanics.world.goblin_threat import ThreatStage
 from Mechanics.world.town import TownState
-from Mechanics.ai.memory import SourceMemory
+from Mechanics.ai.memory import SourceMemory, RegionComfortMemory
 
 
 def create_game_context(data_dir: str | None = None,
@@ -118,15 +118,32 @@ def apply_save(
         for key, val in edata["chemicals"].items():
             ctrl.brain.chemicals.set(key, float(val))
 
-        # Memory
+        # Memory — nested {sources, regions} blob. Legacy saves are the flat
+        # sources dict; detect and upgrade (source labels are uppercase and
+        # never collide with the "sources"/"regions" wrapper keys).
         ctrl.memory._sources.clear()
-        for label, mem_entry in edata["memory"].items():
+        ctrl.memory._regions.clear()
+        mem_blob = edata["memory"]
+        if "sources" in mem_blob or "regions" in mem_blob:
+            sources_blob = mem_blob.get("sources", {})
+            regions_blob = mem_blob.get("regions", {})
+        else:  # legacy flat format (pre-C0049 saves)
+            sources_blob = mem_blob
+            regions_blob = {}
+        for label, mem_entry in sources_blob.items():
             ctrl.memory._sources[label] = SourceMemory(
                 source_label=label,
                 need_id=mem_entry["need_id"],
                 visit_count=mem_entry["visit_count"],
                 avg_satisfaction=float(mem_entry["avg_satisfaction"]),
                 last_visit_tick=mem_entry["last_visit_tick"],
+            )
+        for rid, reg_entry in regions_blob.items():
+            ctrl.memory._regions[rid] = RegionComfortMemory(
+                region_id=rid,
+                avg_comfort=float(reg_entry["avg_comfort"]),
+                visit_count=reg_entry["visit_count"],
+                last_visit_tick=reg_entry["last_visit_tick"],
             )
 
     # Restore player entity
