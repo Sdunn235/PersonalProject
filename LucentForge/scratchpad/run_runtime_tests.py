@@ -46,6 +46,7 @@ from Mechanics.world.tile_map import TileMap
 from Mechanics.ai.player import PlayerController
 from Mechanics.ai.npc_logger import log_spatial_zone
 from Mechanics.runtime.session import WorldSession  # R1 seam under test
+from Mechanics.runtime.kernel import SimulationKernel, SimFrame, COMBAT_COOLDOWN  # R2 seam
 
 # Reuse smoke_test's tick harness verbatim (DRY — same pygame-free driver).
 from smoke_test import _tick_n
@@ -401,6 +402,70 @@ def test_main_compiles():
     check(ok, "main.py compiles clean")
 
 
+# ─── (h) SimulationKernel (R2) — the headless line ────────────────────────────
+
+def test_kernel_headless():
+    print("[H] SimulationKernel (R2) — step(dt, now) advances the sim with no pygame render")
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctxs = []
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        ctxs.append(ctx)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        sources = tile_map.get_need_sources()
+
+        kernel = SimulationKernel.new_session(ctx, tile_map, sources)
+        check(kernel.session.world_sim.clock.tick_count == 0, "kernel starts at tick 0")
+
+        # Step N frames headless; the sim clock must advance and each step returns a SimFrame.
+        dt = 1.0 / settings.SIM_TICK_RATE if settings.SIM_TICK_RATE > 0 else 1.0 / 60.0
+        last = None
+        for i in range(200):
+            last = kernel.step(dt, now=float(i) * dt)
+        check(isinstance(last, SimFrame), "step() returns a SimFrame")
+        check(kernel.session.world_sim.clock.tick_count > 0,
+              "sim clock advanced after stepping headless",
+              f"tick={kernel.session.world_sim.clock.tick_count}")
+
+        # Combat detection: put the player on top of an NPC, past cooldown -> trigger.
+        s = kernel.session
+        target = s.npc_list[0][0]
+        s.player.x, s.player.y = target.x, target.y
+        trig = kernel._detect_combat(now=1_000_000.0)
+        check(trig is target, "combat detected for the co-located NPC past cooldown")
+        # Same NPC, still on cooldown -> no trigger.
+        s.combat_cooldowns[target.entity_id] = 1_000_000.0
+        check(kernel._detect_combat(now=1_000_000.0 + COMBAT_COOLDOWN - 0.1) is None,
+              "no combat while the NPC is on cooldown")
+
+        # Panel-edge detection: player at the north edge -> a [PANEL] message once.
+        s.player.x = settings.TILE_SIZE * 5
+        s.player.y = 0.0
+        kernel._last_at_edge = None
+        msg = kernel._detect_panel_edge()
+        check(msg is not None and "north" in msg, "north panel edge detected", f"{msg}")
+        check(kernel._detect_panel_edge() is None,
+              "edge is edge-triggered (no repeat while still at same edge)")
+
+        # Lifecycle: start_new_session resets; load restores through the kernel.
+        s.defeated_npcs.add(target.entity_id)
+        kernel.save(slot_id=3)
+        kernel.start_new_session()
+        check(kernel.session.world_sim.clock.tick_count == 0
+              and kernel.session.defeated_npcs == set()
+              and kernel._last_at_edge is None,
+              "start_new_session() gives a fresh session + reset edge state")
+        kernel.load(ctx.save_manager.restore(slot_id=3))
+        check(target.entity_id in kernel.session.defeated_npcs,
+              "kernel.load() restores the saved defeated set")
+    finally:
+        for c in ctxs:
+            c.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -414,6 +479,7 @@ if __name__ == "__main__":
     test_item_chest_round_trip()
     test_world_session()
     test_main_compiles()
+    test_kernel_headless()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)

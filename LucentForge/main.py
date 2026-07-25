@@ -2,7 +2,6 @@
 # Run: python main.py
 import sys
 import os
-import math
 
 # Ensure project root is on the path
 sys.path.insert(0, os.path.dirname(__file__))
@@ -12,27 +11,21 @@ import pygame
 import settings
 
 from Mechanics.bootstrap import create_game_context
-from Mechanics.runtime.session import WorldSession
+from Mechanics.runtime.kernel import SimulationKernel
 from Mechanics.renderer.save_menu import run_load_menu, run_save_menu
 from Mechanics.renderer.pause_menu import run_pause_menu
 from Mechanics.entities.factory import get_sprite_path
-from Mechanics.needs.needs_system import apply_health_drain, apply_regen, update_needs
 from Mechanics.world.tile_map import TileMap
-from Mechanics.world.world_coord import PanelEdge
 from Mechanics.renderer.sprite import EntitySprite
 from Mechanics.renderer.hud import draw_hud
 from Mechanics.renderer.trap_overlay import draw_trap_markers
 from Mechanics.renderer.health_bar import draw_stat_bar
-from Mechanics.services.perception import perceive_traps
 from Mechanics.combat.casting import convert_amount
 from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
-from Mechanics.ai.proximity import update_proximity_fear
 from Mechanics.ai.npc_logger import log_spatial_zone
 from Mechanics.ai.zone_ai import ZoneAIResponder
-
-COMBAT_TRIGGER_DIST = settings.TILE_SIZE * 1.2
 
 
 def main():
@@ -59,7 +52,7 @@ def main():
     sources  = tile_map.get_need_sources()
 
     # --- Presentation sprite layer (proto-shell; R4 formalizes into the shell) ---
-    # The WorldSession is pygame-free — sprites live here, keyed by entity_id.
+    # The kernel/session are pygame-free — sprites live here, keyed by entity_id.
     def _build_sprites(sess):
         _sprites = {}
         for _npc, _ in sess.npc_list:
@@ -75,8 +68,9 @@ def main():
         _group = pygame.sprite.Group(*_sprites.values())
         return _sprites, _group
 
-    # --- Build the fresh session + its sprite layer ---
-    session = WorldSession.new_game(ctx, tile_map, sources)
+    # --- Build the headless kernel (owns the WorldSession) + its sprite layer ---
+    kernel = SimulationKernel.new_session(ctx, tile_map, sources)
+    session = kernel.session
     sprites, sprite_group = _build_sprites(session)
 
     print(f"\n[WORLD SIM] Heartbeat-1 active | "
@@ -128,7 +122,7 @@ def main():
     if _chosen_slot is not None:
         _save_data = ctx.save_manager.restore(slot_id=_chosen_slot)
         if _save_data:
-            session.apply_save(_save_data, ctx)
+            kernel.load(_save_data)
             for _npc, _ in session.npc_list:
                 if _npc.entity_id in session.defeated_npcs:
                     sprites[_npc.entity_id].kill()
@@ -154,11 +148,8 @@ def main():
     obs_visible = True   # Heartbeat-6 observation panel (toggle with 'O')
 
     # --- Game loop ---
-    running         = True
-    in_combat       = False
-    COMBAT_COOLDOWN = 4.0
-    _paused_quit    = False
-    _last_at_edge: PanelEdge | None = None   # Phase 3.6: edge-triggered panel detection
+    running      = True
+    _paused_quit = False   # pause-menu quit saves internally; skip save-on-quit
 
     while running:
         dt = clock.tick(settings.FPS) / 1000.0
@@ -180,10 +171,10 @@ def main():
                         _paused_quit = True
                         running = False
                     elif _result == "new_game":
-                        session = WorldSession.new_game(ctx, tile_map, sources)
+                        kernel.start_new_session()
+                        session = kernel.session
                         sprites, sprite_group = _build_sprites(session)
                         _register_zone_subscribers()
-                        _last_at_edge = None
                         _hud_subjects = [(session.player, None, "Player")] + [
                             (npc, ctrl, None) for npc, ctrl in session.npc_list
                         ]
@@ -195,7 +186,7 @@ def main():
                         if _save_data:
                             for _npc, _ in session.npc_list:
                                 sprite_group.add(sprites[_npc.entity_id])
-                            session.apply_save(_save_data, ctx)
+                            kernel.load(_save_data)
                             for _npc, _ in session.npc_list:
                                 if _npc.entity_id in session.defeated_npcs:
                                     sprites[_npc.entity_id].kill()
@@ -212,7 +203,7 @@ def main():
                 elif event.key == pygame.K_s:
                     _slot = run_save_menu(screen, clock, ctx, font)
                     if _slot is not None:
-                        ctx.save_manager.snapshot_session(session, slot_id=_slot)
+                        kernel.save(_slot)
                 elif event.key == pygame.K_e:
                     pcol = int(session.player.x // settings.TILE_SIZE)
                     prow = int(session.player.y // settings.TILE_SIZE)
@@ -242,129 +233,45 @@ def main():
                         print(f"[CONVERT] {_g * 8} Bits -> {_g} Bytes  "
                               f"(BP {_b}/{_player.max_bit_pool}, BYP {_byt}/{_player.max_byte_pool})")
 
-        if not in_combat:
-            # --- World simulation tick ---
-            living_count = len(session.npc_list) - len(session.defeated_npcs)
+        # --- Advance the headless simulation one frame ---
+        now = pygame.time.get_ticks() / 1000.0
+        frame = kernel.step(dt, now)
+        tick = session.world_sim.clock.tick_count
 
-            # Compute average goblin hunger for threat escalation (H4)
-            goblin_hungers = []
-            for npc_e, npc_c in session.npc_list:
-                if (npc_e.entity_id not in session.defeated_npcs
-                        and npc_e.subtype == "goblin"):
-                    h = next((n for n in npc_c.needs
-                              if n.need_id == "hunger"), None)
-                    if h:
-                        goblin_hungers.append(h.current_value / 100.0)
-            avg_goblin_hunger = (sum(goblin_hungers) / len(goblin_hungers)
-                                 if goblin_hungers else 1.0)
+        # --- Periodic orchestration (shell policy, driven by sim_ticks) ---
+        if frame.sim_ticks > 0 and tick % 30 == 0:
+            print(session.world_sim.status_line())
+        if (frame.sim_ticks > 0
+                and settings.AUTOSAVE_INTERVAL > 0
+                and tick % settings.AUTOSAVE_INTERVAL == 0):
+            kernel.save()   # Phase 1.5 autosave (slot 0)
+        if (frame.sim_ticks > 0
+                and tick % settings.RUN_LOG_INTERVAL == 0):
+            run_logger.sample(session.world_sim, session.sources, session.npc_list,
+                              session.defeated_npcs, tick)
 
-            sim_ticks = session.world_sim.tick(dt, living_count, avg_goblin_hunger)
-            if sim_ticks > 0 and session.world_sim.clock.tick_count % 30 == 0:
-                print(session.world_sim.status_line())
+        # Sync sprites to entity state for rendering.
+        sprite_group.update()
 
-            # Phase 3.3: zone crossing detection (player + all living NPCs)
-            if sim_ticks > 0:
-                _zone_entities = (
-                    [e for e, _ in session.npc_list if e.entity_id not in session.defeated_npcs]
-                    + [session.player]
-                )
-                session.world_sim.zone_tracker.check_and_fire(
-                    _zone_entities, tile_map, ctx.rooms,
-                    ctx.current_panel[0], ctx.current_panel[1],
-                    session.world_sim.clock.tick_count,
-                )
+        # --- React to the frame's events ---
+        for _hint in frame.trap_hints:          # Phase 4.2 (§M8) perception hints
+            print(_hint)
+        if frame.panel_edge:                    # Phase 3.6 edge-triggered panel note
+            print(frame.panel_edge)
 
-            # Phase 1.5: periodic autosave
-            if (sim_ticks > 0
-                    and settings.AUTOSAVE_INTERVAL > 0
-                    and session.world_sim.clock.tick_count % settings.AUTOSAVE_INTERVAL == 0):
-                ctx.save_manager.snapshot_session(session)
-
-            # Heartbeat-6: sample world + NPC state to the run-log
-            if (sim_ticks > 0
-                    and session.world_sim.clock.tick_count % settings.RUN_LOG_INTERVAL == 0):
-                run_logger.sample(session.world_sim, session.sources, session.npc_list,
-                                  session.defeated_npcs, session.world_sim.clock.tick_count)
-
-            def _grid(entity):
-                return tile_map.world_to_grid(entity.x, entity.y)
-
-            all_entities = (
-                [e for e, _ in session.npc_list if e.entity_id not in session.defeated_npcs]
-                + [session.player]
-            )
-            occupied_by: dict[str, tuple[int, int]] = {
-                e.entity_id: _grid(e) for e in all_entities
-            }
-
-            # Proximity fear + contested sources (H4)
-            contested = update_proximity_fear(session.npc_list, session.defeated_npcs)
-
-            for npc_entity, npc_ctrl in session.npc_list:
-                if npc_entity.entity_id not in session.defeated_npcs:
-                    others = {
-                        pos for eid, pos in occupied_by.items()
-                        if eid != npc_entity.entity_id
-                    }
-                    npc_ctrl.contested_sources = contested
-                    npc_ctrl.update(dt, occupied_tiles=others)
-                    apply_health_drain(npc_ctrl.needs, npc_entity, dt)
-                    apply_regen(npc_ctrl.needs, npc_entity, dt)
-                    npc_entity.update(dt)
-
-            session.player_controller.update(dt)
-            session.player.update(dt)
-            update_needs(session.player_needs)
-            apply_health_drain(session.player_needs, session.player, dt)
-            apply_regen(session.player_needs, session.player, dt)
-            sprite_group.update()
-
-            # Phase 4.2: passive Intuition trap perception (§M8)
-            for _hint in perceive_traps(session.player, session.chest_reg):
-                print(_hint)
-
-            # Phase 3.6: panel edge detection — fires once per edge entry (edge-triggered)
-            _pcol = int(session.player.x // settings.TILE_SIZE)
-            _prow = int(session.player.y // settings.TILE_SIZE)
-            _edge_now: PanelEdge | None = None
-            if _prow <= 0:
-                _edge_now = PanelEdge.NORTH
-            elif _prow >= settings.ROWS - 1:
-                _edge_now = PanelEdge.SOUTH
-            elif _pcol <= 0:
-                _edge_now = PanelEdge.WEST
-            elif _pcol >= settings.COLS - 1:
-                _edge_now = PanelEdge.EAST
-            if _edge_now is not None and _edge_now is not _last_at_edge:
-                _px, _py = ctx.current_panel
-                if not ctx.panel_loader.can_transition(_px, _py, _edge_now):
-                    print(f"[PANEL] Player at {_edge_now.value.lower()} edge of "
-                          f"Panel({_px},{_py}) — no adjacent panel defined.")
-            _last_at_edge = _edge_now
-
-            now = pygame.time.get_ticks() / 1000.0
-            for npc_entity, _ in session.npc_list:
-                if npc_entity.entity_id in session.defeated_npcs:
-                    continue
-                since_last = now - session.combat_cooldowns.get(npc_entity.entity_id, -999)
-                if since_last < COMBAT_COOLDOWN:
-                    continue
-                dist = math.hypot(session.player.x - npc_entity.x,
-                                  session.player.y - npc_entity.y)
-                if dist < COMBAT_TRIGGER_DIST:
-                    in_combat = True
-                    result = run_combat(screen, clock, font, session.player, npc_entity, ctx,
-                                       inv_svc=session.inv_svc, equip_svc=session.equip_svc)
-                    in_combat = False
-                    session.combat_cooldowns[npc_entity.entity_id] = pygame.time.get_ticks() / 1000.0
-                    if result == "win":
-                        session.defeated_npcs.add(npc_entity.entity_id)
-                        sprites[npc_entity.entity_id].kill()
-                        print(f"[COMBAT] Player defeated {npc_entity.name}!")
-                    elif result == "lose":
-                        print("[COMBAT] Player was defeated — game over.")
-                        running = False
-                    break
+        # Combat: detected by the kernel, run by the shell (blocking modal).
+        if frame.combat_trigger is not None:
+            _npc = frame.combat_trigger
+            result = run_combat(screen, clock, font, session.player, _npc, ctx,
+                               inv_svc=session.inv_svc, equip_svc=session.equip_svc)
+            session.combat_cooldowns[_npc.entity_id] = pygame.time.get_ticks() / 1000.0
+            if result == "win":
+                session.defeated_npcs.add(_npc.entity_id)
+                sprites[_npc.entity_id].kill()
+                print(f"[COMBAT] Player defeated {_npc.name}!")
+            elif result == "lose":
+                print("[COMBAT] Player was defeated — game over.")
+                running = False
 
         # Draw
         screen.fill(settings.BG_COLOR)
@@ -439,7 +346,7 @@ def main():
 
     # Phase 1.5: save-on-quit (window-close path only; pause-menu quit saves internally)
     if settings.SAVE_ON_QUIT and not _paused_quit:
-        ctx.save_manager.snapshot_session(session)
+        kernel.save()
 
     run_logger.finalize(session.world_sim, session.npc_list, session.defeated_npcs)
     pygame.quit()
