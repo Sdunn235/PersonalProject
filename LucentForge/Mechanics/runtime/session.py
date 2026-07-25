@@ -23,6 +23,8 @@ from Mechanics.bootstrap import (
 )
 from Mechanics.entities.factory import create_player, create_all_npcs
 from Mechanics.ai.player import PlayerController
+from Mechanics.ai.npc_logger import log_spatial_zone
+from Mechanics.ai.zone_ai import ZoneAIResponder
 
 
 @dataclass
@@ -41,11 +43,35 @@ class WorldSession:
     chest_reg: dict
     defeated_npcs: set = field(default_factory=set)
     combat_cooldowns: dict = field(default_factory=dict)
+    zone_ai: object = None   # ZoneAIResponder — sim-side zone behavior (R3)
 
     @property
     def npc_controllers(self) -> list:
         """The NPC controllers alone — the shape SaveManager/apply_save expect."""
         return [ctrl for _, ctrl in self.npc_list]
+
+    # ── zone observers (R3) ─────────────────────────────────────────────────────
+    def wire_zone_observers(self) -> None:
+        """Subscribe the SIM-side zone observers (logging + AI behavior) on the
+        current world_sim.zone_tracker. Called by new_game() so a fresh tracker
+        always gets them — this makes the New-Game re-subscribe fix (C0026)
+        automatic. The player zone-flash is NOT wired here: the kernel surfaces it
+        as a SimFrame event for the shell (Model/View split)."""
+        self.world_sim.zone_tracker.subscribe(log_spatial_zone)
+        self.world_sim.zone_tracker.subscribe(self._dispatch_zone_ai)
+
+    def _dispatch_zone_ai(self, event) -> None:
+        """Resolve a zone-crossing event's entity to (entity, controller) and let
+        the ZoneAIResponder react. Skips defeated NPCs."""
+        entity = ctrl = None
+        for npc, c in self.npc_list:
+            if npc.name == event.entity_name and npc.entity_id not in self.defeated_npcs:
+                entity, ctrl = npc, c
+                break
+        if entity is None and self.player.name == event.entity_name:
+            entity, ctrl = self.player, self.player_controller
+        if entity is not None and ctrl is not None:
+            self.zone_ai.on_zone_cross(event, entity, ctrl)
 
     # ── Factory ───────────────────────────────────────────────────────────────
     @classmethod
@@ -71,12 +97,15 @@ class WorldSession:
         chest_reg = create_chest_registry(ctx)
         tile_map.place_chests(chest_reg)
 
-        return cls(
+        session = cls(
             world_sim=world_sim, sources=sources, tile_map=tile_map,
             player=player, player_needs=player_needs,
             player_controller=player_controller, npc_list=npc_list,
             inv_svc=inv_svc, equip_svc=equip_svc, chest_reg=chest_reg,
+            zone_ai=ZoneAIResponder(),
         )
+        session.wire_zone_observers()
+        return session
 
     # ── Load adapter ───────────────────────────────────────────────────────────
     def apply_save(self, save_data, ctx) -> None:

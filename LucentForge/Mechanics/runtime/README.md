@@ -11,8 +11,8 @@ This directory is built up incrementally, one behavior-preserving stage per comm
 
 | File | Stage | Role |
 |------|-------|------|
-| `session.py` | **R1 (C0052)** | `WorldSession` — the live object graph as a **pygame-free** dataclass: world_sim, sources, tile_map, player (+needs/controller), `npc_list` of `(entity, controller)` pairs, defeated/cooldown bookkeeping, item + chest services. `new_game()` is a Factory over the existing `bootstrap.create_*` primitives; `apply_save()` folds the load sequence (apply-save + item/chest rebuild + chest placement) into one call. |
-| `kernel.py` | **R2 (C0053)** | `SimulationKernel` — owns a `WorldSession` + `GameContext`; `step(dt, now) -> SimFrame` advances the sim with **no pygame** (no render, no persistence, no console I/O). Returns a `SimFrame` of events (`combat_trigger`, `trap_hints`, `panel_edge`, `sim_ticks`). Lifecycle `new_session()/start_new_session()/load()/save()` wraps R1. |
+| `session.py` | **R1 (C0052)** / **R3 (C0054)** | `WorldSession` — the live object graph as a **pygame-free** dataclass: world_sim, sources, tile_map, player (+needs/controller), `npc_list` of `(entity, controller)` pairs, defeated/cooldown bookkeeping, item + chest services, a `ZoneAIResponder`. `new_game()` is a Factory over the existing `bootstrap.create_*` primitives; `apply_save()` folds the load sequence (apply-save + item/chest rebuild + chest placement) into one call. **R3:** `new_game()` also wires the sim-side zone observers (`log_spatial_zone` + `_dispatch_zone_ai`) via `wire_zone_observers()` — so a fresh tracker always gets them (the C0026 re-subscribe fix, now automatic). |
+| `kernel.py` | **R2 (C0053)** | `SimulationKernel` — owns a `WorldSession` + `GameContext`; `step(dt, now) -> SimFrame` advances the sim with **no pygame** (no render, no persistence, no console I/O). Returns a `SimFrame` of events (`combat_trigger`, `trap_hints`, `panel_edge`, `zone_flash`, `sim_ticks`). Lifecycle `new_session()/start_new_session()/load()/save()` wraps R1. |
 | `shell.py` | R4 (planned) | `PresentationShell` — pygame view: screen/clock/fonts, the sprite-per-entity map, HUD, and the `RuntimeMode` state machine. Currently the shell lives inline in `main.py`. |
 
 ## Design rules
@@ -43,6 +43,12 @@ This directory is built up incrementally, one behavior-preserving stage per comm
   simulation, so `step()` stays free of DB writes, file I/O, and console output.
 - **`now` is passed in.** The combat cooldown is wall-clock based; the shell passes
   `pygame.time.get_ticks() / 1000` so the kernel never imports pygame.
+- **Zone observers split sim from view (R3).** The sim-side observers (console
+  logging + zone AI behavior) are wired into the session at `new_game()` and run
+  inside `check_and_fire` during `step()`. The one UI observer — the player's
+  room-name flash — is *not* a subscriber; the kernel reads the player's crossing
+  from `check_and_fire`'s return and surfaces it as `SimFrame.zone_flash`, which the
+  shell turns into its HUD countdown.
 
 ## Verification
 

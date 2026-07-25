@@ -24,8 +24,6 @@ from Mechanics.combat.casting import convert_amount
 from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.renderer.combat_scene import run_combat
-from Mechanics.ai.npc_logger import log_spatial_zone
-from Mechanics.ai.zone_ai import ZoneAIResponder
 
 
 def main():
@@ -78,38 +76,11 @@ def main():
           f"Threat={session.world_sim.threat.threat_level:.0f} | "
           f"Town={session.world_sim.town.state.value}")
     print("[MAP] Heartbeat-2 active | River barrier, region zones, bridge crossings")
-    # Phase 3.4: player room-name flash — fires when player crosses a room boundary.
-    # zone_flash[0] = (room_name, frames_remaining) | None
+    # Phase 3.4: player room-name flash. The sim-side zone observers (logging +
+    # zone AI) are now wired inside WorldSession.new_game(); the kernel surfaces
+    # the PLAYER's crossing as a SimFrame event (frame.zone_flash), and the shell
+    # owns this UI countdown (R3). zone_flash[0] = (room_name, frames_left) | None
     zone_flash: list = [None]
-
-    def _on_player_zone_cross(event) -> None:
-        if event.entity_name == session.player.name:
-            room_name = event.to_room.name if event.to_room else "Unknown"
-            zone_flash[0] = (room_name, settings.ZONE_LABEL_DURATION)
-
-    # Phase 3.5: zone-entry AI behavioral triggers.
-    zone_ai = ZoneAIResponder()
-
-    def _zone_ai_event(event) -> None:
-        entity = ctrl = None
-        for npc, c in session.npc_list:
-            if npc.name == event.entity_name and npc.entity_id not in session.defeated_npcs:
-                entity, ctrl = npc, c
-                break
-        if entity is None and session.player.name == event.entity_name:
-            entity, ctrl = session.player, session.player_controller
-        if entity is not None and ctrl is not None:
-            zone_ai.on_zone_cross(event, entity, ctrl)
-
-    def _register_zone_subscribers() -> None:
-        """Re-subscribe all ZoneTracker observers on the current world_sim.zone_tracker.
-        Called at startup and on New Game so a fresh tracker gets all callbacks."""
-        zone_flash[0] = None
-        session.world_sim.zone_tracker.subscribe(log_spatial_zone)
-        session.world_sim.zone_tracker.subscribe(_on_player_zone_cross)
-        session.world_sim.zone_tracker.subscribe(_zone_ai_event)
-
-    _register_zone_subscribers()
 
     print("[H4] Goblin behavior active | Hunger-driven threat, patrol/raid states, proximity fear")
     finite_sources = [s for s in session.sources if s.is_finite]
@@ -174,7 +145,7 @@ def main():
                         kernel.start_new_session()
                         session = kernel.session
                         sprites, sprite_group = _build_sprites(session)
-                        _register_zone_subscribers()
+                        zone_flash[0] = None
                         _hud_subjects = [(session.player, None, "Player")] + [
                             (npc, ctrl, None) for npc, ctrl in session.npc_list
                         ]
@@ -258,6 +229,8 @@ def main():
             print(_hint)
         if frame.panel_edge:                    # Phase 3.6 edge-triggered panel note
             print(frame.panel_edge)
+        if frame.zone_flash is not None:        # Phase 3.4 player room-name flash
+            zone_flash[0] = (frame.zone_flash, settings.ZONE_LABEL_DURATION)
 
         # Combat: detected by the kernel, run by the shell (blocking modal).
         if frame.combat_trigger is not None:

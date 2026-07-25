@@ -466,6 +466,57 @@ def test_kernel_headless():
         os.unlink(tmp_db)
 
 
+# ─── (i) Zone observer lifecycle (R3) — auto-wire + player flash as SimFrame ───
+
+def test_zone_lifecycle():
+    print("[I] Zone observers (R3) — new_game auto-wires sim observers; player flash = SimFrame")
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        sources = tile_map.get_need_sources()
+
+        kernel = SimulationKernel.new_session(ctx, tile_map, sources)
+        s = kernel.session
+        # new_game() wired exactly the 2 SIM-side observers (log + zone AI).
+        check(len(s.world_sim.zone_tracker._callbacks) == 2,
+              "new_game auto-wires 2 sim-side zone observers",
+              f"got {len(s.world_sim.zone_tracker._callbacks)}")
+        check(s.zone_ai is not None, "session owns a ZoneAIResponder")
+
+        # New Game re-wires on the fresh tracker (C0026 fix, now automatic).
+        kernel.start_new_session()
+        check(len(kernel.session.world_sim.zone_tracker._callbacks) == 2,
+              "start_new_session re-wires 2 observers on the fresh tracker",
+              f"got {len(kernel.session.world_sim.zone_tracker._callbacks)}")
+
+        # Player crossing surfaces as a SimFrame event (not a UI subscriber).
+        s = kernel.session
+        px, py = ctx.current_panel[0], ctx.current_panel[1]
+        cell_by_room = {}
+        for col in range(settings.COLS):
+            for row in range(settings.ROWS):
+                room = ctx.rooms.get_room_for_region(px, py, tile_map.get_region(col, row))
+                if room is not None and id(room) not in cell_by_room:
+                    cell_by_room[id(room)] = (col, row, room.name)
+        (ca, cb) = list(cell_by_room.values())[:2]
+        dt = 1.0 / settings.SIM_TICK_RATE if settings.SIM_TICK_RATE > 0 else 1.0 / 60.0
+
+        s.player.x, s.player.y = tile_map.grid_to_world_center(ca[0], ca[1])
+        kernel.step(dt, now=0.0)                     # caches the player's room (no flash)
+        s.player.x, s.player.y = tile_map.grid_to_world_center(cb[0], cb[1])
+        frame = kernel.step(dt, now=dt)              # crossing -> zone_flash event
+        check(frame.zone_flash == cb[2],
+              "player crossing surfaces as frame.zone_flash", f"{frame.zone_flash} != {cb[2]}")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -480,6 +531,7 @@ if __name__ == "__main__":
     test_world_session()
     test_main_compiles()
     test_kernel_headless()
+    test_zone_lifecycle()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)

@@ -39,6 +39,7 @@ class SimFrame:
     combat_trigger: object | None = None            # entity to fight (shell runs modal)
     trap_hints: list = field(default_factory=list)  # [str] perception hints to print
     panel_edge: str | None = None                   # [PANEL] edge message, or None
+    zone_flash: str | None = None                   # room name the PLAYER entered, or None
 
 
 class SimulationKernel:
@@ -88,17 +89,23 @@ class SimulationKernel:
 
         frame.sim_ticks = s.world_sim.tick(dt, living_count, avg_goblin_hunger)
 
-        # Zone crossing detection (fires the wired ZoneTracker observers).
+        # Zone crossing detection: fires the wired sim-side observers (logging +
+        # zone AI) and returns the events. The player's crossing becomes a UI
+        # SimFrame event (zone_flash) for the shell — Model/View split (R3).
         if frame.sim_ticks > 0:
             zone_entities = (
                 [e for e, _ in s.npc_list if e.entity_id not in s.defeated_npcs]
                 + [s.player]
             )
-            s.world_sim.zone_tracker.check_and_fire(
+            events = s.world_sim.zone_tracker.check_and_fire(
                 zone_entities, s.tile_map, self.ctx.rooms,
                 self.ctx.current_panel[0], self.ctx.current_panel[1],
                 s.world_sim.clock.tick_count,
             )
+            for ev in events:
+                if ev.entity_name == s.player.name:
+                    frame.zone_flash = ev.to_room.name if ev.to_room else "Unknown"
+                    break
 
         # Occupancy + proximity fear / contested sources (H4).
         all_entities = (
