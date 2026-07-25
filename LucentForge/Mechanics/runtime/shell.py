@@ -32,6 +32,7 @@ from Mechanics.renderer.health_bar import draw_stat_bar
 from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.combat.casting import convert_amount
+from Mechanics.runtime.commands import Command, DEFAULT_KEY_BINDINGS
 
 
 class RuntimeMode(Enum):
@@ -68,15 +69,18 @@ class PresentationShell:
         self.run_logger = None
         self._kernel = None
 
-        # Keydown dispatch — replaces the event if/elif ladder.
-        self._keymap = {
-            pygame.K_ESCAPE: self._open_pause,
-            pygame.K_TAB:    self._cycle_hud,
-            pygame.K_i:      self._open_inventory,
-            pygame.K_o:      self._toggle_obs,
-            pygame.K_s:      self._open_save,
-            pygame.K_e:      self._open_chest,
-            pygame.K_c:      self._convert_bits,
+        # Input as Commands (R5). Physical key -> Command (remappable) and
+        # Command -> handler are two separate tables; see commands.py.
+        self._bindings = dict(DEFAULT_KEY_BINDINGS)
+        self._commands = {
+            Command.QUIT:       self._quit,
+            Command.PAUSE:      self._open_pause,
+            Command.CYCLE_HUD:  self._cycle_hud,
+            Command.INVENTORY:  self._open_inventory,
+            Command.TOGGLE_OBS: self._toggle_obs,
+            Command.SAVE:       self._open_save,
+            Command.CHEST:      self._open_chest,
+            Command.CONVERT:    self._convert_bits,
         }
 
     @property
@@ -160,14 +164,29 @@ class PresentationShell:
             print("[SAVE] New Game — starting fresh.")
 
     # ── input / modes ───────────────────────────────────────────────────────────
+    def handle_event(self, event) -> "Command | None":
+        """Translate a pygame event into a Command (or None). Remap = change
+        self._bindings; nothing here depends on the specific physical key."""
+        if event.type == pygame.QUIT:
+            return Command.QUIT
+        if event.type == pygame.KEYDOWN:
+            return self._bindings.get(event.key)
+        return None
+
+    def execute(self, command) -> None:
+        """Run a Command's handler. Directly callable for replay/tests."""
+        handler = self._commands.get(command)
+        if handler:
+            handler()
+
     def _handle_events(self) -> None:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.KEYDOWN:
-                handler = self._keymap.get(event.key)
-                if handler:
-                    handler()
+            command = self.handle_event(event)
+            if command is not None:
+                self.execute(command)
+
+    def _quit(self) -> None:
+        self.running = False
 
     def _open_pause(self) -> None:
         self.mode = RuntimeMode.PAUSED

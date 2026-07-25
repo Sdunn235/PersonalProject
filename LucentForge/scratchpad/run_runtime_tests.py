@@ -586,6 +586,61 @@ def test_shell_render():
         os.unlink(tmp_db)
 
 
+# ─── (l) Input Commands (R5) — key -> Command mapping + execute (replay) ───────
+
+def test_input_commands():
+    print("[L] Input Commands (R5) — key->Command mapping + execute() replay")
+    from Mechanics.runtime.shell import PresentationShell
+    from Mechanics.runtime.commands import Command
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tile_map, tile_map.get_need_sources())
+        shell = PresentationShell(ctx)
+        shell._kernel = kernel
+        shell._build_sprites()
+        shell._rebuild_hud_subjects()
+
+        # handle_event: physical event -> Command (or None).
+        ev_o = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_o)
+        check(shell.handle_event(ev_o) == Command.TOGGLE_OBS, "K_o -> TOGGLE_OBS")
+        check(shell.handle_event(pygame.event.Event(pygame.QUIT)) == Command.QUIT,
+              "window close -> QUIT")
+        check(shell.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_x)) is None,
+              "unbound key -> None")
+
+        # execute(): replay non-blocking commands with no pygame key events.
+        before = shell.obs_visible
+        shell.execute(Command.TOGGLE_OBS)
+        check(shell.obs_visible != before, "TOGGLE_OBS flips obs_visible")
+
+        idx0 = shell.hud_index
+        shell.execute(Command.CYCLE_HUD)
+        check(shell.hud_index == (idx0 + 1) % len(shell._hud_subjects),
+              "CYCLE_HUD advances hud_index")
+
+        shell.execute(Command.CONVERT)      # no-op with 0 bits, must not raise
+        check(True, "CONVERT executes without error")
+
+        # Remap: rebind TOGGLE_OBS to a different key, old key goes dead.
+        shell._bindings[pygame.K_p] = Command.TOGGLE_OBS
+        del shell._bindings[pygame.K_o]
+        check(shell.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_p))
+              == Command.TOGGLE_OBS, "remap: K_p -> TOGGLE_OBS")
+        check(shell.handle_event(ev_o) is None, "remap: old K_o now unbound")
+
+        shell.execute(Command.QUIT)
+        check(shell.running is False, "QUIT stops the shell")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -603,6 +658,7 @@ if __name__ == "__main__":
     test_zone_lifecycle()
     test_resolve_combat()
     test_shell_render()
+    test_input_commands()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)
