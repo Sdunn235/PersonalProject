@@ -21,7 +21,7 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
     bar_w = pw - 2 * _PAD
     bar_cx = px + _PAD + bar_w // 2   # draw_stat_bar centers on x
 
-    living = [(n, c) for n, c, _ in npc_list if n.entity_id not in defeated]
+    living = [(n, c) for n, c in npc_list if n.entity_id not in defeated]
     finite = [s for s in sources if s.is_finite]
 
     n_zone = 2 + len(living)   # ZONE header + player row + one row per living NPC

@@ -26,7 +26,7 @@ def update_proximity_fear(npc_list: list, defeated: set[str]) -> set[str]:
 
     # Collect living goblins and their grid positions
     goblins = []
-    for entity, ctrl, _ in npc_list:
+    for entity, ctrl in npc_list:
         if (entity.entity_id not in defeated
                 and entity.subtype == "goblin"):
             goblins.append((entity, ctrl))
@@ -36,7 +36,7 @@ def update_proximity_fear(npc_list: list, defeated: set[str]) -> set[str]:
 
     # Collect non-goblin NPCs
     others = []
-    for entity, ctrl, _ in npc_list:
+    for entity, ctrl in npc_list:
         if (entity.entity_id not in defeated
                 and entity.subtype != "goblin"):
             others.append((entity, ctrl))

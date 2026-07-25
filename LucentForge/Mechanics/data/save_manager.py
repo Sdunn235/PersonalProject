@@ -32,6 +32,19 @@ class SaveManager:
         ).fetchone()
         return row is not None
 
+    def snapshot_session(self, session, slot_id: int = _DEFAULT_SLOT) -> None:
+        """WorldSession adapter (Stage 4.6R / R1): snapshot a whole session,
+        deriving controllers + bag/equipment/chest serialization from it.
+        Collapses main.py's three repeated 10-arg snapshot call sites into one."""
+        self.snapshot(
+            session.world_sim, session.sources, session.npc_controllers,
+            session.player, session.player_needs, session.defeated_npcs,
+            session.combat_cooldowns, slot_id=slot_id,
+            bags=session.inv_svc.serialize_all(),
+            equipment=session.equip_svc.serialize_all(),
+            chests=session.chest_reg,
+        )
+
     def snapshot(
         self,
         world_sim,

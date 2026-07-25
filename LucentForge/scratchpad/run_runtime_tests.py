@@ -22,6 +22,7 @@ Headless. Usage (Windows PowerShell):
 import os
 import sys
 import tempfile
+import py_compile
 
 # Project root on path (mirrors smoke_test.py).
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -44,6 +45,7 @@ from Mechanics.entities.factory import create_player, create_all_npcs
 from Mechanics.world.tile_map import TileMap
 from Mechanics.ai.player import PlayerController
 from Mechanics.ai.npc_logger import log_spatial_zone
+from Mechanics.runtime.session import WorldSession  # R1 seam under test
 
 # Reuse smoke_test's tick harness verbatim (DRY — same pygame-free driver).
 from smoke_test import _tick_n
@@ -335,6 +337,70 @@ def test_item_chest_round_trip():
         os.unlink(tmp_db)
 
 
+# ─── (f) WorldSession seam (R1) — new_game + snapshot/apply_save adapters ──────
+
+def test_world_session():
+    print("[F] WorldSession (R1) — new_game() + snapshot_session/apply_save adapters")
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctxs = []
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        ctxs.append(ctx)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        sources = tile_map.get_need_sources()
+
+        session = WorldSession.new_game(ctx, tile_map, sources)
+        expected_npcs = len(create_all_npcs(ctx))
+        check(session.world_sim.clock.tick_count == 0, "new_game world_sim tick_count == 0")
+        check(session.defeated_npcs == set() and session.combat_cooldowns == {},
+              "new_game defeated/cooldowns empty")
+        check(len(session.npc_list) == expected_npcs,
+              f"new_game npc_list count == {expected_npcs}", f"got {len(session.npc_list)}")
+        check(len(session.npc_controllers) == expected_npcs,
+              "npc_controllers property matches npc_list length")
+        check(all(len(pair) == 2 for pair in session.npc_list),
+              "npc_list holds (entity, controller) 2-tuples (pygame-free)")
+        check(bool(session.chest_reg) and session.inv_svc is not None
+              and session.equip_svc is not None, "item + chest services present")
+
+        # Round-trip through the R1 adapters: snapshot_session -> apply_save.
+        _tick_n(session.world_sim, session.npc_list, session.defeated_npcs, n=300)
+        pre = (session.world_sim.clock.tick_count, session.npc_list[0][0].hp,
+               round(session.npc_list[0][0].x, 3))
+        ctx.save_manager.snapshot_session(session)
+
+        ctx2 = create_game_context(db_path=tmp_db)
+        ctxs.append(ctx2)
+        tm2 = TileMap()
+        tm2.load_real_map()
+        src2 = tm2.get_need_sources()
+        session2 = WorldSession.new_game(ctx2, tm2, src2)
+        session2.apply_save(ctx2.save_manager.restore(), ctx2)
+        post = (session2.world_sim.clock.tick_count, session2.npc_list[0][0].hp,
+                round(session2.npc_list[0][0].x, 3))
+        check(post == pre, "snapshot_session -> apply_save round-trip preserves state",
+              f"{post} != {pre}")
+    finally:
+        for c in ctxs:
+            c.db.close()
+        os.unlink(tmp_db)
+
+
+def test_main_compiles():
+    print("[G] main.py compiles (headless import/syntax check — window blocks a live run)")
+    main_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                             "main.py")
+    ok = True
+    try:
+        py_compile.compile(main_path, doraise=True)
+    except py_compile.PyCompileError as e:
+        ok = False
+        print(f"  (compile error) {e}")
+    check(ok, "main.py compiles clean")
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -346,6 +412,8 @@ if __name__ == "__main__":
     test_zone_subscriber_wiring()
     test_defeated_drives_kill()
     test_item_chest_round_trip()
+    test_world_session()
+    test_main_compiles()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)

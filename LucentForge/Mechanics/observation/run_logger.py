@@ -62,7 +62,7 @@ class RunLogger:
         self._world_w.writerow([tick, f"{day:.3f}", phase, f"{food:.1f}",
                                 f"{threat:.1f}", stage, town, src_str])
 
-        for npc, ctrl, _ in npc_list:
+        for npc, ctrl in npc_list:
             if npc.entity_id in defeated:
                 continue
             pn = get_priority_need(ctrl.needs)
@@ -116,7 +116,7 @@ class RunLogger:
                  f"Goblin raids: {self._raid_count}",
                  "-" * 52,
                  "Final NPC state:"]
-        for npc, ctrl, _ in npc_list:
+        for npc, ctrl in npc_list:
             if npc.entity_id in defeated:
                 lines.append(f"  {npc.name:10} DEFEATED")
                 continue

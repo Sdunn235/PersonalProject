@@ -11,18 +11,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 import pygame
 import settings
 
-from Mechanics.bootstrap import (create_game_context, create_needs,
-                                 create_npc_controller, create_world_sim,
-                                 apply_save, create_item_services,
-                                 rebuild_item_services,
-                                 create_chest_registry, rebuild_chest_registry)
+from Mechanics.bootstrap import create_game_context
+from Mechanics.runtime.session import WorldSession
 from Mechanics.renderer.save_menu import run_load_menu, run_save_menu
 from Mechanics.renderer.pause_menu import run_pause_menu
-from Mechanics.entities.factory import create_player, create_all_npcs, get_sprite_path
+from Mechanics.entities.factory import get_sprite_path
 from Mechanics.needs.needs_system import apply_health_drain, apply_regen, update_needs
 from Mechanics.world.tile_map import TileMap
 from Mechanics.world.world_coord import PanelEdge
-from Mechanics.ai.player import PlayerController
 from Mechanics.renderer.sprite import EntitySprite
 from Mechanics.renderer.hud import draw_hud
 from Mechanics.renderer.trap_overlay import draw_trap_markers
@@ -61,50 +57,39 @@ def main():
     tile_map = TileMap()
     tile_map.load_real_map()
     sources  = tile_map.get_need_sources()
-    world_sim = create_world_sim(sources)
 
-    # --- Inner helper: spawn fresh NPCs, player, controllers, sprites ---
-    # Closure reads world_sim at call time — rebind world_sim before calling for New Game.
-    def _spawn_entities():
-        _npc_list = []
-        for npc in create_all_npcs(ctx):
-            controller = create_npc_controller(npc, ctx, sources, tile_map,
-                                               world_sim=world_sim)
-            sprite = EntitySprite(npc, image_path=get_sprite_path(ctx, npc.entity_id),
-                                  size=settings.TILE_SIZE - 2)
-            _npc_list.append((npc, controller, sprite))
-            print(f"[SPAWN] {npc.name} at ({int(npc.x)}, {int(npc.y)})")
-        _player = create_player(ctx)
-        _player_needs = create_needs(ctx)
-        _player_ctrl = PlayerController(_player, tile_map=tile_map,
-                                        needs=_player_needs, sources=sources)
-        _player_sprite = EntitySprite(_player,
-                                      image_path=get_sprite_path(ctx, _player.entity_id),
-                                      size=settings.TILE_SIZE - 2)
-        print(f"[SPAWN] Player at ({int(_player.x)}, {int(_player.y)})  [Arrow keys to move]")
-        _defeated: set[str] = set()
-        _cooldowns: dict[str, float] = {}
-        _ctrls = [ctrl for _, ctrl, _ in _npc_list]
-        _group = pygame.sprite.Group(*[s for _, _, s in _npc_list], _player_sprite)
-        return (_npc_list, _player, _player_needs, _player_ctrl,
-                _player_sprite, _group, _ctrls, _defeated, _cooldowns)
+    # --- Presentation sprite layer (proto-shell; R4 formalizes into the shell) ---
+    # The WorldSession is pygame-free — sprites live here, keyed by entity_id.
+    def _build_sprites(sess):
+        _sprites = {}
+        for _npc, _ in sess.npc_list:
+            _sprites[_npc.entity_id] = EntitySprite(
+                _npc, image_path=get_sprite_path(ctx, _npc.entity_id),
+                size=settings.TILE_SIZE - 2)
+            print(f"[SPAWN] {_npc.name} at ({int(_npc.x)}, {int(_npc.y)})")
+        _sprites[sess.player.entity_id] = EntitySprite(
+            sess.player, image_path=get_sprite_path(ctx, sess.player.entity_id),
+            size=settings.TILE_SIZE - 2)
+        print(f"[SPAWN] Player at ({int(sess.player.x)}, {int(sess.player.y)})  "
+              f"[Arrow keys to move]")
+        _group = pygame.sprite.Group(*_sprites.values())
+        return _sprites, _group
 
-    (npc_list, player, player_needs, player_controller, player_sprite,
-     sprite_group, _npc_controllers, defeated_npcs, combat_cooldowns) = _spawn_entities()
-    inv_svc, equip_svc = create_item_services(ctx)
-    chest_reg = create_chest_registry(ctx)
+    # --- Build the fresh session + its sprite layer ---
+    session = WorldSession.new_game(ctx, tile_map, sources)
+    sprites, sprite_group = _build_sprites(session)
 
     print(f"\n[WORLD SIM] Heartbeat-1 active | "
-          f"Food={world_sim.resources.food_total:.0f} | "
-          f"Threat={world_sim.threat.threat_level:.0f} | "
-          f"Town={world_sim.town.state.value}")
+          f"Food={session.world_sim.resources.food_total:.0f} | "
+          f"Threat={session.world_sim.threat.threat_level:.0f} | "
+          f"Town={session.world_sim.town.state.value}")
     print("[MAP] Heartbeat-2 active | River barrier, region zones, bridge crossings")
     # Phase 3.4: player room-name flash — fires when player crosses a room boundary.
     # zone_flash[0] = (room_name, frames_remaining) | None
     zone_flash: list = [None]
 
     def _on_player_zone_cross(event) -> None:
-        if event.entity_name == player.name:
+        if event.entity_name == session.player.name:
             room_name = event.to_room.name if event.to_room else "Unknown"
             zone_flash[0] = (room_name, settings.ZONE_LABEL_DURATION)
 
@@ -113,12 +98,12 @@ def main():
 
     def _zone_ai_event(event) -> None:
         entity = ctrl = None
-        for npc, c, _ in npc_list:
-            if npc.name == event.entity_name and npc.entity_id not in defeated_npcs:
+        for npc, c in session.npc_list:
+            if npc.name == event.entity_name and npc.entity_id not in session.defeated_npcs:
                 entity, ctrl = npc, c
                 break
-        if entity is None and player.name == event.entity_name:
-            entity, ctrl = player, player_controller
+        if entity is None and session.player.name == event.entity_name:
+            entity, ctrl = session.player, session.player_controller
         if entity is not None and ctrl is not None:
             zone_ai.on_zone_cross(event, entity, ctrl)
 
@@ -126,14 +111,14 @@ def main():
         """Re-subscribe all ZoneTracker observers on the current world_sim.zone_tracker.
         Called at startup and on New Game so a fresh tracker gets all callbacks."""
         zone_flash[0] = None
-        world_sim.zone_tracker.subscribe(log_spatial_zone)
-        world_sim.zone_tracker.subscribe(_on_player_zone_cross)
-        world_sim.zone_tracker.subscribe(_zone_ai_event)
+        session.world_sim.zone_tracker.subscribe(log_spatial_zone)
+        session.world_sim.zone_tracker.subscribe(_on_player_zone_cross)
+        session.world_sim.zone_tracker.subscribe(_zone_ai_event)
 
     _register_zone_subscribers()
 
     print("[H4] Goblin behavior active | Hunger-driven threat, patrol/raid states, proximity fear")
-    finite_sources = [s for s in sources if s.is_finite]
+    finite_sources = [s for s in session.sources if s.is_finite]
     print(f"[H5] Resource economy active | {len(finite_sources)} finite sources: "
           + ", ".join(f"{s.label}({s.stock:.0f}/{s.capacity:.0f})" for s in finite_sources))
     print()
@@ -143,19 +128,15 @@ def main():
     if _chosen_slot is not None:
         _save_data = ctx.save_manager.restore(slot_id=_chosen_slot)
         if _save_data:
-            apply_save(_save_data, world_sim, sources, _npc_controllers,
-                       player, player_needs, defeated_npcs, combat_cooldowns)
-            rebuild_item_services(_save_data, inv_svc, equip_svc, ctx.item_repo)
-            chest_reg = rebuild_chest_registry(_save_data, ctx.chests, ctx.item_repo)
-            for _npc_e, _, _npc_sprite in npc_list:
-                if _npc_e.entity_id in defeated_npcs:
-                    _npc_sprite.kill()
+            session.apply_save(_save_data, ctx)
+            for _npc, _ in session.npc_list:
+                if _npc.entity_id in session.defeated_npcs:
+                    sprites[_npc.entity_id].kill()
             print(f"[SAVE] Session resumed from slot {_chosen_slot}.")
         else:
             print(f"[SAVE] Slot {_chosen_slot} empty — starting fresh.")
     else:
         print("[SAVE] New Game — starting fresh.")
-    tile_map.place_chests(chest_reg)
 
     # Heartbeat-6: per-run CSV log + emergence summary
     run_logger = RunLogger(settings.RUN_LOG_DIR)
@@ -165,9 +146,9 @@ def main():
 
     # --- HUD cycle state (Tab key) ---
     _hud_subjects = [
-        (player, None, "Player"),
+        (session.player, None, "Player"),
     ] + [
-        (npc, ctrl, None) for npc, ctrl, _ in npc_list
+        (npc, ctrl, None) for npc, ctrl in session.npc_list
     ]
     hud_index = 0
     obs_visible = True   # Heartbeat-6 observation panel (toggle with 'O')
@@ -189,26 +170,22 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     _result = run_pause_menu(
                         screen, clock, ctx, font,
-                        world_sim, sources, _npc_controllers,
-                        player, player_needs, defeated_npcs, combat_cooldowns,
-                        inv_svc=inv_svc, equip_svc=equip_svc,
-                        chest_reg=chest_reg,
+                        session.world_sim, session.sources, session.npc_controllers,
+                        session.player, session.player_needs, session.defeated_npcs,
+                        session.combat_cooldowns,
+                        inv_svc=session.inv_svc, equip_svc=session.equip_svc,
+                        chest_reg=session.chest_reg,
                     )
                     if _result == "quit":
                         _paused_quit = True
                         running = False
                     elif _result == "new_game":
-                        world_sim = create_world_sim(sources)
-                        (npc_list, player, player_needs, player_controller,
-                         player_sprite, sprite_group, _npc_controllers,
-                         defeated_npcs, combat_cooldowns) = _spawn_entities()
-                        inv_svc, equip_svc = create_item_services(ctx)
-                        chest_reg = create_chest_registry(ctx)
-                        tile_map.place_chests(chest_reg)
+                        session = WorldSession.new_game(ctx, tile_map, sources)
+                        sprites, sprite_group = _build_sprites(session)
                         _register_zone_subscribers()
                         _last_at_edge = None
-                        _hud_subjects = [(player, None, "Player")] + [
-                            (npc, ctrl, None) for npc, ctrl, _ in npc_list
+                        _hud_subjects = [(session.player, None, "Player")] + [
+                            (npc, ctrl, None) for npc, ctrl in session.npc_list
                         ]
                         hud_index = 0
                         run_logger = RunLogger(settings.RUN_LOG_DIR)
@@ -216,16 +193,12 @@ def main():
                         _slot_id = int(_result.split(":")[1])
                         _save_data = ctx.save_manager.restore(slot_id=_slot_id)
                         if _save_data:
-                            for _, _, _npc_s in npc_list:
-                                sprite_group.add(_npc_s)
-                            apply_save(_save_data, world_sim, sources, _npc_controllers,
-                                       player, player_needs, defeated_npcs, combat_cooldowns)
-                            rebuild_item_services(_save_data, inv_svc, equip_svc, ctx.item_repo)
-                            chest_reg = rebuild_chest_registry(_save_data, ctx.chests, ctx.item_repo)
-                            tile_map.place_chests(chest_reg)
-                            for _npc_e, _, _npc_s in npc_list:
-                                if _npc_e.entity_id in defeated_npcs:
-                                    _npc_s.kill()
+                            for _npc, _ in session.npc_list:
+                                sprite_group.add(sprites[_npc.entity_id])
+                            session.apply_save(_save_data, ctx)
+                            for _npc, _ in session.npc_list:
+                                if _npc.entity_id in session.defeated_npcs:
+                                    sprites[_npc.entity_id].kill()
                             print(f"[SAVE] Session resumed from slot {_slot_id}.")
                     # else "resume" — continue
                 elif event.key == pygame.K_TAB:
@@ -233,27 +206,20 @@ def main():
                 elif event.key == pygame.K_i:
                     from Mechanics.renderer.inventory_menu import run_inventory_menu
                     run_inventory_menu(screen, clock, ctx, font,
-                                       inv_svc, equip_svc, player)
+                                       session.inv_svc, session.equip_svc, session.player)
                 elif event.key == pygame.K_o:
                     obs_visible = not obs_visible
                 elif event.key == pygame.K_s:
                     _slot = run_save_menu(screen, clock, ctx, font)
                     if _slot is not None:
-                        ctx.save_manager.snapshot(
-                            world_sim, sources, _npc_controllers,
-                            player, player_needs, defeated_npcs, combat_cooldowns,
-                            slot_id=_slot,
-                            bags=inv_svc.serialize_all(),
-                            equipment=equip_svc.serialize_all(),
-                            chests=chest_reg,
-                        )
+                        ctx.save_manager.snapshot_session(session, slot_id=_slot)
                 elif event.key == pygame.K_e:
-                    pcol = int(player.x // settings.TILE_SIZE)
-                    prow = int(player.y // settings.TILE_SIZE)
+                    pcol = int(session.player.x // settings.TILE_SIZE)
+                    prow = int(session.player.y // settings.TILE_SIZE)
                     _adj_chest = None
                     for _dc, _dr in ((0, -1), (0, 1), (-1, 0), (1, 0)):
                         _adj_chest = next(
-                            (c for c in chest_reg.values()
+                            (c for c in session.chest_reg.values()
                              if c.col == pcol + _dc and c.row == prow + _dr),
                             None,
                         )
@@ -262,27 +228,28 @@ def main():
                     if _adj_chest:
                         from Mechanics.renderer.chest_menu import run_chest_menu
                         from Mechanics.services.outcome import OutcomeResolver
-                        run_chest_menu(screen, clock, font, _adj_chest, player,
-                                       inv_svc, equip_svc, ctx.item_repo,
+                        run_chest_menu(screen, clock, font, _adj_chest, session.player,
+                                       session.inv_svc, session.equip_svc, ctx.item_repo,
                                        OutcomeResolver())
                 elif event.key == pygame.K_c:
                     # Phase 4.5b: reliable out-of-combat Bits->Bytes conversion (§M4).
                     # Rest structures all available Bits into Bytes (fills the Byte pool).
-                    _b, _byt, _g = convert_amount(player.bit_pool, player.byte_pool,
-                                                  player.max_byte_pool, player.bit_pool)
+                    _player = session.player
+                    _b, _byt, _g = convert_amount(_player.bit_pool, _player.byte_pool,
+                                                  _player.max_byte_pool, _player.bit_pool)
                     if _g > 0:
-                        player.bit_pool, player.byte_pool = _b, _byt
+                        _player.bit_pool, _player.byte_pool = _b, _byt
                         print(f"[CONVERT] {_g * 8} Bits -> {_g} Bytes  "
-                              f"(BP {_b}/{player.max_bit_pool}, BYP {_byt}/{player.max_byte_pool})")
+                              f"(BP {_b}/{_player.max_bit_pool}, BYP {_byt}/{_player.max_byte_pool})")
 
         if not in_combat:
             # --- World simulation tick ---
-            living_count = len(npc_list) - len(defeated_npcs)
+            living_count = len(session.npc_list) - len(session.defeated_npcs)
 
             # Compute average goblin hunger for threat escalation (H4)
             goblin_hungers = []
-            for npc_e, npc_c, _ in npc_list:
-                if (npc_e.entity_id not in defeated_npcs
+            for npc_e, npc_c in session.npc_list:
+                if (npc_e.entity_id not in session.defeated_npcs
                         and npc_e.subtype == "goblin"):
                     h = next((n for n in npc_c.needs
                               if n.need_id == "hunger"), None)
@@ -291,56 +258,50 @@ def main():
             avg_goblin_hunger = (sum(goblin_hungers) / len(goblin_hungers)
                                  if goblin_hungers else 1.0)
 
-            sim_ticks = world_sim.tick(dt, living_count, avg_goblin_hunger)
-            if sim_ticks > 0 and world_sim.clock.tick_count % 30 == 0:
-                print(world_sim.status_line())
+            sim_ticks = session.world_sim.tick(dt, living_count, avg_goblin_hunger)
+            if sim_ticks > 0 and session.world_sim.clock.tick_count % 30 == 0:
+                print(session.world_sim.status_line())
 
             # Phase 3.3: zone crossing detection (player + all living NPCs)
             if sim_ticks > 0:
                 _zone_entities = (
-                    [e for e, _, _ in npc_list if e.entity_id not in defeated_npcs]
-                    + [player]
+                    [e for e, _ in session.npc_list if e.entity_id not in session.defeated_npcs]
+                    + [session.player]
                 )
-                world_sim.zone_tracker.check_and_fire(
+                session.world_sim.zone_tracker.check_and_fire(
                     _zone_entities, tile_map, ctx.rooms,
                     ctx.current_panel[0], ctx.current_panel[1],
-                    world_sim.clock.tick_count,
+                    session.world_sim.clock.tick_count,
                 )
 
             # Phase 1.5: periodic autosave
             if (sim_ticks > 0
                     and settings.AUTOSAVE_INTERVAL > 0
-                    and world_sim.clock.tick_count % settings.AUTOSAVE_INTERVAL == 0):
-                ctx.save_manager.snapshot(
-                    world_sim, sources, _npc_controllers,
-                    player, player_needs, defeated_npcs, combat_cooldowns,
-                    bags=inv_svc.serialize_all(),
-                    equipment=equip_svc.serialize_all(),
-                    chests=chest_reg,
-                )
+                    and session.world_sim.clock.tick_count % settings.AUTOSAVE_INTERVAL == 0):
+                ctx.save_manager.snapshot_session(session)
 
             # Heartbeat-6: sample world + NPC state to the run-log
             if (sim_ticks > 0
-                    and world_sim.clock.tick_count % settings.RUN_LOG_INTERVAL == 0):
-                run_logger.sample(world_sim, sources, npc_list,
-                                  defeated_npcs, world_sim.clock.tick_count)
+                    and session.world_sim.clock.tick_count % settings.RUN_LOG_INTERVAL == 0):
+                run_logger.sample(session.world_sim, session.sources, session.npc_list,
+                                  session.defeated_npcs, session.world_sim.clock.tick_count)
 
             def _grid(entity):
                 return tile_map.world_to_grid(entity.x, entity.y)
 
             all_entities = (
-                [e for e, _, _ in npc_list if e.entity_id not in defeated_npcs]
-                + [player]
+                [e for e, _ in session.npc_list if e.entity_id not in session.defeated_npcs]
+                + [session.player]
             )
             occupied_by: dict[str, tuple[int, int]] = {
                 e.entity_id: _grid(e) for e in all_entities
             }
 
             # Proximity fear + contested sources (H4)
-            contested = update_proximity_fear(npc_list, defeated_npcs)
+            contested = update_proximity_fear(session.npc_list, session.defeated_npcs)
 
-            for npc_entity, npc_ctrl, _ in npc_list:
-                if npc_entity.entity_id not in defeated_npcs:
+            for npc_entity, npc_ctrl in session.npc_list:
+                if npc_entity.entity_id not in session.defeated_npcs:
                     others = {
                         pos for eid, pos in occupied_by.items()
                         if eid != npc_entity.entity_id
@@ -351,20 +312,20 @@ def main():
                     apply_regen(npc_ctrl.needs, npc_entity, dt)
                     npc_entity.update(dt)
 
-            player_controller.update(dt)
-            player.update(dt)
-            update_needs(player_needs)
-            apply_health_drain(player_needs, player, dt)
-            apply_regen(player_needs, player, dt)
+            session.player_controller.update(dt)
+            session.player.update(dt)
+            update_needs(session.player_needs)
+            apply_health_drain(session.player_needs, session.player, dt)
+            apply_regen(session.player_needs, session.player, dt)
             sprite_group.update()
 
             # Phase 4.2: passive Intuition trap perception (§M8)
-            for _hint in perceive_traps(player, chest_reg):
+            for _hint in perceive_traps(session.player, session.chest_reg):
                 print(_hint)
 
             # Phase 3.6: panel edge detection — fires once per edge entry (edge-triggered)
-            _pcol = int(player.x // settings.TILE_SIZE)
-            _prow = int(player.y // settings.TILE_SIZE)
+            _pcol = int(session.player.x // settings.TILE_SIZE)
+            _prow = int(session.player.y // settings.TILE_SIZE)
             _edge_now: PanelEdge | None = None
             if _prow <= 0:
                 _edge_now = PanelEdge.NORTH
@@ -382,23 +343,23 @@ def main():
             _last_at_edge = _edge_now
 
             now = pygame.time.get_ticks() / 1000.0
-            for npc_entity, _, npc_sprite in npc_list:
-                if npc_entity.entity_id in defeated_npcs:
+            for npc_entity, _ in session.npc_list:
+                if npc_entity.entity_id in session.defeated_npcs:
                     continue
-                since_last = now - combat_cooldowns.get(npc_entity.entity_id, -999)
+                since_last = now - session.combat_cooldowns.get(npc_entity.entity_id, -999)
                 if since_last < COMBAT_COOLDOWN:
                     continue
-                dist = math.hypot(player.x - npc_entity.x,
-                                  player.y - npc_entity.y)
+                dist = math.hypot(session.player.x - npc_entity.x,
+                                  session.player.y - npc_entity.y)
                 if dist < COMBAT_TRIGGER_DIST:
                     in_combat = True
-                    result = run_combat(screen, clock, font, player, npc_entity, ctx,
-                                       inv_svc=inv_svc, equip_svc=equip_svc)
+                    result = run_combat(screen, clock, font, session.player, npc_entity, ctx,
+                                       inv_svc=session.inv_svc, equip_svc=session.equip_svc)
                     in_combat = False
-                    combat_cooldowns[npc_entity.entity_id] = pygame.time.get_ticks() / 1000.0
+                    session.combat_cooldowns[npc_entity.entity_id] = pygame.time.get_ticks() / 1000.0
                     if result == "win":
-                        defeated_npcs.add(npc_entity.entity_id)
-                        npc_sprite.kill()
+                        session.defeated_npcs.add(npc_entity.entity_id)
+                        sprites[npc_entity.entity_id].kill()
                         print(f"[COMBAT] Player defeated {npc_entity.name}!")
                     elif result == "lose":
                         print("[COMBAT] Player was defeated — game over.")
@@ -408,12 +369,12 @@ def main():
         # Draw
         screen.fill(settings.BG_COLOR)
         tile_map.draw(screen)
-        draw_trap_markers(screen, chest_reg, font)  # Phase 4.2 (§M8)
+        draw_trap_markers(screen, session.chest_reg, font)  # Phase 4.2 (§M8)
 
         # Zone labels already rendered by tile_map.draw(); skip source labels
         # that duplicate a zone label (FARM overlaps "Farm" zone).
         _zone_label_names = {"FARM"}  # source labels that match zone labels
-        for src in sources:
+        for src in session.sources:
             if src.label in _zone_label_names:
                 continue
             lbl = label_font.render(f"[{src.label}]", True, (255, 255, 255))
@@ -421,7 +382,7 @@ def main():
                               src.world_y + settings.LEVEL_Y - lbl.get_height() // 2))
 
         # H5: source stock bars for finite sources
-        for src in sources:
+        for src in session.sources:
             if src.is_finite:
                 bar_x = src.world_x + settings.LEVEL_X
                 bar_y = src.world_y + settings.LEVEL_Y + settings.SOURCE_BAR_OFFSET_Y
@@ -440,14 +401,15 @@ def main():
             sprite.draw_overlays(screen)
 
         _e, _ctrl, _lbl = _hud_subjects[hud_index]
-        _needs = player_needs if _ctrl is None else _ctrl.needs
-        _state = _lbl         if _ctrl is None else _ctrl.state
+        _needs = session.player_needs if _ctrl is None else _ctrl.needs
+        _state = _lbl               if _ctrl is None else _ctrl.state
         draw_hud(screen, _e, _needs, _state, font, controller=_ctrl)
 
         # Heartbeat-6: world-overview observation panel (left margin)
         if obs_visible:
-            draw_observation_panel(screen, world_sim, sources, npc_list,
-                                   defeated_npcs, font, player=player)
+            draw_observation_panel(screen, session.world_sim, session.sources,
+                                   session.npc_list, session.defeated_npcs, font,
+                                   player=session.player)
 
         # Phase 3.4: zone-crossing room-name flash (centered above tile map)
         if zone_flash[0] is not None:
@@ -463,12 +425,13 @@ def main():
                          pygame.Rect(settings.LEVEL_X - 2, settings.LEVEL_Y - 2,
                                      settings.LEVEL_W + 4, settings.LEVEL_H + 4), 2)
 
-        day = world_sim.clock.day
+        day = session.world_sim.clock.day
+        _player = session.player
         info_txt = font.render(
-            f"Day {day:.2f}   HP {player.hp:.0f}/{player.max_hp}"
-            f"   SP {player.cycles}/{player.max_cycles}"
-            f"   BP {player.bit_pool}/{player.max_bit_pool}"
-            f"   BYP {player.byte_pool}/{player.max_byte_pool}",
+            f"Day {day:.2f}   HP {_player.hp:.0f}/{_player.max_hp}"
+            f"   SP {_player.cycles}/{_player.max_cycles}"
+            f"   BP {_player.bit_pool}/{_player.max_bit_pool}"
+            f"   BYP {_player.byte_pool}/{_player.max_byte_pool}",
             True, settings.TEXT_COLOR)
         screen.blit(info_txt, (settings.LEVEL_X, 10))
 
@@ -476,15 +439,9 @@ def main():
 
     # Phase 1.5: save-on-quit (window-close path only; pause-menu quit saves internally)
     if settings.SAVE_ON_QUIT and not _paused_quit:
-        ctx.save_manager.snapshot(
-            world_sim, sources, _npc_controllers,
-            player, player_needs, defeated_npcs, combat_cooldowns,
-            bags=inv_svc.serialize_all(),
-            equipment=equip_svc.serialize_all(),
-            chests=chest_reg,
-        )
+        ctx.save_manager.snapshot_session(session)
 
-    run_logger.finalize(world_sim, npc_list, defeated_npcs)
+    run_logger.finalize(session.world_sim, session.npc_list, session.defeated_npcs)
     pygame.quit()
     print("\n[EXIT] Session ended.")
 
