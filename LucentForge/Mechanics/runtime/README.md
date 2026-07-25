@@ -2,10 +2,19 @@
 
 The boundary between the **simulation** (headless, pygame-free) and the
 **presentation** (the pygame shell). Introduced by the Stage 4.6R runtime refactor
-to move the app/session lifecycle out of `main.py`'s single 493-line `main()`.
+to move the app/session lifecycle out of `main.py`'s single 493-line `main()`
+(now 46 lines — a thin composition root).
 
-This directory is built up incrementally, one behavior-preserving stage per commit
-(R1–R6). Each stage keeps `scratchpad/run_all_tests.py` green.
+**Canonical doctrine:** `docs/bible/lucentforge_runtime_architecture_addendum_v1.md`
+(§RT1–§RT8) — the requirements this package satisfies, including the **Ripple Kernel**
+pattern: the kernel *senses* (time + player intent as a `Command`), *thinks* (steps the
+authoritative sim), and emits a `SimFrame`; the shell *acts* (renders/persists). The
+player is just another agent injecting intent into a kernel that runs **with or without
+a shell attached** — the same Sense→Think→Act shape the NPC brains use, one level up.
+This boundary is also the SimCore / Unreal port seam.
+
+Built incrementally, one behavior-preserving stage per commit (R1–R6); each keeps
+`scratchpad/run_all_tests.py` green.
 
 ## Contents
 
