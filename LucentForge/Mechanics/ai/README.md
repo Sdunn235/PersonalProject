@@ -75,7 +75,7 @@ Both inject `fear` via the same `chemicals.add_fear()` pathway. They are additiv
 
 When a non-urgent entity is **stressed** by its current region's affinity and **remembers** a more comfortable region, `IdleState._try_relocate` routes it into `RELOCATING` toward that region. Priority order in `idle.py`: urgent survival need → active `RAIDING` → **comfort-relocate** → `PATROLLING` → idle. So relocation outranks aimless patrol/wander but never a raid or a real need.
 
-- Learned per-region comfort lives in `Memory` (EMA, `settings.MEMORY_EMA_ALPHA`); `best_region()` returns only a positively-remembered region.
+- Learned per-region comfort lives in `Memory` (EMA, `settings.MEMORY_EMA_ALPHA`); `best_region()` returns only a positively-remembered region. Persists across save/load (C0049) — NPCs keep their comfortable-ground memory through a reload.
 - Comfort's dampening role: an entity already at/above `settings.COMFORT_CONTENT_THRESHOLD` stays put.
 - Fully additive — below `COMFORT_RELOCATE_STRESS_THRESHOLD` (or already content, or no better memory) nothing fires and behavior matches pre-Phase-B.
 

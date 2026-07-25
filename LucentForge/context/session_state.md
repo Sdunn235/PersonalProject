@@ -1,8 +1,30 @@
-# Session State — Last updated: 2026-07-19 (Affinity Behavioral Loop Phase A + B — affinity now drives behavior; C0040–C0042)
+# Session State — Last updated: 2026-07-24 (Affinity Behavioral Loop arc COMPLETE — C0040–C0050)
 
 > **Source-of-truth note.** This file drifted (was frozen at Stage 3 while code reached Stage 4.5b). Corrected 2026-07-18 during the Grace Migration Arc. Always cross-check `git log` before trusting a stage claim here.
 
-## Affinity Behavioral Loop (making affinity LIVE) — Phase A + B COMPLETE (C0040–C0042)
+## Affinity Behavioral Loop (making affinity LIVE) — arc COMPLETE (C0040–C0050)
+
+**The arc that made affinity live is closed.** The full loop: region affinity → emitter → comfort/stress/`affinity_strain` chemicals → drive urgency + relocate behavior + learned region memory → perceived need urgency, all legible in the HUD/panel/run-logger, and (C0049) surviving save/load.
+
+| Commit | Delta |
+|--------|-------|
+| C0040–C0042 | Phase A emitter + stress receptor; Phase B learned region EMA + `RELOCATING` drive (detail below) |
+| C0043 | Phase B session_state closeout |
+| C0044 | Fix affinity comfort always +0.0 — stale SQLite entity blobs (delete-DB reseed) |
+| C0045 | Town-affinity content pass (4 settlement regions gain affinity) |
+| C0046 | Phase C `affinity_strain` — sustained hostile exposure elevates perceived need urgency |
+| C0047 | HUD biochem detail section (Tab-cycled NPC panel) |
+| C0048 | Needs/Wants/Drives bible addendum (§9 tiered model → biochem bridge) |
+| **C0049** | **Region-comfort memory persists across save/load** (nested `{sources, regions}` blob; no migration; legacy saves upgrade) |
+| **C0050** | **Arc closeout** — bible §B8 deferred-seams list, README audit, this header |
+
+**Deferred to their own future arcs (documented in biochem addendum §B8):** §M6 affinity combat, chemical reactions, heritable genetics / Hob spark, legacy-injector retrofit (§B2), Derived-affinity emergence, birth-generation rolls, resonance beyond weapon, Light/Void legacy migration. Tier 2/3 *wants* (§W7) are a separate track.
+
+**Verification:** `run_affinity_behavior_tests.py` 25/25 (incl. §D save/restore round-trip); grace, stage3 6/6, attribute + combat parity all green. Live `py main.py` spot-check is Shawn's gate (window blocks headless): build an NPC's region comfort, save, reload, confirm the biochem panel shows the remembered best_region instead of relearning from zero.
+
+**Next arc (Shawn's pick):** first Tier 2/3 want implementation (Social Belonging / Gobby, or Knowledge/Curiosity), or the legacy-injector emitter retrofit, or a domain switch. LucentForge commits are **local only** — push gated on Shawn.
+
+### Phase A + B detail (C0040–C0042)
 
 **GPT Caelum's "Priority 3" arc — the first behavioral loop that *consumes* affinity.** Design canon: `docs/bible/lucentforge_biochem_affinity_addendum_v1.md` (§B1–B6, Creatures-style emitter/receptor). Commits **local only** (LucentForge push gated on Shawn).
 

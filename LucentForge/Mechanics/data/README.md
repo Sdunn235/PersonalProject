@@ -81,6 +81,8 @@ lucentforge.db  ──reload()──►  SqliteDao (in-memory dicts)  ──► 
 | `entity_state` | `(slot_id, entity_id)` | HP, position, needs, traits, chemicals, memory |
 | `game_state` | `slot_id` | Defeated NPCs, combat cooldowns |
 
+The `memory` column is a nested JSON blob `{sources, regions}` (C0049): source-quality memory plus per-region affinity-comfort EMA. Legacy flat blobs (`{label: {…}}`) are detected and upgraded on restore. `chemicals` (including `affinity_strain`) serializes generically, so new chemicals persist without a schema change.
+
 All tables include a `slot_id INTEGER` column — Phase 1.5 uses slot 0; Phase 1.6 adds a slot-picker UI without schema changes.
 
 **API (via `ctx.save_manager`):**

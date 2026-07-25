@@ -49,7 +49,7 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 - Comfort emits two chemicals: **`comfort`** (positive part of the score) and **`stress`** (negative part). Both decay naturally.
 - **Receptor effect (Phase A — built, C0040):** `stress` joins the drive urgency multiplier alongside pain and fear — a stressed entity acts more urgently and settles less. Additive: with `stress = 0`, behavior is unchanged.
 - **Behavior (Phase B — built, C0042):** sustained `stress` raises a relocate/comfort priority so an entity with no urgent survival need drifts toward remembered-comfortable ground; entities **learn** region comfort (an EMA per region), so two same-affinity beings diverge by lived experience (Grace §14.2).
-  - *Learned memory:* `Memory.record_region_comfort` / `best_region` blend each tick's comfort into a per-region EMA (`settings.MEMORY_EMA_ALPHA`), defaulting to `0.0` (unknown = neutral). `best_region` only returns a **positively** remembered region.
+  - *Learned memory:* `Memory.record_region_comfort` / `best_region` blend each tick's comfort into a per-region EMA (`settings.MEMORY_EMA_ALPHA`), defaulting to `0.0` (unknown = neutral). `best_region` only returns a **positively** remembered region. **Persists across save/load (C0049):** `Memory._regions` rides a nested `{sources, regions}` memory blob (no schema migration); legacy flat saves upgrade cleanly with region memory empty.
   - *Relocate drive:* `IdleState` routes a non-urgent, stressed entity toward its best remembered region via a distinct **`RELOCATING`** state (legibility — §B1). It outranks patrol/idle-wander but **never** an active raid or an urgent survival need.
   - *Comfort's dampening/settling role:* an entity already at/above `settings.COMFORT_CONTENT_THRESHOLD` comfort stays put — comfort suppresses the urge to move.
   - *Thresholds:* `COMFORT_RELOCATE_STRESS_THRESHOLD`, `COMFORT_RELOCATE_MARGIN`, `COMFORT_CONTENT_THRESHOLD` (settings). Additive: below threshold / already content → no relocate → byte-identical to pre-Phase-B.
@@ -93,3 +93,23 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 4. `stress` raising increases drive urgency monotonically; `stress = 0` reproduces pre-arc urgency exactly.
 5. (Phase B — built) region-comfort memory is an EMA; a comfortable region's preference rises with repeat exposure; `best_region` picks the highest positive and is `None` when only neutral/negative regions are known. A stressed, non-urgent entity with a better-remembered region enters `RELOCATING`; with `stress = 0` (or already content) it does not (parity).
 6. Legibility: comfort/stress and current-region comfort appear in the observation panel and run-logger; Phase B adds best-remembered region + active relocate target (panel) and `best_region`/`best_region_pref`/`relocating` columns (npcs.csv).
+7. (C0049) Region-comfort memory survives a real `SaveManager.snapshot()`/`restore()`+`apply_save()` round-trip (EMA + `best_region` preserved); legacy flat memory blobs still restore `_sources` with `_regions` empty.
+
+---
+
+## §B8 — Arc Status & Deferred Seams
+
+**Affinity Behavioral Loop arc — COMPLETE (C0040–C0050).** The comfort/stress/strain substrate (§B4, §B7), learned region memory + relocate drive (§B4), town-region affinity content, and the HUD biochem panel are built, tested, and — as of C0049 — persist across save/load. `affinity_strain` and all chemicals ride the generic chemicals save blob; learned region comfort (`Memory._regions`) rides the nested memory blob.
+
+The following affinity work is **designed but deferred to its own future arc** — none block this arc's close. Each is doctrine elsewhere; this list is a pointer, not a restatement:
+
+- **Affinity combat** — §M6 (`stats_magic_addendum_v1.md`). Held until the Grace lattice data model is stable; must express *behavior* over flat ±%, and needs affinity threaded into combat (Fighter + room-into-combat).
+- **Chemical reactions** (`r1+r2 → p1+p2`) — §B1. The next Creatures layer.
+- **Heritable genetics / Hob "innate spark"** — §B1, §M5. Affinity from DNA at birth-generation.
+- **Legacy-injector retrofit** — §B2. Re-express `proximity`/`zone_ai` ad-hoc injections as emitters (parity-gated).
+- **Derived-affinity emergence conditions** — Grace §6.3–§6.4. When plural primals express as a Derived.
+- **Birth-generation affinity rolls** — §M5, Grace §7.5. Runtime roll from race weights vs authored JSON.
+- **Resonance beyond weapon** — §M7, Grace §11. Multi-domain resonance (being/region/item/ritual…).
+- **Light/Void legacy migration** — Grace §17. Per-entity conversion of any residual six-element data.
+
+Tier 2/3 *wants* (`needs_wants_drives_addendum_v1.md` §W7) are a separate track, not affinity.
