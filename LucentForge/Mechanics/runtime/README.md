@@ -13,7 +13,7 @@ This directory is built up incrementally, one behavior-preserving stage per comm
 |------|-------|------|
 | `session.py` | **R1 (C0052)** / **R3 (C0054)** | `WorldSession` — the live object graph as a **pygame-free** dataclass: world_sim, sources, tile_map, player (+needs/controller), `npc_list` of `(entity, controller)` pairs, defeated/cooldown bookkeeping, item + chest services, a `ZoneAIResponder`. `new_game()` is a Factory over the existing `bootstrap.create_*` primitives; `apply_save()` folds the load sequence (apply-save + item/chest rebuild + chest placement) into one call. **R3:** `new_game()` also wires the sim-side zone observers (`log_spatial_zone` + `_dispatch_zone_ai`) via `wire_zone_observers()` — so a fresh tracker always gets them (the C0026 re-subscribe fix, now automatic). |
 | `kernel.py` | **R2 (C0053)** | `SimulationKernel` — owns a `WorldSession` + `GameContext`; `step(dt, now) -> SimFrame` advances the sim with **no pygame** (no render, no persistence, no console I/O). Returns a `SimFrame` of events (`combat_trigger`, `trap_hints`, `panel_edge`, `zone_flash`, `sim_ticks`). Lifecycle `new_session()/start_new_session()/load()/save()` wraps R1. |
-| `shell.py` | R4 (planned) | `PresentationShell` — pygame view: screen/clock/fonts, the sprite-per-entity map, HUD, and the `RuntimeMode` state machine. Currently the shell lives inline in `main.py`. |
+| `shell.py` | **R4 (C0055)** | `PresentationShell` — the pygame view over a kernel: owns screen/clock/fonts, the sprite-per-entity map + group, HUD state (tab index, obs toggle), and the zone-flash countdown. `run(kernel)` is the driver loop (input → `kernel.step` → react to the `SimFrame` → render). A `RuntimeMode` enum (WORLD/COMBAT/PAUSED/INVENTORY/CHEST/SAVE_MENU) labels the interaction context, mirroring the `NPCController` state machine; the keydown dispatch replaces the old if/elif ladder. |
 
 ## Design rules
 
@@ -35,9 +35,13 @@ This directory is built up incrementally, one behavior-preserving stage per comm
 ## Combat & orchestration boundary (R2)
 
 - **Combat is detected in the kernel, run by the shell.** `step()` returns
-  `SimFrame.combat_trigger` (the entity to fight); the shell runs the blocking
-  `run_combat` modal and, on a win, applies the defeat back onto the session
-  (`defeated_npcs.add` + sprite kill). R4 formalizes this as a `COMBAT` mode.
+  `SimFrame.combat_trigger` (the entity to fight); in `COMBAT` mode the shell runs
+  the blocking `run_combat` modal, then reports the result to
+  `kernel.resolve_combat(entity, result, now)` — the kernel applies the model
+  change (records the cooldown, marks the entity defeated on a win) and returns
+  whether it died; the shell reacts by killing the sprite (view). Then back to WORLD.
+- **`main.py` is a thin composition root** — `pygame.init()` → build ctx / world
+  scope / `SimulationKernel` / `PresentationShell` → `shell.run(kernel)`.
 - **Periodic orchestration stays in the shell.** Autosave, run-log sampling, and
   the status-line print are policies driven by `SimFrame.sim_ticks` — they are not
   simulation, so `step()` stays free of DB writes, file I/O, and console output.

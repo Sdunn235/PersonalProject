@@ -517,6 +517,75 @@ def test_zone_lifecycle():
         os.unlink(tmp_db)
 
 
+# ─── (j) Combat handoff (R4) — kernel.resolve_combat ──────────────────────────
+
+def test_resolve_combat():
+    print("[J] kernel.resolve_combat (R4) — win defeats + returns died; lose does not")
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tile_map, tile_map.get_need_sources())
+
+        npc = kernel.session.npc_list[0][0]
+        died = kernel.resolve_combat(npc, "win", now=5.0)
+        check(died is True, "win -> died True")
+        check(npc.entity_id in kernel.session.defeated_npcs, "win adds NPC to defeated set")
+        check(kernel.session.combat_cooldowns[npc.entity_id] == 5.0, "win records cooldown")
+
+        npc2 = kernel.session.npc_list[1][0]
+        died2 = kernel.resolve_combat(npc2, "lose", now=6.0)
+        check(died2 is False, "lose -> died False")
+        check(npc2.entity_id not in kernel.session.defeated_npcs, "lose does not defeat NPC")
+        check(kernel.session.combat_cooldowns[npc2.entity_id] == 6.0, "lose still records cooldown")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
+# ─── (k) PresentationShell (R4) — builds sprites + renders a frame headlessly ──
+
+def test_shell_render():
+    print("[K] PresentationShell (R4) — sprite build + full render path, no crash")
+    from Mechanics.runtime.shell import PresentationShell, RuntimeMode
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tile_map, tile_map.get_need_sources())
+
+        shell = PresentationShell(ctx)
+        shell._kernel = kernel
+        check(shell.mode == RuntimeMode.WORLD, "shell starts in WORLD mode")
+        shell._build_sprites()
+        check(len(shell.sprites) == len(kernel.session.npc_list) + 1,
+              "one sprite per NPC + player", f"got {len(shell.sprites)}")
+        shell._rebuild_hud_subjects()
+
+        # Full render path against a real (dummy) display — must not raise.
+        dt = 1.0 / settings.SIM_TICK_RATE if settings.SIM_TICK_RATE > 0 else 1.0 / 60.0
+        frame = kernel.step(dt, now=0.0)
+        shell._render(frame)
+        check(True, "render path ran without error")
+
+        # HUD tab cycle stays in range across a full wrap.
+        n = len(shell._hud_subjects)
+        for _ in range(n + 1):
+            shell._cycle_hud()
+        check(0 <= shell.hud_index < n, "hud cycle stays in range after wrap")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -532,6 +601,8 @@ if __name__ == "__main__":
     test_main_compiles()
     test_kernel_headless()
     test_zone_lifecycle()
+    test_resolve_combat()
+    test_shell_render()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)

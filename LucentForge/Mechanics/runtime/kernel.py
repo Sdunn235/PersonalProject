@@ -67,6 +67,16 @@ class SimulationKernel:
         """Patch the current session in place from restore() data."""
         self.session.apply_save(save_data, self.ctx)
 
+    def resolve_combat(self, entity, result: str, now: float) -> bool:
+        """Apply a combat outcome to the session (model side of the handoff, R4).
+        Records the cooldown; on a win marks the entity defeated. Returns True if
+        the entity died so the shell can kill its sprite (view side)."""
+        self.session.combat_cooldowns[entity.entity_id] = now
+        if result == "win":
+            self.session.defeated_npcs.add(entity.entity_id)
+            return True
+        return False
+
     def save(self, slot_id: int = 0) -> None:
         """Snapshot the current session to a slot."""
         self.ctx.save_manager.snapshot_session(self.session, slot_id=slot_id)
