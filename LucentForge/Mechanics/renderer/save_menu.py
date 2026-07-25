@@ -122,16 +122,30 @@ def run_load_menu(
     clock: pygame.time.Clock,
     ctx: GameContext,
     font: pygame.font.Font,
+    show_new_game: bool = True,
+    saved_only: bool = False,
 ) -> int | None:
-    """Modal launch menu — all 4 slots plus a New Game row.
+    """Modal load menu.
 
     Returns slot_id (0-3) to load, or None for New Game / cancel.
-    Selecting an empty slot is treated as New Game.
+
+    - Launch (defaults): all 4 slots + a New Game row; an empty slot = New Game.
+    - Pause → Load (``show_new_game=False, saved_only=True``): only slots that
+      actually hold a save; no New Game row (the pause menu has its own New Game).
     """
     all_slot_ids = [0, 1, 2, 3]
-    labels = [_SLOT_LABELS[sid] for sid in all_slot_ids]
-    slot_infos = ctx.save_manager.list_all_slots(all_slot_ids)
-    n_options = len(all_slot_ids) + 1   # 4 slots + New Game
+    all_infos = ctx.save_manager.list_all_slots(all_slot_ids)
+    if saved_only:
+        pairs = [(sid, info) for sid, info in zip(all_slot_ids, all_infos)
+                 if info is not None]
+    else:
+        pairs = list(zip(all_slot_ids, all_infos))
+    slot_ids   = [sid for sid, _ in pairs]
+    slot_infos = [info for _, info in pairs]
+    labels     = [_SLOT_LABELS[sid] for sid in slot_ids]
+
+    n_slots   = len(slot_ids)
+    n_options = n_slots + (1 if show_new_game else 0)
     cursor = 0
 
     fonts = (
@@ -148,25 +162,34 @@ def run_load_menu(
             if event.type == pygame.QUIT:
                 return None
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return None
+                if n_options == 0:
+                    continue                                 # nothing selectable
                 if event.key == pygame.K_UP:
                     cursor = (cursor - 1) % n_options
                 elif event.key == pygame.K_DOWN:
                     cursor = (cursor + 1) % n_options
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                    if cursor == len(all_slot_ids):          # New Game row
+                    if show_new_game and cursor == n_slots:  # New Game row
                         return None
                     if slot_infos[cursor] is None:           # empty slot → New Game
                         return None
-                    return all_slot_ids[cursor]
-                elif event.key == pygame.K_ESCAPE:
-                    return None
+                    return slot_ids[cursor]
 
         screen.fill(settings.BG_COLOR)
-        _draw_slot_menu(
-            screen, "LOAD GAME", slot_infos, labels, cursor,
-            "[↑↓] Select    [Enter] Confirm    [Esc] Cancel",
-            show_new_game=True, fonts=fonts,
-        )
+        if n_options == 0:
+            _draw_slot_menu(
+                screen, "LOAD GAME", [], [], cursor,
+                "No saved games    [Esc] Back",
+                show_new_game=False, fonts=fonts,
+            )
+        else:
+            _draw_slot_menu(
+                screen, "LOAD GAME", slot_infos, labels, cursor,
+                "[↑↓] Select    [Enter] Confirm    [Esc] Cancel",
+                show_new_game=show_new_game, fonts=fonts,
+            )
         pygame.display.flip()
 
 

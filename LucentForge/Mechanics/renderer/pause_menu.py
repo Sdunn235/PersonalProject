@@ -73,7 +73,11 @@ def run_pause_menu(
                             )
                         # fall through — stay in pause menu after save
                     if choice == "Load":
-                        _slot = run_load_menu(screen, clock, ctx, font)
+                        # Saved games only — no New Game row here (the pause menu
+                        # has its own New Game option, and the load-modal New Game
+                        # row was a dead no-op from this path).
+                        _slot = run_load_menu(screen, clock, ctx, font,
+                                              show_new_game=False, saved_only=True)
                         if _slot is not None:
                             return f"load:{_slot}"
                         # None = cancelled — stay in pause menu
