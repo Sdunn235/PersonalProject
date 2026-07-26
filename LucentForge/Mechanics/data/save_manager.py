@@ -139,7 +139,11 @@ class SaveManager:
                         json.dumps(ctrl.brain.traits.as_dict()),
                         json.dumps(mem_data),
                         ctrl.state,
-                        json.dumps({}),
+                        json.dumps({
+                            "target": ctrl.target_source.label if ctrl.target_source else None,
+                            "path": ctrl.path,
+                            "path_index": ctrl.path_index,
+                        }),
                         json.dumps((bags or {}).get(npc.entity_id, [])),
                     ),
                 )
@@ -259,6 +263,7 @@ class SaveManager:
                     "traits":    json.loads(row["traits"]),
                     "memory":    json.loads(row["memory"]),
                     "ai_state":  row["ai_state"],
+                    "ai_data":   json.loads(row["ai_data"]) if row["ai_data"] else {},
                     "bag":       json.loads(row["bag"]) if row["bag"] else [],
                 }
                 for row in entity_rows

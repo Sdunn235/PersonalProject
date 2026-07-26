@@ -146,6 +146,23 @@ def apply_save(
                 last_visit_tick=reg_entry["last_visit_tick"],
             )
 
+        # Behavioral state (ai_state + ai_data). Set directly — no _set_state()
+        # enter() re-trigger — so the NPC resumes exactly what it was doing (state
+        # + target + path) instead of snapping to IDLE. Fixes the long-standing
+        # save/load IDLE-reset gap and underpins faithful rewind. MovingState guards
+        # an empty/exhausted path (-> IDLE), so legacy saves (empty ai_data) degrade
+        # gracefully.
+        _ai_state = edata.get("ai_state")
+        if _ai_state and _ai_state in ctrl._states:
+            ctrl.state = _ai_state
+            ctrl._current_state = ctrl._states[_ai_state]
+        _ai = edata.get("ai_data") or {}
+        _tlabel = _ai.get("target")
+        ctrl.target_source = (next((s for s in sources if s.label == _tlabel), None)
+                              if _tlabel else None)
+        ctrl.path = [tuple(p) for p in _ai.get("path", [])]
+        ctrl.path_index = _ai.get("path_index", 0)
+
     # Restore player entity
     if player.entity_id in entity_data:
         pdata = entity_data[player.entity_id]

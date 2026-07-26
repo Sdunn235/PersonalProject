@@ -737,6 +737,60 @@ def test_glass_box_inspector():
         os.unlink(tmp_db)
 
 
+# ─── (o) Controller behavioral state survives save/load (A1b-i) ───────────────
+
+def test_controller_state_persist():
+    print("[O] Controller state (A1b-i) — behavioral state survives save/load (not IDLE)")
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctxs = []
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        ctxs.append(ctx)
+        tm = TileMap(); tm.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tm, tm.get_need_sources())
+        # Evolve via kernel.step (which runs the NPC controllers, unlike _tick_n)
+        # until at least one NPC is in a non-IDLE state (goblins patrol fast).
+        for i in range(80):
+            kernel.step(1.0, now=float(i))
+
+        subject = None
+        for npc, ctrl in kernel.session.npc_list:
+            if ctrl.state != "IDLE":
+                subject = (npc.entity_id, ctrl.state,
+                           ctrl.target_source.label if ctrl.target_source else None)
+                break
+        check(subject is not None,
+              "at least one NPC is non-IDLE after evolving (test is meaningful)")
+        if subject is None:
+            return
+        eid, exp_state, exp_target = subject
+
+        kernel.save(1)
+        ctx2 = create_game_context(db_path=tmp_db)
+        ctxs.append(ctx2)
+        tm2 = TileMap(); tm2.load_real_map()
+        kernel2 = SimulationKernel.new_session(ctx2, tm2, tm2.get_need_sources())
+        kernel2.load(ctx2.save_manager.restore(slot_id=1))
+
+        rctrl = next(c for n, c in kernel2.session.npc_list if n.entity_id == eid)
+        check(rctrl.state == exp_state,
+              f"restored NPC keeps state '{exp_state}' (was IDLE-reset before)",
+              f"got '{rctrl.state}'")
+        rtarget = rctrl.target_source.label if rctrl.target_source else None
+        check(rtarget == exp_target,
+              f"restored NPC keeps target '{exp_target}'", f"got '{rtarget}'")
+
+        # Restored states must run without error (step the kernel, which runs them).
+        for i in range(30):
+            kernel2.step(1.0, now=float(1000 + i))
+        check(True, "restored behavioral states tick without error")
+    finally:
+        for c in ctxs:
+            c.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -757,6 +811,7 @@ if __name__ == "__main__":
     test_input_commands()
     test_glass_box_pause_step()
     test_glass_box_inspector()
+    test_controller_state_persist()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)
