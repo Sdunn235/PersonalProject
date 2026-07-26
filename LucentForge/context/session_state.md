@@ -26,7 +26,7 @@ characterization suite now). Controls:
 
 **Next (Arc B — "The World Opens"):** existing zones → real panels with transitions (data-driven map
 loader) + a greenfield dialogue/choice system + first Forge story-arc panels. Then Arc C (real-time ATB
-combat). Roadmap approved 2026-07-25. Commits pushed through C0063.
+combat). Roadmap approved 2026-07-25. Pushed through **C0065** (Arc A + rewind polish: silent capture + back-tick sprite sync).
 
 ## Stage 4.6R Runtime Ownership Refactor — arc COMPLETE (C0051–C0058, 2026-07-25)
 
