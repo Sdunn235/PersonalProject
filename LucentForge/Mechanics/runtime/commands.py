@@ -27,6 +27,8 @@ class Command(Enum):
     SAVE       = "SAVE"        # open the save-slot menu
     CHEST      = "CHEST"       # interact with an adjacent chest
     CONVERT    = "CONVERT"     # rest: convert Bits -> Bytes (§M4)
+    PAUSE_SIM  = "PAUSE_SIM"   # Glass Box: freeze/unfreeze the simulation
+    STEP_SIM   = "STEP_SIM"    # Glass Box: advance one sim tick while frozen
 
 
 # Default physical-key -> Command bindings. Remappable: copy this dict, edit the
@@ -39,4 +41,6 @@ DEFAULT_KEY_BINDINGS = {
     pygame.K_s:      Command.SAVE,
     pygame.K_e:      Command.CHEST,
     pygame.K_c:      Command.CONVERT,
+    pygame.K_p:      Command.PAUSE_SIM,   # freeze/unfreeze the sim (Glass Box)
+    pygame.K_PERIOD: Command.STEP_SIM,    # step one tick while frozen
 }

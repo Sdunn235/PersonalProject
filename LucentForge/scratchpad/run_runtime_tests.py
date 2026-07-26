@@ -571,8 +571,8 @@ def test_shell_render():
 
         # Full render path against a real (dummy) display — must not raise.
         dt = 1.0 / settings.SIM_TICK_RATE if settings.SIM_TICK_RATE > 0 else 1.0 / 60.0
-        frame = kernel.step(dt, now=0.0)
-        shell._render(frame)
+        kernel.step(dt, now=0.0)
+        shell._render()
         check(True, "render path ran without error")
 
         # HUD tab cycle stays in range across a full wrap.
@@ -641,6 +641,54 @@ def test_input_commands():
         os.unlink(tmp_db)
 
 
+# ─── (m) Glass Box A1 — sim freeze + single-step ──────────────────────────────
+
+def test_glass_box_pause_step():
+    print("[M] Glass Box A1 (Arc A) — sim freeze (P) + single-step (.)")
+    from Mechanics.runtime.shell import PresentationShell
+    from Mechanics.runtime.commands import Command
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tile_map, tile_map.get_need_sources())
+        shell = PresentationShell(ctx)
+        shell._kernel = kernel
+        shell._build_sprites()
+
+        check(shell.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_p))
+              == Command.PAUSE_SIM, "P -> PAUSE_SIM")
+        check(shell.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_PERIOD))
+              == Command.STEP_SIM, ". -> STEP_SIM")
+
+        check(shell._paused_sim is False, "sim starts unpaused")
+        shell.execute(Command.PAUSE_SIM)
+        check(shell._paused_sim is True, "PAUSE_SIM freezes the sim")
+
+        shell._step_once = False
+        shell.execute(Command.STEP_SIM)
+        check(shell._step_once is True, "STEP_SIM requests a step while frozen")
+
+        t0 = shell.session.world_sim.clock.tick_count
+        shell._advance_one_tick(now=1.0)
+        check(shell.session.world_sim.clock.tick_count == t0 + 1,
+              "advance_one_tick advances exactly one tick",
+              f"{t0} -> {shell.session.world_sim.clock.tick_count}")
+
+        shell.execute(Command.PAUSE_SIM)
+        check(shell._paused_sim is False, "PAUSE_SIM again unfreezes")
+        shell._step_once = False
+        shell.execute(Command.STEP_SIM)
+        check(shell._step_once is False, "STEP_SIM ignored while running")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -659,6 +707,7 @@ if __name__ == "__main__":
     test_resolve_combat()
     test_shell_render()
     test_input_commands()
+    test_glass_box_pause_step()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)

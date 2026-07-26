@@ -66,6 +66,8 @@ class PresentationShell:
         self.mode = RuntimeMode.WORLD
         self.running = True
         self._paused_quit = False               # pause-menu quit saves internally
+        self._paused_sim = False                # Glass Box: sim frozen (P)
+        self._step_once = False                 # Glass Box: advance one tick request (.)
         self.run_logger = None
         self._kernel = None
 
@@ -81,6 +83,8 @@ class PresentationShell:
             Command.SAVE:       self._open_save,
             Command.CHEST:      self._open_chest,
             Command.CONVERT:    self._convert_bits,
+            Command.PAUSE_SIM:  self._toggle_pause_sim,
+            Command.STEP_SIM:   self._request_step,
         }
 
     @property
@@ -101,11 +105,15 @@ class PresentationShell:
             dt = self.clock.tick(settings.FPS) / 1000.0
             self._handle_events()
             now = pygame.time.get_ticks() / 1000.0
-            frame = kernel.step(dt, now)
-            self._orchestrate(frame)
-            self.sprite_group.update()   # sync sprites to entity state
-            self._react(frame)
-            self._render(frame)
+            if not self._paused_sim:
+                frame = kernel.step(dt, now)
+                self._orchestrate(frame)
+                self.sprite_group.update()   # sync sprites to entity state
+                self._react(frame)
+            elif self._step_once:            # Glass Box: single-step the frozen sim
+                self._step_once = False
+                self._advance_one_tick(now)
+            self._render()                   # always draw (incl. while frozen)
 
         self._shutdown()
 
@@ -187,6 +195,35 @@ class PresentationShell:
 
     def _quit(self) -> None:
         self.running = False
+
+    # ── Glass Box: sim freeze / single-step ─────────────────────────────────────
+    def _toggle_pause_sim(self) -> None:
+        """P — freeze/unfreeze the whole simulation (distinct from ESC pause menu)."""
+        self._paused_sim = not self._paused_sim
+
+    def _request_step(self) -> None:
+        """. — advance one tick, only meaningful while frozen."""
+        if self._paused_sim:
+            self._step_once = True
+
+    def _advance_one_tick(self, now: float) -> None:
+        """Advance the frozen sim by exactly one clock tick, sub-stepped at frame dt
+        so movement stays smooth (no coarse jumps / wall-clipping). Renders once
+        (in run()). Stops early if combat triggers so the shell can run it."""
+        dt = 1.0 / settings.FPS
+        target = self.session.world_sim.clock.tick_count + 1
+        guard = 0
+        frame = None
+        while (self.session.world_sim.clock.tick_count < target
+               and guard < settings.FPS * 4):
+            frame = self._kernel.step(dt, now)
+            guard += 1
+            if frame.combat_trigger is not None:
+                break
+        if frame is not None:
+            self._orchestrate(frame)
+            self.sprite_group.update()
+            self._react(frame)
 
     def _open_pause(self) -> None:
         self.mode = RuntimeMode.PAUSED
@@ -307,7 +344,7 @@ class PresentationShell:
         self.mode = RuntimeMode.WORLD
 
     # ── render ──────────────────────────────────────────────────────────────────
-    def _render(self, frame) -> None:
+    def _render(self) -> None:
         s = self.session
         screen = self.screen
         screen.fill(settings.BG_COLOR)
@@ -373,6 +410,13 @@ class PresentationShell:
             f"   BYP {p.byte_pool}/{p.max_byte_pool}",
             True, settings.TEXT_COLOR)
         screen.blit(info_txt, (settings.LEVEL_X, 10))
+
+        # Glass Box: frozen-sim banner (top-center over the map).
+        if self._paused_sim:
+            pause_surf = self.font.render("|| PAUSED   [.] step   [P] resume",
+                                          True, (255, 225, 120))
+            px = settings.LEVEL_X + (settings.LEVEL_W - pause_surf.get_width()) // 2
+            screen.blit(pause_surf, (px, settings.LEVEL_Y - 34))
 
         pygame.display.flip()
 
