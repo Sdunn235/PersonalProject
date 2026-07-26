@@ -34,6 +34,7 @@ from Mechanics.renderer.inspector import draw_inspector
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.combat.casting import convert_amount
 from Mechanics.runtime.commands import Command, DEFAULT_KEY_BINDINGS
+from Mechanics.runtime.rewind import RewindBuffer
 
 
 class RuntimeMode(Enum):
@@ -70,6 +71,7 @@ class PresentationShell:
         self._paused_sim = False                # Glass Box: sim frozen (P)
         self._step_once = False                 # Glass Box: advance one tick request (.)
         self._inspect = False                   # Glass Box: mind inspector open (V)
+        self._rewind = RewindBuffer(ctx)        # Glass Box: in-memory time-scrub ring
         self.run_logger = None
         self._kernel = None
 
@@ -87,6 +89,7 @@ class PresentationShell:
             Command.CONVERT:    self._convert_bits,
             Command.PAUSE_SIM:  self._toggle_pause_sim,
             Command.STEP_SIM:   self._request_step,
+            Command.REWIND:     self._back_tick,
             Command.INSPECT:    self._toggle_inspect,
         }
 
@@ -110,6 +113,8 @@ class PresentationShell:
             now = pygame.time.get_ticks() / 1000.0
             if not self._paused_sim:
                 frame = kernel.step(dt, now)
+                if frame.sim_ticks > 0:
+                    self._rewind.record(self.session)   # time-scrub history
                 self._orchestrate(frame)
                 self.sprite_group.update()   # sync sprites to entity state
                 self._react(frame)
@@ -168,6 +173,7 @@ class PresentationShell:
             if data:
                 self._kernel.load(data)
                 self._kill_defeated_sprites()
+                self._rewind.clear()
                 print(f"[SAVE] Session resumed from slot {chosen}.")
             else:
                 print(f"[SAVE] Slot {chosen} empty — starting fresh.")
@@ -213,6 +219,20 @@ class PresentationShell:
         """V — open/close the deep mind inspector on the TAB-selected subject."""
         self._inspect = not self._inspect
 
+    def _back_tick(self) -> None:
+        """, — step one tick BACK (mirror of .); only while frozen."""
+        if not self._paused_sim:
+            return
+        if self._rewind.back(self.session):
+            self._resync_sprites()   # rewind may revive a defeated NPC
+
+    def _resync_sprites(self) -> None:
+        """Re-attach every entity's sprite, then re-kill the defeated set — keeps
+        the view consistent after a rewind restores the defeated set."""
+        for npc, _ in self.session.npc_list:
+            self.sprite_group.add(self.sprites[npc.entity_id])
+        self._kill_defeated_sprites()
+
     def _advance_one_tick(self, now: float) -> None:
         """Advance the frozen sim by exactly one clock tick, sub-stepped at frame dt
         so movement stays smooth (no coarse jumps / wall-clipping). Renders once
@@ -228,6 +248,8 @@ class PresentationShell:
             if frame.combat_trigger is not None:
                 break
         if frame is not None:
+            if frame.sim_ticks > 0:
+                self._rewind.record(self.session)   # single-step also records
             self._orchestrate(frame)
             self.sprite_group.update()
             self._react(frame)
@@ -247,6 +269,7 @@ class PresentationShell:
             self._kernel.start_new_session()
             self._build_sprites()
             self.zone_flash[0] = None
+            self._rewind.clear()                 # timeline reset
             self._rebuild_hud_subjects()
             self.run_logger = RunLogger(settings.RUN_LOG_DIR)
         elif result.startswith("load:"):
@@ -257,6 +280,7 @@ class PresentationShell:
                     self.sprite_group.add(self.sprites[npc.entity_id])
                 self._kernel.load(data)
                 self._kill_defeated_sprites()
+                self._rewind.clear()             # timeline changed
                 print(f"[SAVE] Session resumed from slot {slot}.")
         # else "resume" — fall through
         self.mode = RuntimeMode.WORLD
@@ -420,7 +444,7 @@ class PresentationShell:
 
         # Glass Box: frozen-sim banner (top-center over the map).
         if self._paused_sim:
-            pause_surf = self.font.render("|| PAUSED   [.] step   [P] resume",
+            pause_surf = self.font.render("|| PAUSED   [,] back  [.] step   [P] resume",
                                           True, (255, 225, 120))
             px = settings.LEVEL_X + (settings.LEVEL_W - pause_surf.get_width()) // 2
             screen.blit(pause_surf, (px, settings.LEVEL_Y - 34))

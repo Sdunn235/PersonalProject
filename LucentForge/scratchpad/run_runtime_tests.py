@@ -791,6 +791,58 @@ def test_controller_state_persist():
         os.unlink(tmp_db)
 
 
+# ─── (p) Glass Box A1b-ii — rewind buffer steps back a tick ───────────────────
+
+def test_rewind_buffer():
+    print("[P] Glass Box A1b-ii (Arc A) — rewind buffer records + back-ticks")
+    from Mechanics.runtime.rewind import RewindBuffer
+    from Mechanics.runtime.commands import Command
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    rb = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tm = TileMap(); tm.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tm, tm.get_need_sources())
+        rb = RewindBuffer(ctx, maxlen=10)
+
+        check(rb.can_back() is False, "empty buffer cannot back")
+
+        # Advance real ticks (kernel.step runs the AI) and record each; snapshot
+        # (tick, first-NPC x) so we can prove the back-tick truly reverts state.
+        marks = []
+        for i in range(5):
+            kernel.step(1.0, now=float(i))   # +1 tick + AI update
+            rb.record(kernel.session)
+            marks.append((kernel.session.world_sim.clock.tick_count,
+                          round(kernel.session.npc_list[0][0].x, 3)))
+        check(rb.can_back() is True, "buffer can back after recording")
+
+        ok = rb.back(kernel.session)
+        check(ok is True, "back() steps back one tick")
+        check(kernel.session.world_sim.clock.tick_count == marks[-2][0],
+              "tick_count reverted to previous recorded tick",
+              f"{kernel.session.world_sim.clock.tick_count} != {marks[-2][0]}")
+        check(round(kernel.session.npc_list[0][0].x, 3) == marks[-2][1],
+              "NPC position reverted to previous recorded tick (true state reversal)",
+              f"{round(kernel.session.npc_list[0][0].x, 3)} != {marks[-2][1]}")
+
+        # Key binding.
+        check(shell_key_to_cmd(pygame.K_COMMA) == Command.REWIND, ", -> REWIND")
+    finally:
+        if rb:
+            rb.close()
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
+def shell_key_to_cmd(key):
+    from Mechanics.runtime.commands import DEFAULT_KEY_BINDINGS
+    return DEFAULT_KEY_BINDINGS.get(key)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -812,6 +864,7 @@ if __name__ == "__main__":
     test_glass_box_pause_step()
     test_glass_box_inspector()
     test_controller_state_persist()
+    test_rewind_buffer()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)
