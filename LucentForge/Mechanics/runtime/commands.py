@@ -29,6 +29,7 @@ class Command(Enum):
     CONVERT    = "CONVERT"     # rest: convert Bits -> Bytes (§M4)
     PAUSE_SIM  = "PAUSE_SIM"   # Glass Box: freeze/unfreeze the simulation
     STEP_SIM   = "STEP_SIM"    # Glass Box: advance one sim tick while frozen
+    INSPECT    = "INSPECT"     # Glass Box: toggle the deep mind inspector
 
 
 # Default physical-key -> Command bindings. Remappable: copy this dict, edit the
@@ -43,4 +44,5 @@ DEFAULT_KEY_BINDINGS = {
     pygame.K_c:      Command.CONVERT,
     pygame.K_p:      Command.PAUSE_SIM,   # freeze/unfreeze the sim (Glass Box)
     pygame.K_PERIOD: Command.STEP_SIM,    # step one tick while frozen
+    pygame.K_v:      Command.INSPECT,     # toggle the deep mind inspector
 }

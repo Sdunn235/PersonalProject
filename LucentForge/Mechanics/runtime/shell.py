@@ -30,6 +30,7 @@ from Mechanics.renderer.hud import draw_hud
 from Mechanics.renderer.trap_overlay import draw_trap_markers
 from Mechanics.renderer.health_bar import draw_stat_bar
 from Mechanics.renderer.observation_panel import draw_observation_panel
+from Mechanics.renderer.inspector import draw_inspector
 from Mechanics.observation.run_logger import RunLogger
 from Mechanics.combat.casting import convert_amount
 from Mechanics.runtime.commands import Command, DEFAULT_KEY_BINDINGS
@@ -68,6 +69,7 @@ class PresentationShell:
         self._paused_quit = False               # pause-menu quit saves internally
         self._paused_sim = False                # Glass Box: sim frozen (P)
         self._step_once = False                 # Glass Box: advance one tick request (.)
+        self._inspect = False                   # Glass Box: mind inspector open (V)
         self.run_logger = None
         self._kernel = None
 
@@ -85,6 +87,7 @@ class PresentationShell:
             Command.CONVERT:    self._convert_bits,
             Command.PAUSE_SIM:  self._toggle_pause_sim,
             Command.STEP_SIM:   self._request_step,
+            Command.INSPECT:    self._toggle_inspect,
         }
 
     @property
@@ -205,6 +208,10 @@ class PresentationShell:
         """. — advance one tick, only meaningful while frozen."""
         if self._paused_sim:
             self._step_once = True
+
+    def _toggle_inspect(self) -> None:
+        """V — open/close the deep mind inspector on the TAB-selected subject."""
+        self._inspect = not self._inspect
 
     def _advance_one_tick(self, now: float) -> None:
         """Advance the frozen sim by exactly one clock tick, sub-stepped at frame dt
@@ -417,6 +424,12 @@ class PresentationShell:
                                           True, (255, 225, 120))
             px = settings.LEVEL_X + (settings.LEVEL_W - pause_surf.get_width()) // 2
             screen.blit(pause_surf, (px, settings.LEVEL_Y - 34))
+
+        # Glass Box: deep mind inspector overlay (V) — drawn last, over everything.
+        if self._inspect:
+            _e, _ctrl, _lbl = self._hud_subjects[self.hud_index]
+            _needs = s.player_needs if _ctrl is None else _ctrl.needs
+            draw_inspector(screen, _e, _ctrl, _needs, self.font)
 
         pygame.display.flip()
 

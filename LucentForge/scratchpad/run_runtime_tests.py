@@ -689,6 +689,54 @@ def test_glass_box_pause_step():
         os.unlink(tmp_db)
 
 
+# ─── (n) Glass Box A2 — deep mind inspector renders (NPC + player) ────────────
+
+def test_glass_box_inspector():
+    print("[N] Glass Box A2 (Arc A) — deep mind inspector renders headlessly (V)")
+    from Mechanics.runtime.shell import PresentationShell
+    from Mechanics.runtime.commands import Command
+    from Mechanics.renderer.inspector import draw_inspector
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tile_map = TileMap()
+        tile_map.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tile_map, tile_map.get_need_sources())
+        shell = PresentationShell(ctx)
+        shell._kernel = kernel
+        shell._build_sprites()
+        shell._rebuild_hud_subjects()
+        # Evolve a bit so memory/biochem have content to show.
+        _tick_n(kernel.session.world_sim, kernel.session.npc_list,
+                kernel.session.defeated_npcs, n=120)
+        screen = pygame.display.get_surface()
+
+        check(shell.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_v))
+              == Command.INSPECT, "V -> INSPECT")
+        shell.execute(Command.INSPECT)
+        check(shell._inspect is True, "INSPECT toggles the inspector on")
+
+        # NPC subject: full mind columns must render without error.
+        npc, ctrl = kernel.session.npc_list[0]
+        draw_inspector(screen, npc, ctrl, ctrl.needs, shell.font)
+        check(True, "inspector renders an NPC (full mind) without error")
+
+        # Player subject: no NPC controller -> mind columns omitted, still no crash.
+        draw_inspector(screen, kernel.session.player, None,
+                       kernel.session.player_needs, shell.font)
+        check(True, "inspector renders the player (no controller) without error")
+
+        # Whole render path with the overlay on.
+        shell._render()
+        check(True, "shell render with inspector overlay ran without error")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -708,6 +756,7 @@ if __name__ == "__main__":
     test_shell_render()
     test_input_commands()
     test_glass_box_pause_step()
+    test_glass_box_inspector()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)
