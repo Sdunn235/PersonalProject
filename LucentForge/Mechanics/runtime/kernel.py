@@ -99,6 +99,10 @@ class SimulationKernel:
 
         frame.sim_ticks = s.world_sim.tick(dt, living_count, avg_goblin_hunger)
 
+        # Glass Box A3: stamp the current tick so sim-side event appends timestamp.
+        from Mechanics.observation.event_log import EVENTS
+        EVENTS.set_tick(s.world_sim.clock.tick_count)
+
         # Zone crossing detection: fires the wired sim-side observers (logging +
         # zone AI) and returns the events. The player's crossing becomes a UI
         # SimFrame event (zone_flash) for the shell — Model/View split (R3).

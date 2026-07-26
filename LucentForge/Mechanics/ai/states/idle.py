@@ -165,3 +165,6 @@ class IdleState:
                 print(f"[NEED] {controller.npc.name} -> {source.label} "
                       f"({priority_need.label} {priority_need.current_value:.1f})")
                 controller._last_need_log = log_key
+                from Mechanics.observation.event_log import EVENTS
+                EVENTS.append("NEED", f"{controller.npc.name} needs {priority_need.label} "
+                                      f"-> {source.label}")

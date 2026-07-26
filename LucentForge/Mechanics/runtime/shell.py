@@ -32,6 +32,7 @@ from Mechanics.renderer.health_bar import draw_stat_bar
 from Mechanics.renderer.observation_panel import draw_observation_panel
 from Mechanics.renderer.inspector import draw_inspector
 from Mechanics.observation.run_logger import RunLogger
+from Mechanics.observation.event_log import EVENTS
 from Mechanics.combat.casting import convert_amount
 from Mechanics.runtime.commands import Command, DEFAULT_KEY_BINDINGS
 from Mechanics.runtime.rewind import RewindBuffer
@@ -71,6 +72,7 @@ class PresentationShell:
         self._paused_sim = False                # Glass Box: sim frozen (P)
         self._step_once = False                 # Glass Box: advance one tick request (.)
         self._inspect = False                   # Glass Box: mind inspector open (V)
+        self._feed = False                      # Glass Box: event feed shown (L)
         self._rewind = RewindBuffer(ctx)        # Glass Box: in-memory time-scrub ring
         self.run_logger = None
         self._kernel = None
@@ -91,6 +93,7 @@ class PresentationShell:
             Command.STEP_SIM:   self._request_step,
             Command.REWIND:     self._back_tick,
             Command.INSPECT:    self._toggle_inspect,
+            Command.FEED:       self._toggle_feed,
         }
 
     @property
@@ -174,6 +177,7 @@ class PresentationShell:
                 self._kernel.load(data)
                 self._kill_defeated_sprites()
                 self._rewind.clear()
+                EVENTS.clear()
                 print(f"[SAVE] Session resumed from slot {chosen}.")
             else:
                 print(f"[SAVE] Slot {chosen} empty — starting fresh.")
@@ -218,6 +222,10 @@ class PresentationShell:
     def _toggle_inspect(self) -> None:
         """V — open/close the deep mind inspector on the TAB-selected subject."""
         self._inspect = not self._inspect
+
+    def _toggle_feed(self) -> None:
+        """L — show/hide the emergence event feed (bottom strip)."""
+        self._feed = not self._feed
 
     def _back_tick(self) -> None:
         """, — step one tick BACK (mirror of .); only while frozen."""
@@ -270,6 +278,7 @@ class PresentationShell:
             self._build_sprites()
             self.zone_flash[0] = None
             self._rewind.clear()                 # timeline reset
+            EVENTS.clear()                       # new world -> fresh feed
             self._rebuild_hud_subjects()
             self.run_logger = RunLogger(settings.RUN_LOG_DIR)
         elif result.startswith("load:"):
@@ -281,6 +290,7 @@ class PresentationShell:
                 self._kernel.load(data)
                 self._kill_defeated_sprites()
                 self._rewind.clear()             # timeline changed
+                EVENTS.clear()
                 print(f"[SAVE] Session resumed from slot {slot}.")
         # else "resume" — fall through
         self.mode = RuntimeMode.WORLD
@@ -369,6 +379,8 @@ class PresentationShell:
         if died:
             self.sprites[npc.entity_id].kill()
             print(f"[COMBAT] Player defeated {npc.name}!")
+            from Mechanics.observation.event_log import EVENTS
+            EVENTS.append("COMBAT", f"Player defeated {npc.name}")
         elif result == "lose":
             print("[COMBAT] Player was defeated — game over.")
             self.running = False
@@ -448,6 +460,22 @@ class PresentationShell:
                                           True, (255, 225, 120))
             px = settings.LEVEL_X + (settings.LEVEL_W - pause_surf.get_width()) // 2
             screen.blit(pause_surf, (px, settings.LEVEL_Y - 34))
+
+        # Glass Box: emergence event feed (L) — bottom strip, newest at bottom.
+        if self._feed:
+            _rows = 6
+            _strip_h = 16 * _rows + 14
+            _strip_y = settings.WINDOW_H - _strip_h
+            _bar = pygame.Surface((settings.WINDOW_W, _strip_h), pygame.SRCALPHA)
+            _bar.fill((10, 10, 16, 214))
+            screen.blit(_bar, (0, _strip_y))
+            _yy = _strip_y + 6
+            for _tick, _cat, _text in EVENTS.tail(_rows):
+                _surf = self.font.render(f"[t{_tick}] {_text}", True, EVENTS.color(_cat))
+                screen.blit(_surf, (settings.LEVEL_X, _yy))
+                _yy += 16
+            screen.blit(self.font.render("[L] EVENT FEED", True, (120, 120, 140)),
+                        (settings.WINDOW_W - 132, _strip_y + 6))
 
         # Glass Box: deep mind inspector overlay (V) — drawn last, over everything.
         if self._inspect:

@@ -31,6 +31,7 @@ class Command(Enum):
     STEP_SIM   = "STEP_SIM"    # Glass Box: advance one sim tick while frozen
     REWIND     = "REWIND"      # Glass Box: step one sim tick BACK while frozen
     INSPECT    = "INSPECT"     # Glass Box: toggle the deep mind inspector
+    FEED       = "FEED"        # Glass Box: toggle the emergence event feed
 
 
 # Default physical-key -> Command bindings. Remappable: copy this dict, edit the
@@ -47,4 +48,5 @@ DEFAULT_KEY_BINDINGS = {
     pygame.K_PERIOD: Command.STEP_SIM,    # step one tick forward while frozen
     pygame.K_COMMA:  Command.REWIND,      # step one tick back while frozen
     pygame.K_v:      Command.INSPECT,     # toggle the deep mind inspector
+    pygame.K_l:      Command.FEED,        # toggle the emergence event feed
 }

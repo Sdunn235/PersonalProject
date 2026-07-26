@@ -843,6 +843,46 @@ def shell_key_to_cmd(key):
     return DEFAULT_KEY_BINDINGS.get(key)
 
 
+# ─── (q) Glass Box A3 — emergence event feed ──────────────────────────────────
+
+def test_event_feed():
+    print("[Q] Glass Box A3 (Arc A) — emergence event feed captures real events")
+    from Mechanics.observation.event_log import EventLog, EVENTS
+    from Mechanics.runtime.commands import DEFAULT_KEY_BINDINGS, Command
+
+    # Ring buffer mechanics.
+    log = EventLog(maxlen=3)
+    log.set_tick(7)
+    log.append("STATE", "a")
+    log.append("ZONE", "b", tick=99)
+    check(log.tail(5) == [(7, "STATE", "a"), (99, "ZONE", "b")], "append + tail + set_tick")
+    for i in range(5):
+        log.append("X", str(i))
+    check(len(log.tail(10)) == 3, "ring caps at maxlen")
+    check(DEFAULT_KEY_BINDINGS.get(pygame.K_l) == Command.FEED, "L -> FEED")
+
+    # The live singleton captures real events during kernel.step (STATE + ZONE).
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        tmp_db = f.name
+    ctx = None
+    try:
+        ctx = create_game_context(db_path=tmp_db)
+        tm = TileMap(); tm.load_real_map()
+        kernel = SimulationKernel.new_session(ctx, tm, tm.get_need_sources())
+        EVENTS.clear()
+        for i in range(60):
+            kernel.step(1.0, now=float(i))   # runs AI -> state changes + zone crossings
+        cats = {cat for _, cat, _ in EVENTS.tail(200)}
+        check("STATE" in cats, "state transitions reach the feed", f"cats={cats}")
+        check("ZONE" in cats, "zone crossings reach the feed", f"cats={cats}")
+        check(all(isinstance(t, int) for t, _, _ in EVENTS.tail(200)),
+              "events carry a tick timestamp")
+    finally:
+        if ctx:
+            ctx.db.close()
+        os.unlink(tmp_db)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -865,6 +905,7 @@ if __name__ == "__main__":
     test_glass_box_inspector()
     test_controller_state_persist()
     test_rewind_buffer()
+    test_event_feed()
     print("=" * 66)
     print(f"  {_passed} PASS  |  {_failed} FAIL")
     print("=" * 66)

@@ -5,9 +5,11 @@ import settings
 
 
 def log_spatial_zone(event) -> None:
-    """ZoneTracker subscriber — prints [ZONE] on room entry."""
+    """ZoneTracker subscriber — prints [ZONE] on room entry (+ Glass Box feed)."""
     room_name = event.to_room.name if event.to_room else "Unknown"
     print(f"[ZONE] {event.entity_name} entered {room_name} (tick {event.tick})")
+    from Mechanics.observation.event_log import EVENTS
+    EVENTS.append("ZONE", f"{event.entity_name} -> {room_name}", tick=event.tick)
 
 
 class NeedZoneLogger:

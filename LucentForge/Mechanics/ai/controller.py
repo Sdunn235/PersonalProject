@@ -83,6 +83,9 @@ class NPCController:
         return self.rooms.get_room_for_region(panel_x, panel_y, region)
 
     def _set_state(self, name: str) -> None:
+        if name != self.state:   # Glass Box A3: log real behavioral transitions
+            from Mechanics.observation.event_log import EVENTS
+            EVENTS.append("STATE", f"{self.npc.name}: {self.state} -> {name}")
         self.state = name
         self._current_state = self._states[name]
         self._current_state.enter(self)
