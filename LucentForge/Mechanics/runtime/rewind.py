@@ -26,7 +26,7 @@ class RewindBuffer:
 
     def record(self, session) -> None:
         """Capture current session state — call once per advanced tick."""
-        self._sm.snapshot_session(session, slot_id=0)
+        self._sm.snapshot_session(session, slot_id=0, verbose=False)
         self._states.append(self._sm.restore(slot_id=0))
 
     def can_back(self) -> bool:
@@ -37,8 +37,8 @@ class RewindBuffer:
         Returns True if it stepped back, False if no earlier state is buffered."""
         if len(self._states) < 2:
             return False
-        self._states.pop()                               # drop the current tick
-        session.apply_save(self._states[-1], self.ctx)   # restore the previous
+        self._states.pop()                                             # drop current tick
+        session.apply_save(self._states[-1], self.ctx, verbose=False)  # restore previous
         return True
 
     def clear(self) -> None:

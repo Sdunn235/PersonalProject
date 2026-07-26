@@ -57,6 +57,7 @@ def apply_save(
     player_needs: list,
     defeated_npcs: set,
     combat_cooldowns: dict,
+    verbose: bool = True,
 ) -> None:
     """Patch live game objects with data restored from a save slot.
 
@@ -188,11 +189,12 @@ def apply_save(
     combat_cooldowns.clear()
     combat_cooldowns.update(gdata["combat_cooldowns"])
 
-    print(
-        f"[SAVE] Restored tick={world_sim.clock.tick_count} "
-        f"threat={world_sim.threat.threat_level:.1f} "
-        f"defeated={len(defeated_npcs)}"
-    )
+    if verbose:
+        print(
+            f"[SAVE] Restored tick={world_sim.clock.tick_count} "
+            f"threat={world_sim.threat.threat_level:.1f} "
+            f"defeated={len(defeated_npcs)}"
+        )
 
 
 def create_npc_controller(npc, ctx: GameContext,

@@ -32,10 +32,12 @@ class SaveManager:
         ).fetchone()
         return row is not None
 
-    def snapshot_session(self, session, slot_id: int = _DEFAULT_SLOT) -> None:
+    def snapshot_session(self, session, slot_id: int = _DEFAULT_SLOT,
+                         verbose: bool = True) -> None:
         """WorldSession adapter (Stage 4.6R / R1): snapshot a whole session,
         deriving controllers + bag/equipment/chest serialization from it.
-        Collapses main.py's three repeated 10-arg snapshot call sites into one."""
+        Collapses main.py's three repeated 10-arg snapshot call sites into one.
+        verbose=False silences the [SAVE] print (used by the per-tick rewind ring)."""
         self.snapshot(
             session.world_sim, session.sources, session.npc_controllers,
             session.player, session.player_needs, session.defeated_npcs,
@@ -43,6 +45,7 @@ class SaveManager:
             bags=session.inv_svc.serialize_all(),
             equipment=session.equip_svc.serialize_all(),
             chests=session.chest_reg,
+            verbose=verbose,
         )
 
     def snapshot(
@@ -58,6 +61,7 @@ class SaveManager:
         bags: dict[str, list] | None = None,
         equipment: dict[str, dict] | None = None,
         chests: dict | None = None,
+        verbose: bool = True,
     ) -> None:
         """Write full world state to the given slot in a single transaction."""
         conn = self._db.conn
@@ -206,10 +210,11 @@ class SaveManager:
                 ),
             )
 
-        print(
-            f"[SAVE] Snapshot slot={slot_id} tick={world_sim.clock.tick_count} "
-            f"entities={len(controllers) + 1} at={saved_at}"
-        )
+        if verbose:
+            print(
+                f"[SAVE] Snapshot slot={slot_id} tick={world_sim.clock.tick_count} "
+                f"entities={len(controllers) + 1} at={saved_at}"
+            )
 
     def restore(self, slot_id: int = _DEFAULT_SLOT) -> dict | None:
         """Return saved world data dict, or None if no save exists for this slot."""

@@ -108,14 +108,14 @@ class WorldSession:
         return session
 
     # ── Load adapter ───────────────────────────────────────────────────────────
-    def apply_save(self, save_data, ctx) -> None:
+    def apply_save(self, save_data, ctx, verbose: bool = True) -> None:
         """Patch this session in place from restore() data: sim/entity state via
         bootstrap.apply_save, item services + chest registry rebuilt, chests
         re-placed. Mirrors main.py's old load block (minus sprite kills, which
-        stay in the shell)."""
+        stay in the shell). verbose=False silences the [SAVE] print (rewind ring)."""
         _apply_world_save(save_data, self.world_sim, self.sources,
                           self.npc_controllers, self.player, self.player_needs,
-                          self.defeated_npcs, self.combat_cooldowns)
+                          self.defeated_npcs, self.combat_cooldowns, verbose=verbose)
         rebuild_item_services(save_data, self.inv_svc, self.equip_svc, ctx.item_repo)
         self.chest_reg = rebuild_chest_registry(save_data, ctx.chests, ctx.item_repo)
         self.tile_map.place_chests(self.chest_reg)

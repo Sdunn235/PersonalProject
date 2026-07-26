@@ -232,7 +232,8 @@ class PresentationShell:
         if not self._paused_sim:
             return
         if self._rewind.back(self.session):
-            self._resync_sprites()   # rewind may revive a defeated NPC
+            self._resync_sprites()       # rewind may revive a defeated NPC
+            self.sprite_group.update()   # move sprites to the rewound positions
 
     def _resync_sprites(self) -> None:
         """Re-attach every entity's sprite, then re-kill the defeated set — keeps
