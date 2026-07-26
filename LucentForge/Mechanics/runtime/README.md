@@ -23,7 +23,26 @@ Built incrementally, one behavior-preserving stage per commit (R1–R6); each ke
 | `session.py` | **R1 (C0052)** / **R3 (C0054)** | `WorldSession` — the live object graph as a **pygame-free** dataclass: world_sim, sources, tile_map, player (+needs/controller), `npc_list` of `(entity, controller)` pairs, defeated/cooldown bookkeeping, item + chest services, a `ZoneAIResponder`. `new_game()` is a Factory over the existing `bootstrap.create_*` primitives; `apply_save()` folds the load sequence (apply-save + item/chest rebuild + chest placement) into one call. **R3:** `new_game()` also wires the sim-side zone observers (`log_spatial_zone` + `_dispatch_zone_ai`) via `wire_zone_observers()` — so a fresh tracker always gets them (the C0026 re-subscribe fix, now automatic). |
 | `kernel.py` | **R2 (C0053)** | `SimulationKernel` — owns a `WorldSession` + `GameContext`; `step(dt, now) -> SimFrame` advances the sim with **no pygame** (no render, no persistence, no console I/O). Returns a `SimFrame` of events (`combat_trigger`, `trap_hints`, `panel_edge`, `zone_flash`, `sim_ticks`). Lifecycle `new_session()/start_new_session()/load()/save()` wraps R1. |
 | `shell.py` | **R4 (C0055)** / **R5 (C0057)** | `PresentationShell` — the pygame view over a kernel: owns screen/clock/fonts, the sprite-per-entity map + group, HUD state (tab index, obs toggle), and the zone-flash countdown. `run(kernel)` is the driver loop (input → `kernel.step` → react to the `SimFrame` → render). A `RuntimeMode` enum (WORLD/COMBAT/PAUSED/INVENTORY/CHEST/SAVE_MENU) labels the interaction context, mirroring the `NPCController` state machine. **R5:** input is Commands — `handle_event(evt) -> Command` then `execute(command)`, over a remappable `self._bindings` table. |
-| `commands.py` | **R5 (C0057)** | `Command` enum (PAUSE/CYCLE_HUD/INVENTORY/TOGGLE_OBS/SAVE/CHEST/CONVERT/QUIT) + `DEFAULT_KEY_BINDINGS` (physical key → Command). Decouples keys from intents: enables remap (edit the bindings) and replay (feed Commands to `shell.execute()` with no pygame events). |
+| `commands.py` | **R5 (C0057)** / **Arc A** | `Command` enum + `DEFAULT_KEY_BINDINGS` (physical key → Command). Decouples keys from intents: enables remap and replay (feed Commands to `shell.execute()` with no pygame events). Arc A added PAUSE_SIM/STEP_SIM/REWIND/INSPECT/FEED. |
+| `rewind.py` | **Arc A / A1b (C0062)** | `RewindBuffer` — an in-memory ring (deque) of session snapshots for scrub-back (`,`). Captures via the exact save/load path (snapshot → restore) against a **private in-memory SQLite DB**, so rewound state can't diverge from the persistent save system; no disk I/O. Faithful because A1b-i made save/restore capture controller behavioral state. |
+
+### Glass Box — observability & sim time control (Arc A, C0059–C0063)
+
+Debug/inspection tooling layered on the runtime seams (view + input + a read-only
+event sink; the sim is untouched). Controls:
+
+| Key | Command | What |
+|-----|---------|------|
+| `P` | PAUSE_SIM | freeze / unfreeze the whole simulation |
+| `.` | STEP_SIM | advance exactly one tick while frozen (sub-stepped, smooth) |
+| `,` | REWIND | step one tick **back** while frozen (`rewind.py` ring) |
+| `V` | INSPECT | full-screen deep mind inspector on the TAB-selected NPC (`renderer/inspector.py`) |
+| `L` | FEED | bottom-strip emergence event feed (`observation/event_log.py`) |
+
+`observation/event_log.py::EVENTS` is a module singleton the sim appends to (state
+transitions via `controller._set_state`, zone crossings, need targeting, combat) and
+the shell renders. **A1b-i** (C0061) also fixed the long-standing "NPCs reset to IDLE
+on load" gap — `apply_save` now restores `ai_state`/`ai_data` (state + target + path).
 
 ## Design rules
 

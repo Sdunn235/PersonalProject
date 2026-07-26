@@ -1,6 +1,53 @@
-# Session State — Last updated: 2026-07-24 (Affinity Behavioral Loop arc COMPLETE — C0040–C0050)
+# Session State — Last updated: 2026-07-26 (Arc A "The Glass Box" COMPLETE — C0059–C0063)
 
 > **Source-of-truth note.** This file drifted (was frozen at Stage 3 while code reached Stage 4.5b). Corrected 2026-07-18 during the Grace Migration Arc. Always cross-check `git log` before trusting a stage claim here.
+
+## Arc A — "The Glass Box" (observability + sim time control) — COMPLETE (C0059–C0063, 2026-07-26)
+
+**First arc of the post-refactor roadmap (A → B World+Dialogue → C real-time combat).** Debug/inspection
+tooling built on the Stage 4.6R runtime seams — view + input + a read-only event sink; the simulation is
+untouched, so `scratchpad/run_all_tests.py` stayed **22/22 green** after every commit (92-check
+characterization suite now). Controls:
+
+| Key | What | Commit |
+|-----|------|--------|
+| `P` / `.` | freeze the sim / step one tick forward (sub-stepped, smooth) | C0059 |
+| `V` | full-screen deep mind inspector (all chemicals, drives + winner, memory, affinity, traits) on the TAB-selected NPC | C0060 |
+| `,` | step one tick **back** — true time-reversal via an in-memory snapshot ring | C0061 (state persist) + C0062 (rewind) |
+| `L` | bottom-strip emergence event feed (state changes, zone crossings, needs, combat) | C0063 |
+
+- **New files:** `Mechanics/renderer/inspector.py`, `Mechanics/runtime/rewind.py`,
+  `Mechanics/observation/event_log.py` (singleton `EVENTS`).
+- **A1b-i (C0061) also fixed a long-standing save/load gap:** `apply_save` now restores controller
+  behavioral state (`ai_state`/`ai_data` = state + target + path), so NPCs resume what they were doing
+  on load instead of snapping to IDLE. This underpins faithful rewind.
+- **Rewind design:** captures via the exact snapshot→restore path against a private in-memory SQLite DB
+  (zero drift from the real save system, no disk I/O). Buffer/feed cleared on New Game / load.
+
+**Next (Arc B — "The World Opens"):** existing zones → real panels with transitions (data-driven map
+loader) + a greenfield dialogue/choice system + first Forge story-arc panels. Then Arc C (real-time ATB
+combat). Roadmap approved 2026-07-25. Commits pushed through C0063.
+
+## Stage 4.6R Runtime Ownership Refactor — arc COMPLETE (C0051–C0058, 2026-07-25)
+
+**`main.py`'s 493-line god-`main()` is now a 46-line composition root over a new `Mechanics/runtime/`
+package.** Behavior-preserving throughout — the golden-master gate `scratchpad/run_all_tests.py` stayed
+**22/22 green after every commit**, and each stage was live-gated by Shawn.
+
+| Layer | File | Role |
+|-------|------|------|
+| **SimulationKernel** | `Mechanics/runtime/kernel.py` | Headless-authoritative. `step(dt, now) -> SimFrame` advances the sim with **no pygame** (no render/persist/console I/O). `resolve_combat` = model side of the combat handoff. Lifecycle `new_session/start_new_session/load/save`. |
+| **WorldSession** | `Mechanics/runtime/session.py` | The pygame-free object graph as a dataclass. `new_game()` Factory over bootstrap `create_*`; `apply_save()` load adapter; `wire_zone_observers()` (sim-side zone logging + AI). |
+| **PresentationShell** | `Mechanics/runtime/shell.py` | The pygame view. Owns screen/sprites/HUD/zone-flash + `run(kernel)` loop + `RuntimeMode` state machine (WORLD/COMBAT/PAUSED/INVENTORY/CHEST/SAVE_MENU). Combat modal + sprite kill live here. |
+| **Command** | `Mechanics/runtime/commands.py` | Input as intents over a remappable key→Command table; `handle_event`→`execute`. |
+
+- **SimFrame** (sim→view events): `sim_ticks`, `combat_trigger`, `trap_hints`, `panel_edge`, `zone_flash`.
+- **Stages:** R0 net (C0051) → R1 session (C0052) → R2 kernel/SimFrame (C0053) → R3 zone-observer lifecycle (C0054) → R4 shell/RuntimeMode (C0055) → R5 Commands (C0057) → R6 bible addendum (C0058). **C0056** fixed a pre-existing pause→Load dead "New Game" row (unrelated to the refactor).
+- **Tests:** `scratchpad/run_runtime_tests.py` — 63-check headless characterization suite (A–L). `scratchpad/run_all_tests.py` — master runner over all scratchpad suites (22 green). The sim is now testable with no window; the `py main.py`-only ceiling is lifted.
+- **Doctrine:** `docs/bible/lucentforge_runtime_architecture_addendum_v1.md` (§RT1–§RT8) — Kernel/Session/Shell/Command/RuntimeMode + the **Ripple Kernel** (player = one more agent; world sims without a shell) + the SimCore/Unreal port seam.
+- **Invariants to hold:** kernel + session import no pygame, `step()` does no I/O; `tile_map`+`sources` reused across New Game; sim→view = SimFrame, view→model = Command / `resolve_combat`; every future runtime change keeps `run_all_tests.py` green.
+
+Commits **local only** — push gated on Shawn (origin was at C0050). Next arc = Shawn's pick.
 
 ## Affinity Behavioral Loop (making affinity LIVE) — arc COMPLETE (C0040–C0050)
 
