@@ -1,0 +1,11 @@
+plate_id,display_name,source_layer,source_hex,crust_composition,motion_x,motion_y,motion_confidence,canonical_status,notes
+PLATE-CENTRAL,Central Plate,Layer3,F5FF0083,continental,TBD,TBD,low,draft,Convergence focus; extreme mountain building; mythic central peak (§W5)
+PLATE-ARCH-N,Northern Archipelago Plate,Layer4,00FFE483,mixed,TBD,TBD,low,draft,Northern island arcs / island continents; older/cooler proposal (§T6)
+PLATE-ARCH-S,Southern Archipelago Plate,Layer5,AA00FF83,mixed,TBD,TBD,low,draft,Southern active island system; younger/more volcanic proposal (§T6)
+PLATE-DEEP,Deep Ocean Plate,Layer6,0014FF83,oceanic,TBD,TBD,low,draft,Closing ocean basin being divided; split motion is open (§T5)
+PLATE-MID,Midlands Plate,Layer7,833A7383,unresolved,TBD,TBD,low,draft,Geography unresolved
+PLATE-WEST,Westlands Plate,Layer8,57F50083,unresolved,TBD,TBD,low,draft,Geography unresolved
+PLATE-GREATER,Greaterlands Plate,Layer9,FF008083,unresolved,TBD,TBD,low,draft,Major converging plate; pressures Deep Ocean (source CSV had malformed quote; corrected here)
+PLATE-NORTH,Northern Plate,Layer10,F5000083,unresolved,TBD,TBD,low,draft,Northern/polar system; geography unresolved
+PLATE-LESSOR,Lessorland Plate,Layer11,FF720083,unresolved,TBD,TBD,low,draft,Converging plate; pressures Deep Ocean
+PLATE-SOUTH,Southern Plate,Layer12,33F35683,unresolved,TBD,TBD,low,draft,Southern/polar system; geography unresolved

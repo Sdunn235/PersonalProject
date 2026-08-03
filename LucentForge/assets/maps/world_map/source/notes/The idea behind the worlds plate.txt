@@ -1,0 +1,15 @@
+The idea behind the worlds plate:
+
+My idea is that in this fantasy world that the planet is in a state where its close to being in a Pangea super continent. Not there fully but relatively close for how long it takes planets to do this. Its all colliding around one center plate (Layer3|"Central Plate"|F5FF0083). That plate is to have high mountains and since its fantasy like one large mountain in the center. I would imagine it would be have almost no coast line and be steep cliff mountain sides. 
+
+The southern and northern archipelago plates (Layer4|"Northern Archipelago Plate"|00FFE483 and Layer5|"Southern Archipelago Plate"|AA00FF83) would have lots of islands or maybe island continents and be similar to our ring of fire. 
+
+The Deep ocean plate (Layer6|"Deep Ocean Plate"|0014FF83) would be as if all these plates are converging on Earth's Pacific ocean and essentially getting squash to death. With the Lessorland Plate (Layer11|"Lessorland Plate"|FF720083) and Greaterland Plate (Layer9|"Greaterlands Plate|FF008083) vicing it and cutting it in two. Where the Ocean plate is showing this by both halves starting to go in separate directions. 
+
+The geography for the rest I dont know to much about. I would like to discuss and brain storm about using the plate directions (Layer2|"Plate Directions"|000000E1) I came up with. I tried to get them as close as I could to the plate boundries (Layer1|"Plate Boundries"|00000083).
+
+I am still aiming for a very large world. Where when the geography is layered over this we can break each color pixel of the land masses hex code can correlate with something in like a csv file and we would know what would be in that landscape and that pixel can then be broken down into (x) amount of panels. This would be tied into the Genesis World Generator idea that is a sperate project to tie into Lucent Forge.
+
+There are colors, png, various file formats, csv, and notes found at "C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\assets\maps\world_map"  
+
+C:\Users\Shawn\Documents\Workspace\Personal Project\LucentForge\assets\maps\world_map\Lucent Forge World\ExportedLayers is the layers indiviualy

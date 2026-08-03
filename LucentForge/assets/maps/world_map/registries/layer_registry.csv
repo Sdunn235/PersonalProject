@@ -1,0 +1,14 @@
+layer_id,layer_name,purpose,source_file,format,width,height,projection,color_model,alpha,authority,version,status,approved_by,notes
+Layer1,Plate Boundaries,plate boundary lines,exported_layers/Layer1.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 00000083
+Layer2,Plate Directions,plate motion arrows,exported_layers/Layer2.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 000000E1; absolute-vs-relative undecided
+Layer3,Central Plate,plate fill PLATE-CENTRAL,exported_layers/Layer3.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex F5FF0083
+Layer4,Northern Archipelago Plate,plate fill PLATE-ARCH-N,exported_layers/Layer4.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 00FFE483
+Layer5,Southern Archipelago Plate,plate fill PLATE-ARCH-S,exported_layers/Layer5.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex AA00FF83
+Layer6,Deep Ocean Plate,plate fill PLATE-DEEP,exported_layers/Layer6.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 0014FF83
+Layer7,Midlands Plate,plate fill PLATE-MID,exported_layers/Layer7.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 833A7383
+Layer8,Westlands Plate,plate fill PLATE-WEST,exported_layers/Layer8.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 57F50083
+Layer9,Greaterlands Plate,plate fill PLATE-GREATER,exported_layers/Layer9.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex FF008083
+Layer10,Northern Plate,plate fill PLATE-NORTH,exported_layers/Layer10.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex F5000083
+Layer11,Lessorland Plate,plate fill PLATE-LESSOR,exported_layers/Layer11.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex FF720083
+Layer12,Southern Plate,plate fill PLATE-SOUTH,exported_layers/Layer12.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex 33F35683
+Layer13,Background,background fill,exported_layers/Layer13.png,png,TBD,TBD,unset,RGBA,yes,source,v001,draft,pending,hex FFFFFFFF
