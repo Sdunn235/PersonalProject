@@ -21,7 +21,7 @@ commit. New ideas get the next free `LF-###`; IDs are never reused.
 
 1. **Last real work (2026-08-09):** the Rest/Fatigue want was built and passed QC, then sat
    uncommitted. Its live test on 2026-11-17 **failed** (fatigue never rises — a tuning bug), so it's
-   parked on branch `wip/fatigue-want` (LF-001). `master` is **23/23 green**.
+   parked on branch `wip/fatigue-want` (LF-001). `master` is **22/22 green** (23/23 on the branch).
 2. **Arc B "The World Opens" is next on the roadmap.** Its world foundation (bible §W/§T/§S/§C) is
    written; nothing runnable has been built yet.
 3. **The Studio** (department agents) works for Systems Design, QC and Engineering. World Building and

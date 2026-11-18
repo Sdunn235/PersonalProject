@@ -248,7 +248,7 @@ Before commit numbering. Initial workspace commit (2026-03-04), then a burst of 
 
 ## Reference: how the project grew
 - **Test safety net:** 3-test smoke (Jun) → per-stage smoke suites → 92-check runtime characterization
-  + `run_all_tests.py` (**23 suites, all green** as of 2026-11-17).
+  + `run_all_tests.py` (**22 suites on master, all green** as of 2026-11-17; 23 on `wip/fatigue-want`).
 - **Controls today:** arrows move · `TAB` cycle HUD · `I` inventory · `E` chest · `C` convert
   Bits→Bytes · `O` world panel · `S` save · `ESC` pause · `P` freeze · `.` step · `,` rewind ·
   `V` inspector · `L` event feed.

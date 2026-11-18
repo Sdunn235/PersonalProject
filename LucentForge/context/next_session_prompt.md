@@ -10,8 +10,8 @@ LucentForge PyGame prototype — fixing the parked Rest/Fatigue want (BACKLOG LF
 live gate and merge to master, before starting Arc B "The World Opens" (map loader, LF-010).
 
 ## Last verified state
-- **master** (`Personal Project` repo): C0069 = CHANGELOG + BACKLOG + full sync (2026-11-17).
-  `py scratchpad/run_all_tests.py` → 23/23 green.
+- **master** (`Personal Project` repo): C0069 = CHANGELOG + BACKLOG + full sync, C0071 = suite-count fix (2026-11-17).
+  `py scratchpad/run_all_tests.py` → 22/22 green (23/23 on the branch).
 - **Branch `wip/fatigue-want`** (C0070): the fatigue want (fatigue chemical, `ExertionEmitter`,
   `endurance(attrs)`, legibility in HUD / `V` inspector / `O` panel / npcs.csv, `run_fatigue_tests.py`
   17 checks) + the Engineering department. Headless tests are green, but the **live gate FAILED

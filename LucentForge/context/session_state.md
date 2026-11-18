@@ -5,7 +5,7 @@
 - **Shipped history:** [CHANGELOG.md](../CHANGELOG.md) — every arc, C0001 → now.
 - **Everything still to do:** [BACKLOG.md](../BACKLOG.md) — `LF-###` items with sources; its top
   section says where to start.
-- **Health (2026-11-17):** `py scratchpad/run_all_tests.py` → **23/23 green**.
+- **Health (2026-11-17):** `py scratchpad/run_all_tests.py` → **22/22 green on master** (23/23 on `wip/fatigue-want`, which adds the fatigue suite).
 - **Last build work (2026-08-09, logged retroactively):** the **Rest/Fatigue want v1** — `fatigue`
   chemical + `ExertionEmitter` + polymorphic `endurance(attrs)`, boosting only `tiredness`. It is the
   first feature built through the Studio's new **Engineering** department (`studio/engineering/`).
