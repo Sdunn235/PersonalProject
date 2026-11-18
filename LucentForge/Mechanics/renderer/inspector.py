@@ -85,7 +85,11 @@ def draw_inspector(surface, entity, controller, needs, font) -> None:
         zcolor = (settings.COLOR_CRITICAL if z == NeedZone.CRITICAL
                   else settings.COLOR_WARNING if z == NeedZone.WARNING else _VAL)
         label = getattr(need, "label", getattr(need, "need_id", "?"))
-        line(C2, f"{label:<10}{need.current_value:6.1f}  {zname}", zcolor)
+        pull = getattr(need, "perceived_pull", 0.0)
+        if pull > 0.0:   # §W6 receptor: show what the NPC FEELS (decisions use this value)
+            line(C2, f"{label:<10}{need.current_value:6.1f}>{need.perceived_value:.0f} {zname}", zcolor)
+        else:
+            line(C2, f"{label:<10}{need.current_value:6.1f}  {zname}", zcolor)
 
     sec(C2, "- AFFINITY -")
     aff = getattr(entity, "affinity", None)
@@ -100,6 +104,7 @@ def draw_inspector(surface, entity, controller, needs, font) -> None:
     if controller is not None:
         line(C2, f"comfort  {getattr(controller, 'affinity_comfort', 0.0):+.3f}")
         line(C2, f"strain   {controller.brain.chemicals.get('affinity_strain'):.3f}")
+        line(C2, f"fatigue  {controller.brain.chemicals.get('fatigue'):.4f}")
 
     sec(C2, "- TRAITS -")
     for k, v in _fields(getattr(entity, "traits", None)).items():
@@ -113,7 +118,8 @@ def draw_inspector(surface, entity, controller, needs, font) -> None:
 
         sec(C3, "- BIOCHEM (all) -")
         for k, v in chem.as_dict().items():
-            line(C3, f"{k:<16}{v:+.3f}", _VAL if abs(v) > 0.05 else _DIM)
+            # 4 decimals: slow chemicals move ~1e-4/frame, invisible at 3 (live gate 2026-11-17)
+            line(C3, f"{k:<16}{v:+.4f}", _VAL if abs(v) > 0.05 else _DIM)
 
         sec(C3, "- DRIVES -")
         urg = [(d.need_id, d.compute_urgency(chem, brain.traits)) for d in brain.drives]

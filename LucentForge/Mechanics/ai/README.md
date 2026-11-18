@@ -81,6 +81,12 @@ When a non-urgent entity is **stressed** by its current region's affinity and **
 
 ---
 
+## Exertion / fatigue (needs/wants addendum §W6)
+
+`NPCController` owns an `ExertionEmitter` (beside `_affinity_emitter`). Each `update()` (step 2c) it calls `emit(chemicals, npc.attributes, self.state, is_sleeping)`: the current AI **state is the locus**. `EXERTING_STATES = {MOVING, RAIDING, RELOCATING, PATROLLING}` accrue `fatigue`; `is_sleeping` (SATISFYING at a bed) is the one restful locus that pulls fatigue toward 0; everything else is neutral (natural decay only). `self.fatigue` mirrors `self.affinity_comfort` for observability. Fatigue feeds the **existing** Sleep drive by boosting `tiredness` (in `Chemicals.tick`) — no new state, need, or bed. Parity: fatigue=0 → no behavioral change.
+
+**Step 2d — perceived-need receptor (2026-11-17).** Right after the emitter, `apply_perceived_pulls(self.needs, chemicals)` (`biochem/receptor.py`) sets the sleep need's `perceived_pull` from fatigue. All states decide on `need.zone`, which reads the *perceived* value, so a worn-out NPC (idle pick, goblin `behavior.decide`, patrol/relocate/raid exits) treats sleep as urgent sooner. This — not the `tiredness` boost — is what changes behavior: decisions never read chemicals directly.
+
 ## Design rules
 
 - `ai/` has no import from `renderer/` — draw calls belong to the renderer layer.

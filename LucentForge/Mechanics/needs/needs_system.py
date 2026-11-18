@@ -20,12 +20,13 @@ def update_needs(needs: list[Need], is_sleeping: bool = False) -> None:
 
 
 def sort_needs_by_urgency(needs: list[Need]) -> list[Need]:
-    """Sort ascending by current_value (lowest = most urgent first)."""
+    """Sort ascending by perceived value (lowest = most urgent first).
+    perceived_value == current_value when no biochem pull is set (parity)."""
     arr = list(needs)
     n = len(arr)
     for i in range(n):
         for j in range(0, n - i - 1):
-            if arr[j].current_value > arr[j + 1].current_value:
+            if arr[j].perceived_value > arr[j + 1].perceived_value:
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
     return arr
 

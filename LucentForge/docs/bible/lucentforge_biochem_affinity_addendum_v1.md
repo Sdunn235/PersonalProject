@@ -75,6 +75,7 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 - **Decay:** Natural chemical decay in `Chemicals.tick()` at `_DECAY × 0.3` per tick (slower than comfort/stress at 0.7×). Combined with the emitter's own approach-to-zero when score ≥ 0, strain falls off when the entity reaches comfort.
 - **Effect:** When `affinity_strain > 0.01`, `Chemicals.tick()` adds `strain × AFFINITY_STRAIN_NEED_BOOST` to each survival need chemical per tick. The brain reads a slightly elevated need chemical → `Drive.compute_urgency()` computes higher urgency → NPC acts on hunger/thirst/sleep sooner than the raw `current_value` alone would trigger.
 - **Parity invariant:** `affinity_strain = 0` → the boost loop does nothing → behavior is byte-identical to C0044. Fully additive.
+- **⚠ Code gap (found 2026-11-17):** the "acts sooner" step does not happen. NPC decisions read need zones (`needs_system.get_priority_need`), and `Drive.compute_urgency()` only feeds the HUD/inspector, so strain is **visible but behaviorally inert**. The fix pattern now exists — a perceived-need receptor (`biochem/receptor.py`, needs/wants §W6.1). Wiring strain into it is BACKLOG LF-042.
 
 **Design intent.** The effect is perceived urgency through the biochem layer, not raw need decay acceleration. The actual `need.current_value` decays at its normal rate; the entity only *feels* the need as more pressing. This matches the lived experience of stress-taxed biology and stays within the existing emitter/receptor abstraction. Physical decay acceleration is a future arc.
 

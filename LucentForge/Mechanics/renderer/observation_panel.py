@@ -96,8 +96,9 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
         surface.blit(font.render(f"{npc.name[:8]}: {room.name[:7] if room else '?'}",
                                  True, settings.OBS_LABEL_COLOR), (x, y))
         surface.blit(font.render(f"{c:+.1f}", True, c_color), (x + 108, y))
-        # Phase B+C legibility: show relocate target > strain > best-region hint.
+        # Phase B+C+§W6 legibility: relocate target > strain > fatigue > best-region hint.
         strain = ctrl.brain.chemicals.get("affinity_strain")
+        fatigue = ctrl.brain.chemicals.get("fatigue")
         tgt = getattr(ctrl, "relocate_target_region", None)
         best = getattr(ctrl, "best_region", None)
         if tgt:
@@ -106,6 +107,8 @@ def draw_observation_panel(surface, world_sim, sources, npc_list,
                                  settings.COLOR_WARNING)
         elif strain > 0.01:
             suffix, sfx_color = f"s{strain:.2f}", settings.COLOR_CRITICAL
+        elif fatigue > 0.01:
+            suffix, sfx_color = f"f{fatigue:.2f}", (120, 140, 210)
         elif best:
             suffix, sfx_color = f"b{best[1]:+.1f}", settings.OBS_HINT_COLOR
         else:

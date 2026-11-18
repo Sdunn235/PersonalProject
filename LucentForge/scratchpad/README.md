@@ -26,6 +26,7 @@ run it green *before and after every stage* to prove behavior was preserved.
 | `smoke_test.py` | Save/load round-trip, autosave, slot isolation (Phase 1.5/1.6). Its `_build_game`/`_tick_n` harness is reused by `run_runtime_tests.py`. |
 | `run_grace_tests.py` | The Grace 8-affinity lattice doctrine (§18). |
 | `run_affinity_behavior_tests.py` | Affinity emitter/receptor + region-comfort memory + persistence (§B6/§D). |
+| `run_fatigue_tests.py` | Rest/Fatigue want (§W6): fatigue=0 parity, exertion accrual + rest decay, the sleeping-with-fatigue → tiredness-still-down special case, save round-trip, endurance strategy. |
 | `run_stage2_tests.py` / `run_stage3_tests.py` | Consolidated Stage 2 (items) / Stage 3 (rooms-as-zones) suites. |
 | `test_attr_parity.py` / `test_combat_parity.py` | Attribute-derivation and combat behavior parity guards. |
 | `smoke_phase3x.py` / `smoke_phase4x.py` | Historical per-phase smokes (superseded by the consolidated runners but kept green). |

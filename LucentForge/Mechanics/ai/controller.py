@@ -5,7 +5,8 @@ from Mechanics.needs.need import Need
 from Mechanics.needs.needs_system import update_needs
 from Mechanics.needs.need_source import NeedSource
 from Mechanics.biochem.brain import Brain
-from Mechanics.biochem.emitter import AffinityComfortEmitter
+from Mechanics.biochem.emitter import AffinityComfortEmitter, ExertionEmitter
+from Mechanics.biochem.receptor import apply_perceived_pulls
 from Mechanics.world.tile_map import TileMap
 from Mechanics.ai.memory import Memory
 from Mechanics.ai.npc_logger import NeedZoneLogger
@@ -35,6 +36,11 @@ class NPCController:
         self.rooms = rooms
         self._affinity_emitter = AffinityComfortEmitter()
         self.affinity_comfort: float = 0.0  # last comfort score, for observability
+        # Exertion emitter (needs/wants §W6) — reads the current AI state (the locus) each
+        # tick and pushes `fatigue`. `self.fatigue` mirrors `self.affinity_comfort` for
+        # observability (HUD / inspector / run-logger / observation-panel).
+        self._exertion_emitter = ExertionEmitter()
+        self.fatigue: float = 0.0  # last fatigue level, for observability
         # Learned-comfort relocate (Phase B): best remembered region + active relocate
         # target, both surfaced in the observation panel / run-logger for legibility.
         self.best_region: tuple[str, float] | None = None
@@ -118,6 +124,16 @@ class NPCController:
         if room is not None:
             self.memory.record_region_comfort(room.id, self.affinity_comfort, self._tick)
         self.best_region = self.memory.best_region()
+
+        # 2c. Exertion emitter — sample the current AI-state locus and push `fatigue`.
+        #     `is_sleeping` (computed in step 1) is the one restful locus (SATISFYING at a
+        #     bed); exerting loci accrue, everything else is neutral (natural decay only).
+        self.fatigue = self._exertion_emitter.emit(
+            self.brain.chemicals, self.npc.attributes, self.state, is_sleeping)
+
+        # 2d. Perceived-need receptor — fatigue makes sleep FEEL lower, so the zone-based
+        #     decisions below (state update) act on it. Parity: fatigue ≤ floor → pull 0.
+        apply_perceived_pulls(self.needs, self.brain.chemicals)
 
         # 3. Log zone transitions
         self._logger.check_zone_changes(self.needs)
