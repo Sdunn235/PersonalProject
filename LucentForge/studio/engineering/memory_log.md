@@ -19,6 +19,25 @@ Keep entries short — this is a build ledger, not project state (`active_contex
 
 ---
 
+## 2026-11-17/18 — Rest/Fatigue want v1.1 FIX (LF-001; Director-implemented with Shawn present)
+- **Built:** (1) per-frame tuning `FATIGUE_BASE_GAIN` 0.0003 -> 0.0015, derived from "human ref (endurance 10)
+  reaches 0.5 in ~1/2 day"; every authored NPC now out-gains natural decay. (2) **Perceived-need receptor**:
+  `biochem/receptor.py` sets `Need.perceived_pull = fatigue x FATIGUE_SLEEP_PULL (30)` on sleep; `Need.zone`/
+  `urgency_score`/priority sort read `perceived_value`. Needed because decisions read need ZONES, never
+  chemicals — the v1 tiredness boost could not change behavior even when tuned. (3) Inspector: chemicals to
+  4 decimals + needs show `actual>perceived` when a pull is active.
+- **Files:** settings.py, needs/need.py, needs/needs_system.py, biochem/receptor.py (new), ai/controller.py
+  (step 2d), renderer/inspector.py; READMEs (biochem, ai, new needs/README); bible needs/wants §W6 + §W6.1,
+  biochem §B7 code-gap note.
+- **Tests:** run_fatigue_tests.py 17 -> 38: §6 integrated accrual over the real roster (written first, FAILED
+  14/14 on old tuning — reproduced the live gate), §7 receptor unit + parity + no-bed-loop, §8 full-loop
+  SimulationKernel same-seed with vs without pull (goblins bed down ~1/5 day sooner).
+- **Gate:** run_all_tests.py 23/23 GREEN; run_fatigue_tests 38/38.
+- **QC verdict:** not run as a separate department pass this time (Director-implemented, Shawn live-gating).
+- **Live-gate left:** Shawn's py main.py re-run of the 5 checks.
+- **Gotcha:** `affinity_strain` has the same inert-boost gap — reuse the receptor pattern (LF-042). Any new
+  want must reach behavior through a receptor, not a chemical boost.
+
 ## 2026-11-17 — Rest/Fatigue want v1: LIVE GATE FAILED (Director, after Shawn's `py main.py` check)
 - **Seen live:** fatigue row/suffix present but fatigue stayed 0.00 for every NPC; stepping (`.`) showed no change.
 - **Cause:** per-tick accrual `FATIGUE_BASE_GAIN / endurance` (0.0003 / 6–23 = 0.000013–0.000050) is

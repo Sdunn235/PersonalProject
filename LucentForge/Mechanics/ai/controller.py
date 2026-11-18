@@ -6,6 +6,7 @@ from Mechanics.needs.needs_system import update_needs
 from Mechanics.needs.need_source import NeedSource
 from Mechanics.biochem.brain import Brain
 from Mechanics.biochem.emitter import AffinityComfortEmitter, ExertionEmitter
+from Mechanics.biochem.receptor import apply_perceived_pulls
 from Mechanics.world.tile_map import TileMap
 from Mechanics.ai.memory import Memory
 from Mechanics.ai.npc_logger import NeedZoneLogger
@@ -129,6 +130,10 @@ class NPCController:
         #     bed); exerting loci accrue, everything else is neutral (natural decay only).
         self.fatigue = self._exertion_emitter.emit(
             self.brain.chemicals, self.npc.attributes, self.state, is_sleeping)
+
+        # 2d. Perceived-need receptor — fatigue makes sleep FEEL lower, so the zone-based
+        #     decisions below (state update) act on it. Parity: fatigue ≤ floor → pull 0.
+        apply_perceived_pulls(self.needs, self.brain.chemicals)
 
         # 3. Log zone transitions
         self._logger.check_zone_changes(self.needs)

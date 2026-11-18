@@ -24,6 +24,11 @@ class Need:
     hp_drain_rate: float = 0.0         # per real second when at zero
     sleep_decay_mult: float = 0.20     # decay multiplier while sleeping
     chemical: str = ""                 # chemical key in biochem system
+    # Perceived-need pull (needs/wants §W6 receptor): need-points the owner's biochem says this
+    # need FEELS lower than it is (e.g. fatigue makes sleep feel more pressing). Set each frame
+    # by the controller from biochem/receptor.py; runtime-only (saves store current_value).
+    # Zone/urgency/sorting read perceived_value, so every decision path agrees. 0.0 = parity.
+    perceived_pull: float = 0.0
 
     @staticmethod
     def from_dict(d: dict) -> Need:
@@ -46,10 +51,16 @@ class Need:
         )
 
     @property
+    def perceived_value(self) -> float:
+        """The value decisions act on: actual value minus any biochem pull (never below 0)."""
+        return max(0.0, self.current_value - self.perceived_pull)
+
+    @property
     def zone(self) -> NeedZone:
-        if self.current_value <= self.critical_threshold:
+        value = self.perceived_value
+        if value <= self.critical_threshold:
             return NeedZone.CRITICAL
-        if self.current_value <= self.warning_threshold:
+        if value <= self.warning_threshold:
             return NeedZone.WARNING
         return NeedZone.FINE
 
@@ -65,7 +76,7 @@ class Need:
     def urgency_score(self) -> float:
         if not self.is_urgent:
             return 0.0
-        return max(0.0, 1.0 - (self.current_value / self.warning_threshold))
+        return max(0.0, 1.0 - (self.perceived_value / self.warning_threshold))
 
     @property
     def zone_color(self) -> tuple[int, int, int]:

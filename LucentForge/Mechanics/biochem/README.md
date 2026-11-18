@@ -15,13 +15,26 @@ Dict-based registry keyed by string name. Three affinity chemicals emitted by th
 
 Need-driven chemicals (`hunger_chem`, `thirst_chem`, `tiredness`) are populated dynamically from need definitions and updated in `tick()`. When `affinity_strain > 0.01`, a small boost (`strain × AFFINITY_STRAIN_NEED_BOOST`) is added to each survival need chemical per tick — making needs feel more urgent sooner without changing their physical decay rate.
 
-**Fatigue → sleep urgency (§W6).** When `fatigue > FATIGUE_ACTIVE_FLOOR`, a boost (`fatigue × FATIGUE_SLEEP_BOOST`) is added to **only** `tiredness` (the sleep chemical) — a worked NPC crosses into the sleep WARNING zone sooner via the *unchanged* Sleep drive. This boost runs AFTER the sleep-need branch (which hard-decays `tiredness` at `_DECAY×5` while an NPC sleeps); `FATIGUE_SLEEP_BOOST` is tuned conservatively so a sleeping NPC with nonzero fatigue still nets `tiredness` **downward** (the decay dominates the boost). Additive with the strain boost, clamped to [0,1]. Parity: `fatigue = 0` → no effect.
+**Fatigue → sleep urgency (§W6).** *Behavior goes through the receptor below (`receptor.py`); this chemical boost is display-side.* When `fatigue > FATIGUE_ACTIVE_FLOOR`, a boost (`fatigue × FATIGUE_SLEEP_BOOST`) is added to **only** `tiredness` (the sleep chemical) — a worked NPC crosses into the sleep WARNING zone sooner via the *unchanged* Sleep drive. This boost runs AFTER the sleep-need branch (which hard-decays `tiredness` at `_DECAY×5` while an NPC sleeps); `FATIGUE_SLEEP_BOOST` is tuned conservatively so a sleeping NPC with nonzero fatigue still nets `tiredness` **downward** (the decay dominates the boost). Additive with the strain boost, clamped to [0,1]. Parity: `fatigue = 0` → no effect.
 
 ## Emitter (emitter.py)
 
 `AffinityComfortEmitter.emit()` samples the entity's current region each tick and pushes `comfort`, `stress`, and `affinity_strain` toward their lattice-score-derived targets. The `_approach(key, target, gain)` helper moves any chemical a gain fraction toward a target, clamped to [0, 1].
 
 `ExertionEmitter.emit(chemicals, attrs, state, at_bed)` samples the controller's current AI state (the locus) each tick and pushes `fatigue`. `EXERTING_STATES = {MOVING, RAIDING, RELOCATING, PATROLLING}` push fatigue toward `EXERTION_TARGET_MAX`; resting at a bed (`at_bed=True`, i.e. SATISFYING at a sleep source) pulls it toward 0; every other locus (IDLE, SATISFYING at a non-bed source) is neutral (natural decay only). Accrual gain is attribute-derived — `FATIGUE_BASE_GAIN / endurance(attrs)` — so a hardy NPC tires slower; recomputed from *live* attributes each tick (never spawn-frozen).
+
+## Receptor (receptor.py) — chemicals that change DECISIONS
+
+NPC decisions (IdleState, goblin behavior, patrol/relocate/raid exits) read need **zones**, not
+chemicals — `Drive.compute_urgency()` / `Brain.get_priority_need_id()` only feed the HUD and the `V`
+inspector. So a chemical changes behavior only through a receptor that writes a **perceived pull** onto a
+need (`Need.perceived_pull`; `zone`/`is_urgent`/sorting read `Need.perceived_value`).
+
+`apply_perceived_pulls(needs, chemicals)` runs each frame in `NPCController.update` (step 2d). First
+receptor: **fatigue → sleep** — `pull = fatigue × FATIGUE_SLEEP_PULL` need-points (0 at/below
+`FATIGUE_ACTIVE_FLOOR`), so a worn-out NPC crosses its sleep WARNING line sooner. Max pull 30 keeps a
+just-slept NPC FINE (no bed loop). Side effect by design: a perceived-urgent need also pauses HP/SP regen.
+`affinity_strain` does **not** have a receptor yet (BACKLOG LF-042).
 
 ## Drive (drive.py)
 
@@ -32,7 +45,8 @@ Need-driven chemicals (`hunger_chem`, `thirst_chem`, `tiredness`) are populated 
 ```
 AFFINITY_STRAIN_GAIN       = 0.0003   # per-tick approach rate (~60s to ~50% under full discomfort)
 AFFINITY_STRAIN_NEED_BOOST = 0.0002   # per unit strain added to each need chemical per tick
-FATIGUE_BASE_GAIN     = 0.0003   # numerator of effective_gain (endurance divides it)
+FATIGUE_BASE_GAIN     = 0.0015   # numerator of per-FRAME gain (endurance divides it); must beat decay 0.00005
+FATIGUE_SLEEP_PULL    = 30.0     # need-points of perceived sleep loss per unit fatigue (receptor)
 EXERTION_TARGET_MAX   = 1.0      # fatigue target while in an exerting locus
 FATIGUE_DECAY_MULT    = 0.25     # natural-decay multiplier in Chemicals.tick
 FATIGUE_ACTIVE_FLOOR  = 0.01     # fatigue must exceed this to boost tiredness

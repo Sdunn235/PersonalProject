@@ -243,6 +243,140 @@ step_high = ch_live.get("fatigue") - before
 check("(5) effective_gain recomputes from LIVE attrs (higher CON -> smaller step)",
       step_high < step_low)
 
+# ---------------------------------------------------------------------------
+# (6) INTEGRATED ACCRUAL - the check the 2026-08-09 suite was missing (live gate
+# failed 2026-11-17: fatigue stayed 0 for every NPC). Real authored entities, the
+# full emitter + Chemicals.tick path together (natural decay included), exerting
+# for one in-game day of frames. Each half passing alone proves nothing: the gain
+# must beat the leak for the HARDIEST authored entity.
+# ---------------------------------------------------------------------------
+print("-" * 64)
+try:
+    from Mechanics.bootstrap import create_game_context as _cgc
+    from Mechanics.entities.factory import create_all_npcs as _can
+    from Mechanics.needs.need import make_default_needs as _mdn
+
+    tmp_db6 = os.path.join(tempfile.gettempdir(), "lf_fatigue_integrated.db")
+    if os.path.exists(tmp_db6):
+        try:
+            os.remove(tmp_db6)
+        except OSError:
+            pass
+    ctx6 = _cgc(db_path=tmp_db6)
+    roster = _can(ctx6)
+    decay = Chemicals._DECAY * settings.FATIGUE_DECAY_MULT
+    frames_per_day = int(settings.SIM_DAY_SECONDS * settings.FPS)  # controller runs per frame
+    em6 = ExertionEmitter()
+    for npc6 in roster:
+        gain0 = settings.FATIGUE_BASE_GAIN / endurance(npc6.attributes)
+        check(f"(6) {npc6.name}: exertion gain beats natural decay "
+              f"({gain0:.6f} > {decay:.6f}, endurance {endurance(npc6.attributes):.0f})",
+              gain0 > decay)
+        ch6 = Chemicals()
+        needs6 = _mdn()                       # needs stay FINE: isolates fatigue itself
+        for _ in range(frames_per_day):
+            em6.emit(ch6, npc6.attributes, "PATROLLING", at_bed=False)
+            ch6.tick(needs6)
+        check(f"(6) {npc6.name}: one day of exertion reaches visible fatigue "
+              f"(got {ch6.get('fatigue'):.3f}, need > 0.1)",
+              ch6.get("fatigue") > 0.1)
+    if hasattr(ctx6, "close"):
+        ctx6.close()
+except Exception as ex:  # noqa: BLE001
+    import traceback
+    traceback.print_exc()
+    check(f"(6) integrated accrual (exception: {ex})", False)
+
+# ---------------------------------------------------------------------------
+# (7) PERCEIVED-NEED RECEPTOR - fatigue lowers the sleep need's PERCEIVED value, which is
+# what every zone-based decision reads. Parity: no fatigue -> pull 0 -> zone unchanged.
+# ---------------------------------------------------------------------------
+print("-" * 64)
+from Mechanics.biochem.receptor import apply_perceived_pulls, fatigue_sleep_pull  # noqa: E402
+from Mechanics.needs.need import NeedZone, make_default_needs  # noqa: E402
+from Mechanics.needs.needs_system import get_priority_need  # noqa: E402
+
+ch7 = Chemicals()
+needs7 = make_default_needs()
+sleep7 = next(n for n in needs7 if n.need_id == "sleep")
+sleep7.current_value = sleep7.warning_threshold + 10.0          # just above WARNING -> FINE
+apply_perceived_pulls(needs7, ch7)
+check("(7) parity: fatigue 0 -> pull 0, sleep zone FINE, nothing prioritized",
+      sleep7.perceived_pull == 0.0 and sleep7.zone == NeedZone.FINE
+      and get_priority_need(needs7) is None)
+ch7.set("fatigue", 0.5)
+apply_perceived_pulls(needs7, ch7)
+check("(7) fatigue 0.5 -> sleep pull = 0.5 x FATIGUE_SLEEP_PULL",
+      abs(sleep7.perceived_pull - 0.5 * settings.FATIGUE_SLEEP_PULL) < 1e-9)
+check("(7) fatigued NPC perceives sleep as WARNING and prioritizes it (actual value unchanged)",
+      sleep7.zone == NeedZone.WARNING and get_priority_need(needs7) is sleep7
+      and sleep7.current_value == sleep7.warning_threshold + 10.0)
+check("(7) pull targets ONLY sleep (other needs keep pull 0)",
+      all(n.perceived_pull == 0.0 for n in needs7 if n.need_id != "sleep"))
+sleep7.current_value = 100.0
+ch7.set("fatigue", 1.0)
+apply_perceived_pulls(needs7, ch7)
+check("(7) no bed loop: just-slept NPC at max fatigue still perceives sleep FINE",
+      sleep7.zone == NeedZone.FINE)
+ch7.set("fatigue", settings.FATIGUE_ACTIVE_FLOOR)
+check("(7) dead-band: fatigue at the floor -> no pull", fatigue_sleep_pull(ch7) == 0.0)
+
+# ---------------------------------------------------------------------------
+# (8) FULL LOOP (live-gate check 4, headless) - the real SimulationKernel, same seed, one
+# in-game day, run twice: with the receptor and with FATIGUE_SLEEP_PULL = 0 (decisions then
+# ignore fatigue = the pre-receptor baseline). Hard-exerting goblins must bed down SOONER.
+# ---------------------------------------------------------------------------
+print("-" * 64)
+try:
+    import contextlib
+    import io
+    import random
+    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    import pygame
+    pygame.init()
+    pygame.display.set_mode((1, 1))     # PlayerController reads key state
+    from Mechanics.bootstrap import create_game_context as _cgc8
+    from Mechanics.world.tile_map import TileMap as _TM8
+    from Mechanics.runtime.kernel import SimulationKernel
+
+    def _first_sleep_frames(pull: float, frames: int) -> dict:
+        saved_pull = settings.FATIGUE_SLEEP_PULL
+        settings.FATIGUE_SLEEP_PULL = pull
+        try:
+            random.seed(1234)
+            db8 = os.path.join(tempfile.mkdtemp(), "lf_fatigue_loop.db")
+            ctx8 = _cgc8(db_path=db8)
+            tm8 = _TM8()
+            with contextlib.redirect_stdout(io.StringIO()):
+                tm8.load_real_map()
+                kern = SimulationKernel.new_session(ctx8, tm8, tm8.get_need_sources())
+                first: dict = {}
+                dt8, now8 = 1.0 / settings.FPS, 0.0
+                for frame in range(frames):
+                    now8 += dt8
+                    kern.step(dt8, now8)
+                    for ent, ctl in kern.session.npc_list:
+                        asleep = (ctl.state == "SATISFYING" and ctl.target_source is not None
+                                  and ctl.target_source.need_id == "sleep")
+                        if asleep and ent.name not in first:
+                            first[ent.name] = frame
+            ctx8.db.close()
+            return first
+        finally:
+            settings.FATIGUE_SLEEP_PULL = saved_pull
+
+    day = int(settings.SIM_DAY_SECONDS * settings.FPS)
+    with_pull = _first_sleep_frames(settings.FATIGUE_SLEEP_PULL, day)
+    no_pull = _first_sleep_frames(0.0, day)
+    for gob in ("Gruk", "Skrix"):          # patrol/raid nonstop -> the exertion test cases
+        a8, b8 = with_pull.get(gob), no_pull.get(gob)
+        check(f"(8) {gob} beds down sooner with fatigue (frame {a8} vs {b8} without)",
+              a8 is not None and b8 is not None and a8 < b8)
+except Exception as ex:  # noqa: BLE001
+    import traceback
+    traceback.print_exc()
+    check(f"(8) full-loop sleep timing (exception: {ex})", False)
+
 print("=" * 64)
 if _fails:
     print(f"{len(_fails)} FAIL: " + "; ".join(_fails))
