@@ -178,6 +178,24 @@ COMFORT_CONTENT_THRESHOLD         = 0.4  # comfort at/above this dampens the dri
 AFFINITY_STRAIN_GAIN       = 0.0003  # per-tick approach toward discomfort target (~60s to ~50%)
 AFFINITY_STRAIN_NEED_BOOST = 0.0002  # per unit strain added to each need chemical per tick
 
+# --- Rest/Fatigue want (needs/wants addendum §W6, mirrors §B7 strain) ---
+# Activity-driven fatigue: a slow chemical that rises while an NPC exerts itself
+# (moving/raiding/relocating/patrolling) and relaxes at rest, elevating the PERCEIVED
+# urgency of the existing Sleep drive. No new need/bed; perceived-urgency only (no SP
+# drain in v1). Parity: fatigue=0 → boost loop is a no-op → behavior byte-identical.
+FATIGUE_BASE_GAIN     = 0.0003  # numerator of effective_gain; endurance divides it (~strain scale)
+EXERTION_TARGET_MAX   = 1.0     # fatigue target while in an exerting locus (0.0 otherwise)
+FATIGUE_DECAY_MULT    = 0.25    # natural-decay multiplier in Chemicals.tick (recovery out-rates accrual)
+FATIGUE_ACTIVE_FLOOR  = 0.01    # fatigue must exceed this to boost tiredness (dead-band, like strain's 0.01)
+FATIGUE_SLEEP_BOOST   = 0.0003  # per unit fatigue added to `tiredness` per tick (CONSERVATIVE — must stay
+                                # below the sleep-decay branch's _DECAY*5=0.001 so a sleeping, fatigued
+                                # NPC still nets tiredness DOWN)
+# Endurance formula (polymorphic strategy in derivation.py) resists fatigue accrual.
+# Constitution (durability) leads, Physique (raw strength) secondary — §M3/§W6, Q2.
+ENDURANCE_CON_WEIGHT  = 1.0     # Constitution weight (primary; > PHY weight)
+ENDURANCE_PHY_WEIGHT  = 0.5     # Physique weight (secondary)
+ENDURANCE_MIN         = 1.0     # clamp floor so effective_gain never divides by <1 (guards frail NPCs)
+
 # --- Source Selection Weights (rebalanced in H5 for stock factor) ---
 SOURCE_DIST_WEIGHT     = 0.4     # weight for distance in source selection
 SOURCE_MEMORY_WEIGHT   = 0.3     # weight for memory preference in source selection

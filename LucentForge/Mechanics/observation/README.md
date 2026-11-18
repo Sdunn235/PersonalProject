@@ -16,7 +16,7 @@ Two halves:
 
 Output per run (under `logs/`, gitignored):
 - `world.csv` — tick, day, phase, food_total, threat, stage, town, source stocks
-- `npcs.csv` — tick, name, subtype, state, priority need + value + zone, target, hp, room, aff_score, comfort, stress (affinity Phase A), best_region + best_region_pref + relocating (Phase B)
+- `npcs.csv` — tick, name, subtype, state, priority need + value + zone, target, hp, room, aff_score, comfort, stress (affinity Phase A), affinity_strain (Phase C), fatigue (§W6 rest/fatigue want), best_region + best_region_pref + relocating (Phase B)
 - `summary.txt` — min food, peak threat, raid count, worst town state, final NPC state
 
 ## Wiring (`main.py`)

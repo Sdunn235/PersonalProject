@@ -36,6 +36,7 @@ class RunLogger:
                               "priority_need", "need_value", "zone",
                               "target", "hp",
                               "room", "aff_score", "comfort", "stress", "affinity_strain",
+                              "fatigue",
                               "best_region", "best_region_pref", "relocating"])
 
         # Accumulated run stats for the summary
@@ -80,6 +81,7 @@ class RunLogger:
                 f"{ctrl.brain.chemicals.get('comfort'):.3f}",
                 f"{ctrl.brain.chemicals.get('stress'):.3f}",
                 f"{ctrl.brain.chemicals.get('affinity_strain'):.3f}",
+                f"{ctrl.brain.chemicals.get('fatigue'):.3f}",
                 best[0] if best else "",
                 f"{best[1]:+.2f}" if best else "",
                 getattr(ctrl, "relocate_target_region", None) or "",

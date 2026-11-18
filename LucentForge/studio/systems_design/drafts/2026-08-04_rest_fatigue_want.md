@@ -1,9 +1,16 @@
-# Design Note — Rest/Fatigue Want (v1, REVIEWED — PASS WITH NOTES; implementation gated on Shawn's open-question decisions)
+# Design Note — Rest/Fatigue Want (v1, IMPLEMENTED on branch wip/fatigue-want — LIVE GATE FAILED 2026-11-17: tuning makes fatigue inert; see BACKLOG LF-001)
 
-> **Status:** Design accepted by the Director on 2026-08-04 after QC review (PASS WITH NOTES). This is
-> an *accepted design*, not yet canon and not yet implemented — see the Director Reconciliation section
-> at the bottom. It stays in `studio/systems_design/drafts/` until Shawn answers the open questions and
-> it is implemented; only then does a distilled version graduate to `design/` or a bible addendum.
+> **Implementation status (2026-08-09):** Engineering implemented as locked (no kickback); QC reviewed at
+> Implementation×Systems → PASS WITH NOTES (gate 23/23 green; tiredness special-case proven). Changes are
+> in the working tree, **uncommitted**. Remaining: (a) Shawn's `py main.py` live gate; (b) the integration
+> commit must include `scratchpad/run_fatigue_tests.py` (QC minor). After the live gate passes, a distilled
+> version graduates to a bible addendum.
+
+> **Status:** Design accepted (QC PASS WITH NOTES, 2026-08-04) and **all open questions resolved by the
+> Director on 2026-08-09** (Shawn delegated the calls) — see **Director Decisions** at the very bottom,
+> which supersede the Open Questions section for implementation. Ready to run at Implementation stage
+> (implementer writes the code, QC reviews with the test gate live). A distilled version graduates to
+> `design/` or a bible addendum once implemented.
 
 ## 1. Problem / intent
 
@@ -124,3 +131,58 @@ answered — none are structural, all are tuning/scope):
 When Shawn wants it built, answer Q1–Q5, then it runs back through the studio at Implementation stage
 (Systems Design implements → QC reviews with the test gate live). Until then it rests here as an
 accepted design.
+
+---
+
+## Director Decisions — Open Questions Resolved (Caelum, 2026-08-09)
+
+Shawn delegated these calls. **These supersede the Open Questions section for implementation.**
+
+**Q1 — SATISFYING locus split → eating/drinking is NOT exertion.**
+`EXERTING_STATES = {MOVING, RAIDING, RELOCATING, PATROLLING}`. `SATISFYING` is **neutral** (fatigue is
+neither pushed up nor force-discharged — it just naturally decays) **except** when satisfying at a
+`sleep`/bed source, which is the one **restful** locus that actively pulls fatigue toward 0. `IDLE` is
+mildly restful (natural decay suffices; no active push). *Why:* the effort of traveling to food is already
+captured by `MOVING`; the act of consuming isn't strenuous, and "eating tires you" would be a weird
+emergent artifact. Sleep is the canonical recovery.
+
+**Q2 — Endurance basis → Constitution (primary) + Physique (secondary); no new attribute now.**
+`endurance(attrs) = constitution × ENDURANCE_CON_WEIGHT + physique × ENDURANCE_PHY_WEIGHT`, with
+`ENDURANCE_CON_WEIGHT > ENDURANCE_PHY_WEIGHT` (durability leads). Do **not** add Reflexes or a dedicated
+Stamina attribute. *Why:* thematically right (durability + strength = stamina resistance); QC's
+Constitution-coupling flag is real but acceptable because the formula is a **swappable polymorphic
+strategy** — when a dedicated Stamina attribute lands in the attribute-progression arc (§M9.1), re-register
+the strategy without touching the emitter. Accept the coupling, keep the seam swappable.
+
+**Q3 — SP-drain → DEFER to its own arc. v1 is perceived-urgency only.**
+Fatigue boosts `tiredness` and nothing else; no `sp` drain in v1. *Why:* the discipline of this change is
+"additive, no migration, parity at fatigue=0, runnable." SP-drain pulls in the stamina/combat economy (SP
+regen, combat SP-cost interaction, bottoming out mid-fight) — genuinely its own mechanic. Land the
+perceived-urgency layer, prove it live, **then** build the physical self-destructive layer as *"Fatigue
+Arc 2: exertion drains SP"*, which is where the §W3/§W4 self-destructive-wants dimension gets its proper
+treatment. *(If Shawn wants the self-destructive dimension in v1 it's a small addition — but I recommend
+against bundling it; cleaner as its own arc.)*
+
+**Q4 — tiredness stacking → ADDITIVE.**
+`tiredness ← min(1, tiredness + strain × AFFINITY_STRAIN_NEED_BOOST + fatigue × FATIGUE_SLEEP_BOOST)`.
+*Why:* compounding pressure (stressed **and** exhausted → hard collapse into sleep) is the more emergent,
+more honest behavior and fits the "awkward/self-destructive outcomes are proof the model is real" ethos.
+Both are slow, clamped chemicals — no runaway. **Mitigation:** tune `FATIGUE_SLEEP_BOOST` **conservatively**
+so fatigue *alone* shifts sleep meaningfully-but-not-jarringly earlier; the rare stressed+exhausted case
+slamming sleep is intended, not a bug.
+
+**Q5 — legibility → RESOLVED (verified in code 2026-08-09).** `affinity_strain` is already surfaced in all
+four required surfaces; add `fatigue` at the adjacent slot in each — this is a hard implementation
+acceptance item:
+- `Mechanics/observation/run_logger.py` — npcs.csv header (~L38) + value (~L82).
+- `Mechanics/renderer/hud.py` — chem-rows list (~L16–18): `("fatigue","Fatigue",<color>)`.
+- `Mechanics/renderer/inspector.py` — chemical lines (~L101–102).
+- `Mechanics/renderer/observation_panel.py` — strain line (~L100).
+
+**Implementation acceptance (for the QC Implementation-stage review):**
+1. Parity: `fatigue=0` → behavior byte-identical to pre-change (regression suites green).
+2. The `tiredness` special-case: a test proving fatigue-nonzero **while sleeping** still nets `tiredness`
+   downward (the sleep-decay branch dominates the boost) — QC's major note.
+3. Legibility present in all four surfaces (Q5).
+4. Rides the generic chemicals save blob; no migration; save/load round-trip green.
+5. Live gate (Shawn): drive an NPC hard, confirm it seeks a bed sooner and fatigue is visible/decays on sleep.

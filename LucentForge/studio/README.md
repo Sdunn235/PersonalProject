@@ -84,15 +84,19 @@ project state or a durable lesson, it belongs in Caelum memory instead.
 | Code Review / QC | `lucentforge-qc` | Correctness + canon-consistency. Reviews vary by production stage × department (see its charter's matrix). Can block. |
 | World Building | `lucentforge-world-building` | Physical/geographic canon — planetary foundation, tectonics/plates, map scale, climate/hydrology, biomes, and how geography connects to the Panel grid (§W/§T/§S/§C, extends §R1). |
 | Story / Lore | `lucentforge-story-lore` | Narrative & meaning — characters, arcs, history, culture, in-character/on-world judgment. Grounded in the Gobby WIP source story (primary authority) + the Grace cosmology. |
+| Engineering | `lucentforge-engineering` | Implements a *locked* design into tested `Mechanics/` code. Implements the spec exactly (kicks back rather than redesigning); parity-first; runs the gate; does not commit. |
 
-Four departments are scaffolded; **Systems Design + QC are proven end-to-end** (fatigue-want run, 2026-08-04).
-World Building and Story/Lore are built and ready but not yet run — their first task is their first proof.
+Five departments are scaffolded; **Systems Design + QC are proven end-to-end** (fatigue-want design run, 2026-08-04).
+Engineering's first job is the fatigue-want *implementation* (2026-08-09). World Building and Story/Lore are
+built but not yet run — their first task is their first proof.
 
 ## Lane boundaries (so departments don't collide)
-- **Systems Design** = mechanics (numbers-as-formulas, needs/drives/combat).
+- **Systems Design** = mechanics *design* (numbers-as-formulas, needs/drives/combat) — produces a note, not code.
+- **Engineering** = *implements* a locked design into `Mechanics/` code — builds the spec, doesn't redesign it.
 - **World Building** = the *physics* of a place (geography, climate, plates).
 - **Story / Lore** = the *meaning* of a place and its people (characters, arcs, culture).
-- **QC** = correctness/canon across all of them, by the stage×domain matrix.
+- **QC** = correctness/canon across all of them, by the stage×domain matrix. (Engineering's output is reviewed
+  at **Implementation stage** against the originating design's domain.)
 When a task spans lanes (e.g. "a new region"), the Director splits it: World Building gives the geography,
 Story/Lore gives its people and history, Systems Design gives any mechanics — QC reviews each, Director reconciles.
 

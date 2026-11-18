@@ -100,6 +100,7 @@ def draw_inspector(surface, entity, controller, needs, font) -> None:
     if controller is not None:
         line(C2, f"comfort  {getattr(controller, 'affinity_comfort', 0.0):+.3f}")
         line(C2, f"strain   {controller.brain.chemicals.get('affinity_strain'):.3f}")
+        line(C2, f"fatigue  {controller.brain.chemicals.get('fatigue'):.3f}")
 
     sec(C2, "- TRAITS -")
     for k, v in _fields(getattr(entity, "traits", None)).items():

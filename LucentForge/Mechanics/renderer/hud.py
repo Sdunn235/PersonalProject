@@ -16,6 +16,7 @@ _CHEM_ROWS = [
     ("comfort",        "Comfort",  settings.COLOR_FINE),
     ("stress",         "Stress",   settings.COLOR_CRITICAL),
     ("affinity_strain","Strain",   (200, 80, 200)),
+    ("fatigue",        "Fatigue",  (120, 140, 210)),
     ("pain",           "Pain",     settings.COLOR_CRITICAL),
     ("fear",           "Fear",     settings.COLOR_WARNING),
 ]

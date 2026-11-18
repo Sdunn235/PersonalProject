@@ -24,6 +24,9 @@ class Chemicals:
         # Slow-accumulating strain from sustained hostile-affinity exposure (§B7).
         # Boosts perceived urgency of survival needs; parity: strain=0 → no effect.
         self._levels["affinity_strain"] = 0.0
+        # Activity-driven fatigue (needs/wants §W6) — written by the ExertionEmitter;
+        # boosts ONLY the sleep chemical (`tiredness`). Parity: fatigue=0 → no effect.
+        self._levels["fatigue"] = 0.0
 
     def get(self, key: str) -> float:
         return self._levels.get(key, 0.0)
@@ -50,7 +53,8 @@ class Chemicals:
         for key, decay_mult in [("pain", 1.0), ("fear", 1.0),
                                 ("anger", 0.5), ("loneliness", 0.3),
                                 ("comfort", 0.7), ("stress", 0.7),
-                                ("affinity_strain", 0.3)]:
+                                ("affinity_strain", 0.3),
+                                ("fatigue", settings.FATIGUE_DECAY_MULT)]:
             val = self.get(key)
             if val > 0:
                 self.set(key, max(0.0, val - self._DECAY * decay_mult))
@@ -62,6 +66,23 @@ class Chemicals:
             for need in needs:
                 chem_key = getattr(need, "chemical", "") or need.need_id + "_chem"
                 self.set(chem_key, min(1.0, self.get(chem_key) + boost))
+
+        # Fatigue → perceived SLEEP urgency (needs/wants §W6). Unlike strain (which boosts
+        # every survival chemical), fatigue is specifically about rest, so it boosts ONLY
+        # `tiredness` (the sleep need's chemical). Additive with the strain boost above and
+        # clamped by set() → no runaway. Parity: fatigue=0 → no effect.
+        #
+        # ORDERING NOTE (QC major): `tiredness` has a dedicated sleep-decay branch in the
+        # need loop above (hard-decays at _DECAY*5=0.001 while NOT urgent, i.e. sleeping).
+        # This boost runs AFTER that branch, so it ADDS back. FATIGUE_SLEEP_BOOST is tuned
+        # conservatively (max add = fatigue*0.0003 ≤ 0.0003, plus strain ≤ 0.0002 → ≤ 0.0005)
+        # to stay BELOW the 0.001 sleep-decay, so a sleeping NPC with nonzero fatigue still
+        # nets `tiredness` DOWNWARD. Do not raise FATIGUE_SLEEP_BOOST above ~0.0007 without
+        # re-checking this invariant.
+        fatigue = self.get("fatigue")
+        if fatigue > settings.FATIGUE_ACTIVE_FLOOR:
+            self.set("tiredness", min(1.0, self.get("tiredness")
+                                      + fatigue * settings.FATIGUE_SLEEP_BOOST))
 
     def add_pain(self, amount: float) -> None:
         self.set("pain", min(1.0, self.get("pain") + amount))

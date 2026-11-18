@@ -11,6 +11,17 @@ Entity base classes, stat/trait dataclasses, and the data-driven entity factory.
 | `traits.py` | `Traits` dataclass (curiosity, aggression, fearfulness, sociability) |
 | `status.py` | Status effect flag indices (POISON, BURN, STUNNED, etc.) |
 | `factory.py` | Entity factory — spawns NPC/Player from `data/entities.json` |
+| `derivation.py` | Polymorphic attribute-derivation strategies (§M3): `bit_capacity`, `byte_capacity`, and `endurance` — "capacity is a formula, not a coefficient." Recompute from *current* attributes every call. |
+
+## Attribute-derived formulas (derivation.py)
+
+Swappable strategies mapping `Attributes` → a derived value, so per-race variants can be registered without touching callers:
+
+| Strategy | Formula | Consumer |
+|---|---|---|
+| `bit_capacity` | Intuition × Constitution | Bit-pool max (§M3) |
+| `byte_capacity` | Intuition × Constitution × Intellect / 8 | Byte-pool max (§M3) |
+| `endurance` | Constitution × `ENDURANCE_CON_WEIGHT` + Physique × `ENDURANCE_PHY_WEIGHT` (clamped ≥ `ENDURANCE_MIN`) | Fatigue accrual gain in `ExertionEmitter` (§W6) — Constitution-led stamina resistance |
 
 ## Factory Pattern
 
