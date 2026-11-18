@@ -1,4 +1,26 @@
-# Session State — Last updated: 2026-07-26 (Arc A "The Glass Box" COMPLETE — C0059–C0063)
+# Session State — Last updated: 2026-11-17 (review + full sync after a 3-month break)
+
+## Where you left off — read this first
+
+- **Shipped history:** [CHANGELOG.md](../CHANGELOG.md) — every arc, C0001 → now.
+- **Everything still to do:** [BACKLOG.md](../BACKLOG.md) — `LF-###` items with sources; its top
+  section says where to start.
+- **Health (2026-11-17):** `py scratchpad/run_all_tests.py` → **23/23 green**.
+- **Last build work (2026-08-09, logged retroactively):** the **Rest/Fatigue want v1** — `fatigue`
+  chemical + `ExertionEmitter` + polymorphic `endurance(attrs)`, boosting only `tiredness`. It is the
+  first feature built through the Studio's new **Engineering** department (`studio/engineering/`).
+  QC: PASS WITH NOTES. **Live gate FAILED 2026-11-17** — fatigue never rises (per-tick natural decay ≥
+  exertion gain for every NPC). Parked on branch **`wip/fatigue-want`**; `master` does NOT contain it.
+  Cause + fix options: BACKLOG LF-001.
+- **Roadmap position:** Arc A (Glass Box) done → **Arc B "The World Opens"** foundation docs done
+  (C0067), implementation not started → Arc C (real-time combat) after.
+- **Studio:** Systems Design, QC and Engineering proven; World Building and Story/Lore never run yet.
+- The sections below are the historical arc record, kept as-is. The old "Known issues" list moved to
+  BACKLOG.md.
+
+---
+
+## Arc A — historical header (2026-07-26)
 
 > **Source-of-truth note.** This file drifted (was frozen at Stage 3 while code reached Stage 4.5b). Corrected 2026-07-18 during the Grace Migration Arc. Always cross-check `git log` before trusting a stage claim here.
 
@@ -228,7 +250,7 @@ Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-
 - **What is saved**: clock tick/accumulator, threat level/stage, town state, finite source stocks, per-entity hp/x/y/cycles/mp/equipment/needs/traits/chemicals/memory, defeated NPC set, combat cooldowns.
 - **Boundary preserved**: m0001 content tables untouched; JSON stays canonical. Delete `lucentforge.db` → fresh game.
 - **Verified**: 3-test headless smoke suite (`scratchpad/smoke_test.py`) — fresh-seed, round-trip (500 ticks → snapshot → restore → assert), autosave interval. All PASS. Live DB migrated cleanly.
-## Current status: STABLE — Stages 1–3 COMPLETE, Stage 4 COMPLETE through 4.5b (C0036); Grace Migration Arc IN PROGRESS (see top of file)
+## Status (historical snapshot): STABLE — Stages 1–4, Grace Migration, Affinity Loop, Stage 4.6R and Arc A all COMPLETE. Current status is at the top of this file.
 
 ## What works right now
 - `py main.py` (Windows PowerShell) — 1024x768 window, 576x576 level centered with border zones
@@ -336,21 +358,9 @@ Heartbeat arc is closed. Stage 1 (SQLite/persistence/UI) is complete as of 2026-
 | Heartbeat-6: Observation Layer | **Complete** |
 
 ## Known issues / next session work
-1. **Visual test needed** — Heartbeat-5 + fixes passed headless tests but needs live visual verification (stock bars, silo tile, BED relocation, riverbank tiles, raid behavior)
-2. **Humans eat from wild-side FOOD** — FOOD source at (1,1) is in forest. Human NPCs path there because it's closest. Realistic but may want FOOD on civilized side too.
-3. **NPC idle wander** — NPCs stand still during cooldown when no food. Could add a wander/fidget behavior for visual polish.
-4. **Heartbeat-6** — Observation Layer: UI panels, town stats, source stocks, threat/economy graphs
-5. **Storage mechanics** — Phase 6: silo tile is placed but non-functional. Storage overflow, NPC food retrieval.
-6. **NPC cultivation** — Phase 7: NPCs work the farm to boost production.
-7. **Threat escalation pacing** — Threat went 10→15.7 in 1 day. Still PASSIVE. May want faster escalation or lower FORAGE to force raids sooner.
-8. **Grid expansion** — 18x18 may be too small for individual buildings, farm plots. Separate future task.
-9. **Camera scrolling** — Shawn wants scroll/pan for larger maps. Future phase.
-10. **Buff spells** — barrier/shield spells not yet implemented
-11. **Spell learning** — no way to learn new spells during gameplay
-12. **Element resistances** — elements on spells but no resistance system on entities
-13. **World death deferred** — traps clamp HP to 1; full death + respawn is a Stage 4+ arc item (§A8)
-14. **Durability decay deferred** — `durability` field exists on DurableItem; wear mechanics are Stage 4+
-15. **Shops deferred** — no buy/sell economy yet; items only acquirable from chests
+**Moved to [BACKLOG.md](../BACKLOG.md) on 2026-11-17** and checked against the code. Heartbeat-6
+(#4) shipped (C0002). Resistances (#12) partly exist — the multiplier is live, the data is thin
+(LF-054). The rest are LF-100–LF-105, LF-127 and LF-053–LF-063.
 
 ## How to run
 ```powershell

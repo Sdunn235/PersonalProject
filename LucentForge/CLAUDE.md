@@ -11,7 +11,11 @@ Medieval fantasy RPG prototype in PyGame. Core goal: emergent NPC autonomy drive
 
 ## Current State
 
-Always read `context/session_state.md` first — it is the source of truth.
+Always read `context/session_state.md` first — it is the source of truth for working state.
+
+- `CHANGELOG.md` — what shipped, arc by arc (C#### commit IDs). Add to it when an arc or feature lands.
+- `BACKLOG.md` — every open item as `LF-###` with a source link. Delete an item when it ships (and log it in the CHANGELOG); give new ideas the next free ID.
+- Headless gate before any commit that touches runtime: `py scratchpad/run_all_tests.py` (all green).
 
 ## Project Master
 
@@ -39,11 +43,14 @@ DO read, reference, deconstruct, and copy patterns from it. This is source mater
 
 | Directory | Purpose |
 |-----------|---------|
-| Mechanics/ | Core game systems |
+| Mechanics/ | Core game systems (game data JSON lives in `Mechanics/data/`) |
 | assets/ | Images and maps |
 | context/ | Session state and project context |
-| data/ | Game data files |
-| design/ | Canonical design vision docs — architecture, philosophy, port strategy |
+| docs/bible/ | **Design authority** — §-numbered doctrine; requirements cite these sections |
+| docs/genesis/, docs/maps/ | World-generator design (docs only) and map layer standards |
+| design/ | Early (March 2026) vision docs — philosophy and port strategy; the bible supersedes them where they differ |
+| studio/ | AI department agents (Systems Design, QC, Engineering, World Building, Story/Lore) — see `studio/README.md` |
+| scratchpad/ | Headless test suites + `run_all_tests.py` master runner |
 | ReferenceFilesAndCode/ | READ ONLY source material — read and reference freely, never modify |
 
 ## Philosophy
