@@ -1,17 +1,20 @@
-# Session State — Last updated: 2026-11-17 (review + full sync after a 3-month break)
+# Session State — Last updated: 2026-11-18 (return from break: review + sync; fatigue want shipped)
 
 ## Where you left off — read this first
 
 - **Shipped history:** [CHANGELOG.md](../CHANGELOG.md) — every arc, C0001 → now.
 - **Everything still to do:** [BACKLOG.md](../BACKLOG.md) — `LF-###` items with sources; its top
   section says where to start.
-- **Health (2026-11-17):** `py scratchpad/run_all_tests.py` → **22/22 green on master** (23/23 on `wip/fatigue-want`, which adds the fatigue suite).
-- **Last build work (2026-08-09, logged retroactively):** the **Rest/Fatigue want v1** — `fatigue`
-  chemical + `ExertionEmitter` + polymorphic `endurance(attrs)`, boosting only `tiredness`. It is the
-  first feature built through the Studio's new **Engineering** department (`studio/engineering/`).
-  QC: PASS WITH NOTES. **Live gate FAILED 2026-11-17** — fatigue never rises (per-tick natural decay ≥
-  exertion gain for every NPC). Parked on branch **`wip/fatigue-want`**; `master` does NOT contain it.
-  Cause + fix options: BACKLOG LF-001.
+- **Health (2026-11-18):** `py scratchpad/run_all_tests.py` → **23/23 green** on master (C0073).
+- **Latest build (C0070–C0073):** the **Rest/Fatigue want v1.1** — `fatigue` chemical +
+  `ExertionEmitter` + `endurance(attrs)`, and a new **perceived-need receptor** (`biochem/receptor.py`,
+  `Need.perceived_pull` / `perceived_value`) so fatigue actually changes decisions. Built through the
+  Studio's **Engineering** department (2026-08-09), failed its first live test (2026-11-17), fixed and
+  **passed** (2026-11-18). Controls: `V` inspector now shows chemicals to 4 decimals and `actual>felt`
+  for pulled needs.
+- **Key architectural fact (learned 2026-11-17):** NPC decisions read need **zones**, never chemicals.
+  `Drive.compute_urgency` / `Brain.get_priority_need_id` are HUD/inspector-only. A want reaches behavior
+  only through a receptor. `affinity_strain` doesn't have one yet → BACKLOG LF-042.
 - **Roadmap position:** Arc A (Glass Box) done → **Arc B "The World Opens"** foundation docs done
   (C0067), implementation not started → Arc C (real-time combat) after.
 - **Studio:** Systems Design, QC and Engineering proven; World Building and Story/Lore never run yet.

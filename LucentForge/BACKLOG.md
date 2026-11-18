@@ -17,19 +17,20 @@ commit. New ideas get the next free `LF-###`; IDs are never reused.
 
 ---
 
-## Where you left off (2026-11-17)
+## Where you left off (2026-11-18)
 
-1. **Last real work (2026-08-09):** the Rest/Fatigue want was built and passed QC, then sat
-   uncommitted. Its live test on 2026-11-17 **failed** (fatigue never rises — a tuning bug), so it's
-   parked on branch `wip/fatigue-want` (LF-001). `master` is **22/22 green** (23/23 on the branch).
+1. **Just shipped (C0073):** the Rest/Fatigue want works — exertion builds fatigue and worn-out NPCs go
+   to bed sooner (live gate passed). It also exposed that NPC decisions never read chemicals; the new
+   **perceived-need receptor** (`biochem/receptor.py`) is now the way any want reaches behavior.
+   Master is **23/23 green**.
 2. **Arc B "The World Opens" is next on the roadmap.** Its world foundation (bible §W/§T/§S/§C) is
    written; nothing runnable has been built yet.
 3. **The Studio** (department agents) works for Systems Design, QC and Engineering. World Building and
    Story/Lore have never been run.
 
-**Recommended first pick when you have an evening:** LF-001 (fix fatigue — the cause and fix are
-already written down, so it's a short, satisfying win), then LF-002 (live spot-checks, ~30 min), then LF-010 (map loader). If you'd rather do design than code, try LF-004 (a first World Building or
-Story/Lore task).
+**Recommended first pick when you have an evening:** LF-042 (give `affinity_strain` a receptor — same
+pattern as fatigue, so it's a short, satisfying win), then LF-002 (live spot-checks, ~30 min), then LF-010
+(map loader). If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
 
 ---
 
@@ -37,26 +38,10 @@ Story/Lore task).
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-001 | **Fix the fatigue want, then live-gate + merge** — code is on branch `wip/fatigue-want`. Details below the table. | S–M | ready | branch `wip/fatigue-want`, `studio/engineering/memory_log.md` |
 | LF-002 | **Unconfirmed July live checks**: goblin relocates home (`RELO`) when stressed; region comfort survives save → reload; Grace entities build (player neutral + LIGHT_TOUCHED). Never eyeballed in a window. | S | ready | session_state (Affinity / Grace sections) |
 | LF-003 | **Decide the unmerged `agent/alignment-genesis-bootstrap` branch** (one 2026-07-26 commit: `docs/architecture/README.md`, which proposes a bible → decisions → architecture → roadmap → research authority order). Merge, adapt, or delete. | S | design | `origin/agent/alignment-genesis-bootstrap` |
 | LF-004 | **First real job for World Building and Story/Lore** — their first task is their proof (e.g., the §T3 workshop prep for World Building; Gobby's Act 1 people for Story/Lore). | M | ready | `studio/README.md` |
 | LF-005 | Re-save `Gobby_the_Goblin/brain_dump.docx` in Word — the file isn't a valid docx, so it's unreadable. | S | ready | memory `project_gobby_world` |
-
-**LF-001 — why the 2026-11-17 live gate failed.** Each tick, fatigue gains `FATIGUE_BASE_GAIN ÷
-endurance` (0.0003 ÷ 6–23) while natural decay removes `0.0002 × FATIGUE_DECAY_MULT` = 0.00005 —
-*including while exerting*. Every NPC has endurance ≥ 6, so gain ≤ decay and fatigue stays 0 (Gruk and
-Elara exactly cancel; Ignarix gains a quarter of its decay). The 17 tests passed because they test
-emitter and decay separately with low test attributes.
-- **Fix options:** (a) tuning — raise `FATIGUE_BASE_GAIN` about 10× (≈0.003), so even endurance 23 nets
-  positive; re-check the sleep invariant (`FATIGUE_SLEEP_BOOST` < 0.001) still holds. (b) structural —
-  skip natural decay while in an exerting state (a design change → Systems Design + QC pass).
-- **Add the missing test:** every real NPC from `entities.json`, ticked through the full
-  emitter + `Chemicals.tick` path in an exerting state for thousands of ticks, must reach a
-  visible fatigue (e.g. > 0.1).
-- **Legibility (live check 3):** a working fatigue still moves about 0.0005 per tick, invisible at the
-  inspector's 2 decimals. Show 4 decimals or a per-tick delta for chemicals in the `V` inspector.
-- Then: re-run the live gate → merge the branch into master → move to CHANGELOG.
 
 ---
 
@@ -76,7 +61,7 @@ emitter and decay separately with low test attributes.
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-030 | **Fatigue Arc 2 — exertion drains SP** (the physical, self-destructive layer; interacts with SP regen and combat costs). | M | blocked by LF-001 | fatigue design note, Director Q3 |
+| LF-030 | **Fatigue Arc 2 — exertion drains SP** (the physical, self-destructive layer; interacts with SP regen and combat costs). | M | ready | fatigue design note, Director Q3 |
 | LF-031 | **Social Belonging want** (Tier 2) — belonging-comfort near familiar entities, loneliness when isolated. Gobby is the test case. | Arc | design | §W7 needs/wants/drives addendum |
 | LF-032 | **Knowledge / curiosity want** (Tier 3) — novelty exposure builds curiosity; weight from the `curiosity` trait. | M | design | §W7 |
 | LF-033 | **Power want** (Tier 3) — control or defeat others; weight from `aggression`; stress spike under bad odds. | M | design | §W7 |
@@ -87,6 +72,8 @@ emitter and decay separately with low test attributes.
 | LF-038 | **Legacy-injector retrofit** — re-express `proximity.py` fear and `zone_ai.py` nudges as emitters; parity-gated, own phase. | M | ready | §B8, §B2 |
 | LF-039 | **Goblin scout → swarm escalation** — lone goblins scout; success draws more; swarms are the threat. | L | design | memory `project_goblin_lore` |
 | LF-040 | **Talent read by the Brain** — gifted-ness influences behavior. | M | idea | §M9 (§M3 seam) |
+| LF-042 | **Give `affinity_strain` a perceived-need receptor** — C0046's strain only boosts chemicals, which decisions never read, so it's inert. Add a pull (strain × a named constant) on all survival needs in `biochem/receptor.py`; same-seed kernel test like fatigue §8. | S–M | ready | biochem §B7 code-gap note; needs/wants §W6 |
+| LF-043 | **Decide: should the drive chain ever own decisions?** `Brain.get_priority_need_id` (chemicals pick the need, Creatures-style) is display-only today; receptors are the narrow bridge. Revisit when several wants exist. | Arc | design | 2026-11-18 session; §W6 |
 
 ---
 

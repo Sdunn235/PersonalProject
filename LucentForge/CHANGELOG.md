@@ -14,35 +14,52 @@ numbers — arcs are the release unit.
 ---
 
 ## [Unreleased]
+Nothing yet.
 
-### Rest/Fatigue want v1 — on branch `wip/fatigue-want`, NOT on master
-Built 2026-08-09; **live gate FAILED 2026-11-17** (fatigue never rises — tuning bug, see BACKLOG
-LF-001). Parked on its own branch so the work is safe and synced while `master` stays tested.
+---
 
-The first feature to go through the full Studio pipeline (Systems Design → QC → **Engineering** → QC).
-It mirrors `affinity_strain`: exertion builds a slow `fatigue` chemical, and fatigue raises how urgent
-sleep *feels* through the existing Sleep drive. No new need, bed, or migration.
+## C0069–C0073 — Return from break + the Rest/Fatigue want (2026-11-17 → 11-18)
+After three months away: a full project review, then the first new behavior since July.
+
+### Review + sync (C0069, C0071)
+**Added:** this CHANGELOG, `BACKLOG.md`, `design/README.md`, `assets/maps/tools/` (biome-map rework
+script, kept out of `scratchpad/` because the test runner would execute it and it rewrites the map).
+**Changed:** session_state current-state header; known-issues list moved to BACKLOG (checked against the
+code); CLAUDE.md directory table; next-session prompt from the Caelum template. Now tracked: the biome
+map files and `Gobby_the_Goblin/`.
+
+### Rest/Fatigue want v1.1 (C0070 built 2026-08-09 → C0072 fix → C0073 merge)
+The first feature to go through the full Studio pipeline (Systems Design → QC → **Engineering** → QC),
+then fixed after its first live test failed. Exertion builds a slow `fatigue` chemical; fatigue makes
+the sleep need *feel* lower, so worn-out NPCs go to bed sooner. No new need, bed, or migration.
 
 **Added**
-- `fatigue` chemical and an `ExertionEmitter` (`biochem/emitter.py`). The exerting states are MOVING,
-  RAIDING, RELOCATING and PATROLLING. Sleeping at a bed pulls fatigue toward 0. IDLE and eating or
-  drinking are neutral.
-- `endurance(attrs)` polymorphic derivation strategy (`entities/derivation.py`) — Constitution leads,
-  Physique is secondary, recomputed live. Accrual = `FATIGUE_BASE_GAIN / endurance`.
-- Fatigue boosts **only** `tiredness` (additive with strain). It is tuned so a sleeping NPC still nets
-  tiredness down (`FATIGUE_SLEEP_BOOST 0.0003` < sleep-decay `0.001`).
-- Legible in all four surfaces: HUD chem row, `V` inspector, `O` panel suffix (`f0.xx`), `npcs.csv`.
-- 7 named constants in `settings.py`.
-- `scratchpad/run_fatigue_tests.py` — 17 checks (parity at fatigue=0, accrual/decay, the
-  sleeping-tiredness special case, save round-trip, endurance).
-- **Studio: Engineering department** (`studio/engineering/` + workspace agent
-  `lucentforge-engineering`). It implements a *locked* design, kicks back rather than redesigning,
-  and does not commit.
+- `fatigue` chemical and an `ExertionEmitter` (`biochem/emitter.py`). MOVING, RAIDING, RELOCATING and
+  PATROLLING exert; sleeping at a bed pulls fatigue toward 0; IDLE and eating/drinking are neutral.
+- `endurance(attrs)` polymorphic derivation (`entities/derivation.py`) — Constitution leads, Physique
+  secondary, recomputed live. Per-frame gain = `FATIGUE_BASE_GAIN / endurance`.
+- **Perceived-need receptor** (`biochem/receptor.py`): `Need.perceived_pull = fatigue × FATIGUE_SLEEP_PULL`
+  on sleep. `Need.zone`, `urgency_score` and priority sorting read `perceived_value`, so every decision
+  path (idle pick, goblin behavior, patrol/relocate/raid exits) agrees. Max pull 30 → no bed loop.
+- Legibility: HUD Fatigue row, `V` inspector (chemicals now 4 decimals; needs show `actual>felt`),
+  `O` panel suffix `f0.xx`, `npcs.csv` column.
+- `scratchpad/run_fatigue_tests.py` — 38 checks, including an integrated real-roster accrual test and a
+  same-seed headless kernel day with vs without the receptor (goblins sleep ~⅕ day sooner).
+- **Studio: Engineering department** (`studio/engineering/` + workspace agent `lucentforge-engineering`)
+  — implements a *locked* design, kicks back rather than redesigning, does not commit.
 
-**Deferred:** SP drain from exertion → "Fatigue Arc 2" (BACKLOG LF-030).
-**Gate:** `run_all_tests.py` 23/23 green (re-verified 2026-11-17). QC: PASS WITH NOTES. **Live gate:
-FAILED** — the unit tests checked the emitter and decay separately; no test ran a real NPC with both.
-Source: `studio/systems_design/drafts/2026-08-04_rest_fatigue_want.md`, `studio/engineering/memory_log.md`.
+**Fixed (C0072, after the 2026-11-17 live test failed)**
+- Fatigue never rose: the controller runs per frame, and natural decay (0.00005/frame) beat the gain
+  (0.0003 ÷ endurance) for every NPC. `FATIGUE_BASE_GAIN` 0.0003 → 0.0015, derived from "a human
+  (endurance 10) reaches 0.5 in about half a day".
+- Even when tuned, fatigue could not change behavior: decisions read need zones, never chemicals. The
+  receptor above is the fix.
+
+**Changed:** HP/SP regen pauses while sleep *feels* urgent (exhaustion halts recovery).
+**Docs:** bible needs/wants §W6 code-reality note + §W6.1; biochem §B7 code-gap note (strain has the same
+inert-boost problem → BACKLOG LF-042); READMEs biochem, ai, new `Mechanics/needs/README.md`.
+**Gate:** `run_all_tests.py` 23/23 green; live gate passed (all six checks; run-log: Gruk peak fatigue
+0.71, Skrix 0.62, both falling while asleep).
 
 ---
 
@@ -248,7 +265,7 @@ Before commit numbering. Initial workspace commit (2026-03-04), then a burst of 
 
 ## Reference: how the project grew
 - **Test safety net:** 3-test smoke (Jun) → per-stage smoke suites → 92-check runtime characterization
-  + `run_all_tests.py` (**22 suites on master, all green** as of 2026-11-17; 23 on `wip/fatigue-want`).
+  + `run_all_tests.py` (**23 suites, all green** as of 2026-11-18).
 - **Controls today:** arrows move · `TAB` cycle HUD · `I` inventory · `E` chest · `C` convert
   Bits→Bytes · `O` world panel · `S` save · `ESC` pause · `P` freeze · `.` step · `,` rewind ·
   `V` inspector · `L` event feed.

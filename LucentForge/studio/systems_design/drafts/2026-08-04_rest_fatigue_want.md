@@ -1,4 +1,8 @@
-# Design Note — Rest/Fatigue Want (v1, IMPLEMENTED on branch wip/fatigue-want — LIVE GATE FAILED 2026-11-17: tuning makes fatigue inert; see BACKLOG LF-001)
+# Design Note — Rest/Fatigue Want (v1 → v1.1 SHIPPED C0073, 2026-11-18; distilled into bible needs/wants §W6.1)
+
+> **Outcome:** v1 failed its first live gate (fatigue inert: per-frame decay ≥ gain; and decisions never read
+> the `tiredness` boost). v1.1 retuned `FATIGUE_BASE_GAIN` and added a perceived-need receptor
+> (`biochem/receptor.py`). Live gate passed. This note is now historical; the bible §W6.1 is authority.
 
 > **Implementation status (2026-08-09):** Engineering implemented as locked (no kickback); QC reviewed at
 > Implementation×Systems → PASS WITH NOTES (gate 23/23 green; tiredness special-case proven). Changes are
