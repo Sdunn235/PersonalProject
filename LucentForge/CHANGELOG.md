@@ -14,7 +14,13 @@ numbers — arcs are the release unit.
 ---
 
 ## [Unreleased]
-Nothing yet.
+
+**Docs**
+- `docs/bible/README.md` gains an **Authority order** section (bible → decisions → architecture →
+  roadmap → research → code), each tier mapped to its existing home, plus the conflict rule: surface
+  code/bible disagreements, never silently rewrite either side. Adapted from GPT Caelum's unmerged
+  `agent/alignment-genesis-bootstrap` proposal; branch deleted.
+- Planet map as a navigable zoom: **decided no** (§S confirmed); a diegetic map view is iced as LF-166.
 
 ---
 

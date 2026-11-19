@@ -5,6 +5,37 @@ Implementation must satisfy the bible; the bible does not merely describe the im
 
 ---
 
+## Authority order
+
+> **Extend canon; do not shadow canon.**
+
+When two sources disagree, the higher one wins. Each tier already has a home — do not create a parallel
+one.
+
+| # | Tier | Where it lives |
+|---|---|---|
+| 1 | **Doctrine** — what the world and simulation *are* | `docs/bible/` (this folder) |
+| 2 | **Accepted decisions** — choices and their tradeoffs | "Approved / standing decisions" sections inside each addendum; `design/design_decisions_log.md`; handoff decision registers (`docs/handoffs/*/15_DECISION_REGISTER.md`) |
+| 3 | **Architecture** — subsystem boundaries, ownership, data flow | `lucentforge_runtime_architecture_addendum_v1.md` (§RT) + each `Mechanics/*/README.md` |
+| 4 | **Roadmap** — sequencing and active scope | `BACKLOG.md` (what's next) · `CHANGELOG.md` (what shipped) · `context/session_state.md` (working state) |
+| 5 | **Research** — evidence, experiments, unresolved possibilities | `docs/genesis/`, `studio/*/drafts/`, `docs/handoffs/` (historical, not authority) |
+| 6 | **Code and tests** — implementation of accepted doctrine | `Mechanics/`, `scratchpad/` |
+
+**Conflict rule.** When code and the bible disagree, **surface the disagreement — never silently rewrite
+either side.** Record it where it was found (a dated "code gap" / "code reality" note in the bible
+section, plus a BACKLOG item) until one side is changed on purpose. *Example: the biochem addendum
+§B7 says `affinity_strain` makes NPCs act sooner; the code never did (found 2026-11-17 → §B7 note +
+BACKLOG LF-042).*
+
+**Before creating a new document**, decide which tier it belongs to and extend the existing home for
+that tier (a new addendum, a new section, a BACKLOG item, a draft) rather than starting a new folder. Add a
+dedicated folder (e.g. `docs/decisions/` for ADRs) only when the first real document needs it.
+
+*Adapted 2026-11-18 from GPT Caelum's unmerged `agent/alignment-genesis-bootstrap` proposal (2026-07-26),
+which named the same tiers as separate `docs/` folders.*
+
+---
+
 ## Documents
 
 | File | Purpose | Authority |
@@ -31,7 +62,7 @@ Source drawing: `docs/bible/affinity_grace/` (`affinity_grace.png` / `.jpeg`) �
 
 > **The Grace supersedes the six-element affinity model** (`EARTH/FIRE/AIR/WATER/VOID/LIGHT` + Light↔Void opposition) that Stage 4.4 shipped. Light and Dark are ontological states, not affinities. Affinity is now an eight-position lattice. `stats_magic_addendum` §M5–§M6, Foundation §7, and terminology_map §8.2 are revised to match.
 
-> **The World / Planetary docs EXTEND, they do not supersede, the Panel doctrine.** `world_map_scale_addendum` (§S) adds a planetary authoring/indexing layer *above* the Panel; `rooms_panels_addendum` §R1 (a Panel is one fixed 18×18 tile map, one scale everywhere) is unchanged. There is no world-map zoom; `PlanetCoord` wraps the existing `WorldPos`. The World docs are **drafts with Out-of-Scope registers** — canonical *structure* with known gaps (plate boundaries, planet scale), not finished canon. Generator implementation lives outside the Bible in `docs/genesis/`.
+> **The World / Planetary docs EXTEND, they do not supersede, the Panel doctrine.** `world_map_scale_addendum` (§S) adds a planetary authoring/indexing layer *above* the Panel; `rooms_panels_addendum` §R1 (a Panel is one fixed 18×18 tile map, one scale everywhere) is unchanged. There is no world-map zoom (**confirmed by Shawn 2026-11-18** — not for now; someday an in-world spell or technology might offer a map view, BACKLOG LF-166); `PlanetCoord` wraps the existing `WorldPos`. The World docs are **drafts with Out-of-Scope registers** — canonical *structure* with known gaps (plate boundaries, planet scale), not finished canon. Generator implementation lives outside the Bible in `docs/genesis/`.
 
 ---
 

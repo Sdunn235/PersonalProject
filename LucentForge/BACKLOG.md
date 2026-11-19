@@ -39,7 +39,6 @@ pattern as fatigue, so it's a short, satisfying win), then LF-002 (live spot-che
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
 | LF-002 | **Unconfirmed July live checks**: goblin relocates home (`RELO`) when stressed; region comfort survives save → reload; Grace entities build (player neutral + LIGHT_TOUCHED). Never eyeballed in a window. | S | ready | session_state (Affinity / Grace sections) |
-| LF-003 | **Decide the unmerged `agent/alignment-genesis-bootstrap` branch** (one 2026-07-26 commit: `docs/architecture/README.md`, which proposes a bible → decisions → architecture → roadmap → research authority order). Merge, adapt, or delete. | S | design | `origin/agent/alignment-genesis-bootstrap` |
 | LF-004 | **First real job for World Building and Story/Lore** — their first task is their proof (e.g., the §T3 workshop prep for World Building; Gobby's Act 1 people for Story/Lore). | M | ready | `studio/README.md` |
 | LF-005 | Re-save `Gobby_the_Goblin/brain_dump.docx` in Word — the file isn't a valid docx, so it's unreadable. | S | ready | memory `project_gobby_world` |
 
@@ -166,16 +165,21 @@ From `docs/Ideas For How Character stats work.txt`. Keep these in mind when desi
 - **LF-164** Failure has consequences — fail badly enough and something bad happens.
 - **LF-165** Weight, style, type and stats all feed every action's speed, power and cost — easy to
   learn, hard to master.
+- **LF-166** An in-world way to *see* the planet map — a scrying spell, a cartographer's artifact, a
+  technology — rather than a UI zoom (Shawn, 2026-11-18). The map stays §S indexing data; this would be a
+  diegetic window onto it.
 
 ---
 
 ## Open decisions (Shawn)
 These shape the items above. Also logged in Caelum `feedback/questions_for_shawn.md`.
 
-- **D1** Is the planet map ever a **navigable zoom** level? Today §S says no — it only extends §R1's
-  single Panel scale. If yes, §S needs revisiting before LF-010/LF-081.
-- **D2** Merge the agent-branch authority order (`docs/decisions`, `docs/architecture`,
-  `docs/roadmap`) → LF-003. If adopted, this BACKLOG could move to `docs/roadmap/`.
+- ~~**D1** Is the planet map ever a navigable zoom level?~~ **Decided 2026-11-18: no, not for now** —
+  §S stands (the planet map only indexes §R1's single Panel scale). Possible someday via an in-world
+  spell or technology (LF-166).
+- ~~**D2** The agent-branch authority order.~~ **Decided 2026-11-18: adapted** into
+  `docs/bible/README.md` "Authority order" (tiers mapped to existing homes; BACKLOG stays the roadmap);
+  branch deleted.
 - **D3** Faction-system depth (LF-107) and memory-scaling approach (LF-128).
 - **D4** Git-LFS for the large map PSDs.
 

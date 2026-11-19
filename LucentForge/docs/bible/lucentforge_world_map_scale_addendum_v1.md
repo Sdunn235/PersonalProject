@@ -1,7 +1,7 @@
 # LucentForge World Map & Scale Addendum v1
 
 **Created:** 2026-08-02 | **Stage:** World / Planetary (Arc B foundation) | **Authority:** LucentForge Bible — bridge between planetary maps and the existing Panel doctrine
-**Status:** Draft for Shawn approval — establishes the authority boundary; does NOT choose final physical distances (see §S6, §S9)
+**Status:** Draft — the authority boundary (planet map indexes Panels, no navigable zoom) **confirmed by Shawn 2026-11-18**; does NOT choose final physical distances (see §S6, §S9)
 **Section IDs:** §S1–§S9
 
 ---
