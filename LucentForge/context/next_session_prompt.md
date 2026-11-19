@@ -3,44 +3,33 @@
 **Caelum Session Start**
 
 **Date:** [YYYY-MM-DD]
-**Session topic:** lucentforge_strain_receptor
+**Session topic:** lucentforge_arc_b_world
 
 ## What I'm working on
-LucentForge PyGame prototype. Give `affinity_strain` the same perceived-need receptor fatigue got
-(BACKLOG LF-042), so strain actually changes behavior. Then the July live spot-checks (LF-002), then start
-Arc B "The World Opens" (map loader, LF-010).
+LucentForge, Arc B "The World Opens", step 2: decide and build what lies beyond the starting panel, so
+walking off an edge loads a real neighbour panel (LF-010). Panels are already data (C0089).
 
 ## Last verified state
-- **master** (`Personal Project` repo): C0073 = merge of the Rest/Fatigue want v1.1 (C0070 build, C0072
-  fix); C0074–C0075 docs. `py scratchpad/run_all_tests.py` → 23/23 green; fatigue live gate passed
-  2026-11-18.
-- `biochem/receptor.py` holds `apply_perceived_pulls(needs, chemicals)`. It currently sets only
-  fatigue → sleep. `Need.perceived_pull` / `perceived_value`; `zone` reads the perceived value.
-- `affinity_strain` (C0046) only boosts need chemicals, which decisions never read, so it's inert
-  (bible biochem §B7 code-gap note).
-- Uncommitted on purpose: `TheForge/global.json` (SDK rollForward change in the read-only blueprint;
-  waiting on Shawn's call).
-- Brief is a hypothesis — check `git log` / `git status` first.
+- master C0089, `run_all_tests.py` 30/30 green, CI green; hooks enabled.
+- Starting panel: `Mechanics/data/panels/panel_0_0.json`; `panels.json` edges are all null.
+- Studio: 7 departments (QA + Art new); World Building and Story/Lore have never run.
+- Waiting on Shawn: LF-178 (wire generated Grom/Gobby art), LF-173 (acceptance examples), registry
+  sources for the 10 original sprite sheets.
 
 ## Tasks for this session
-1. Design the strain pull: strain × a named constant on **all** survival needs (hunger, thirst, sleep).
-   Combine it with fatigue's sleep pull (additive?) and cap the total so a just-satisfied need stays FINE.
-2. Write the test first: a same-seed `SimulationKernel` day with vs without the strain pull (pattern:
-   `run_fatigue_tests.py` §8). Pick NPCs that actually sit in hostile-affinity ground long enough.
-3. Implement in `receptor.py`, run `run_all_tests.py`, then the live gate (Shawn).
-4. If time: LF-002 live spot-checks (relocate `RELO`, region memory across save/reload, Grace entities).
+1. Run **World Building** + **Story/Lore** (their first real job): propose the neighbouring panels (which
+   biome/region, who lives there; Gobby lore + world foundation §W). Proposals → Shawn decides canon.
+2. **QA:** failing tests for edge transitions (walk off EAST → Panel(1,0) loads, player/NPC positions map
+   across, `can_transition` true).
+3. **Engineering:** transitions until green; Art grows props for the new biome from genomes.
 
 ## What feels unclear
-- Does anyone accumulate enough strain in normal play to show the effect? Villagers live on neutral
-  town ground; goblins leave their camp to raid. Measure peak strain headlessly first.
-- Should strain's pull be smaller than fatigue's (it's a background tax, not exhaustion)?
+- How big Arc B's first world slice should be (one neighbour, or a ring of four).
+- Whether NPCs follow across panels now or later (LF-120 off-screen sim).
 
 ## Files likely to touch
-- `Mechanics/biochem/receptor.py` — the strain receptor
-- `settings.py` — `AFFINITY_STRAIN_PULL` (+ a total-pull cap, if needed)
-- `scratchpad/run_affinity_behavior_tests.py` — integrated behavior test
-- `docs/bible/lucentforge_biochem_affinity_addendum_v1.md` §B7 — replace the code-gap note
-- `CHANGELOG.md`, `BACKLOG.md`, `context/session_state.md`, `Mechanics/biochem/README.md`
+- `Mechanics/data/panels.json`, `Mechanics/data/panels/*.json`, `Mechanics/world/world_coord.py`,
+  `Mechanics/runtime/kernel.py` (`_detect_panel_edge`), `Mechanics/world/tile_map.py`, new scratchpad suites.
 
 ## How to start
 1. Read `Caelum/Caelum_Framework_Shawn_2026-03-12_Workflow_Expansion/CLAUDE.md` directly.
