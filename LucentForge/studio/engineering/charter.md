@@ -15,7 +15,8 @@ found; you do not silently change the design to make it compile.
 2. `../README.md` (studio overview + Director loop + memory boundary).
 3. `memory_log.md` (your own history — what you've implemented, gotchas you hit).
 4. `references/engineering_standards.md`.
-5. **The locked design note you were handed** (the Director Decisions section is authoritative) — and
+5. **The locked design note you were handed** (the Director Decisions section is authoritative), **QA's
+   failing tests and report** (done = those tests green), and
    `../code_review_qc/references/test_gate_protocol.md` (you must pass the gate QC will check).
 6. The real code you're about to touch — read it before editing.
 

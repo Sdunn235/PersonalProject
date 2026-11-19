@@ -3,8 +3,9 @@
 A "studio" of AI department specialists for building LucentForge. Shawn is a solo developer;
 this lets one person dispatch, review, and integrate the way a small game studio would.
 
-**This is a proof-of-concept.** Two departments exist today: **Systems Design** and **Code
-Review / QC**. More get added only after the pattern proves worth the overhead (see *Scaling*).
+Seven departments exist (2026-11-19). The studio is the engine of LucentForge's **autonomy**
+(`../docs/autonomy.md`): the build is test-first (`../docs/testing.md`), so the QA department writes the
+tests before Engineering builds, and green tests rather than Shawn's eyes carry the trust.
 
 ---
 
@@ -84,24 +85,28 @@ project state or a durable lesson, it belongs in Caelum memory instead.
 | Code Review / QC | `lucentforge-qc` | Correctness + canon-consistency. Reviews vary by production stage × department (see its charter's matrix). Can block. |
 | World Building | `lucentforge-world-building` | Physical/geographic canon — planetary foundation, tectonics/plates, map scale, climate/hydrology, biomes, and how geography connects to the Panel grid (§W/§T/§S/§C, extends §R1). |
 | Story / Lore | `lucentforge-story-lore` | Narrative & meaning — characters, arcs, history, culture, in-character/on-world judgment. Grounded in the Gobby WIP source story (primary authority) + the Grace cosmology. |
-| Engineering | `lucentforge-engineering` | Implements a *locked* design into tested `Mechanics/` code. Implements the spec exactly (kicks back rather than redesigning); parity-first; runs the gate; does not commit. |
+| Engineering | `lucentforge-engineering` | Implements a *locked* design into tested `Mechanics/` code. Implements the spec exactly (kicks back rather than redesigning); parity-first; builds until QA's tests and the full gate are green; does not commit. |
+| QA / Test | `lucentforge-qa` | Writes the tests **before** anything is built: turns a design note or BACKLOG item into acceptance tests that fail for the right reason (unit / integrated / A-B / render / soak). Owns `docs/testing.md`. Never implements. |
+| Art | `lucentforge-art` | How the world *looks*, **grown not painted**: art genomes (data) → renderer (`Mechanics/art/`) for creatures, trees, rocks, built to grow and evolve. Bakes to `assets/generated/`; keeps the asset registry. Never edits Shawn's existing art. |
 
-Five departments are scaffolded; **Systems Design + QC are proven end-to-end** (fatigue-want design run, 2026-08-04).
-Engineering's first job is the fatigue-want *implementation* (2026-08-09). World Building and Story/Lore are
-built but not yet run — their first task is their first proof.
+**Pipeline for a feature:** Systems Design (note) → **QA (failing tests)** → Engineering (green) → QC (review)
+→ Director commits under `docs/autonomy.md`. Proven: Systems Design + QC (2026-08-04), Engineering (2026-08-09).
+QA and Art founded 2026-11-19; World Building and Story/Lore not yet run — their first task is their first proof.
 
 ## Lane boundaries (so departments don't collide)
 - **Systems Design** = mechanics *design* (numbers-as-formulas, needs/drives/combat) — produces a note, not code.
 - **Engineering** = *implements* a locked design into `Mechanics/` code — builds the spec, doesn't redesign it.
 - **World Building** = the *physics* of a place (geography, climate, plates).
 - **Story / Lore** = the *meaning* of a place and its people (characters, arcs, culture).
+- **QA** = the *tests* that define done, written before the build; never the build itself.
+- **Art** = the *look*, grown from genomes; asks Story/Lore who a creature is and World Building where things grow.
 - **QC** = correctness/canon across all of them, by the stage×domain matrix. (Engineering's output is reviewed
   at **Implementation stage** against the originating design's domain.)
 When a task spans lanes (e.g. "a new region"), the Director splits it: World Building gives the geography,
 Story/Lore gives its people and history, Systems Design gives any mechanics — QC reviews each, Director reconciles.
 
 ## Scaling further (after each new department's first run holds)
-- Only staff a department that has real work. **Animation/Graphics** stay unstaffed until there's an
-  art pipeline. **Genesis Development** is docs-only today, so it would be a design-only department.
+- Only staff a department that has real work. **Animation** stays unstaffed until the Art genome
+  renderer needs more than walk cycles. **Genesis Development** is docs-only today, so it would be a design-only department.
 - If epics become routine, add `studio/EPICS.md` where the Director records each epic's decomposition
   and which departments ran.
