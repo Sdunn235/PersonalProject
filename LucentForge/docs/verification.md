@@ -17,6 +17,15 @@ Entry template:
 
 ---
 
+## 2026-11-19 — First hosted CI run (PR #1 head 28ecccd = C0079–C0081 + C0080 policy)
+- Local gate: 25/25 GREEN (Windows, Python 3.14.6, pygame-ce 2.5.7).
+- Hosted CI: **25/25 GREEN** on ubuntu-latest, Python 3.14, pygame-ce **2.5.8** (installed from wheels;
+  no source build), `verify` green, 54 s end to end.
+  https://github.com/Sdunn235/PersonalProject/actions/runs/44475158441
+- Evidence: `lucentforge-screens` artifact (309 KB, 3 frames) uploaded from Linux.
+- Gaps: CI on `master` pushes starts only once PR #1 merges (the workflow lives on that branch).
+  Local 2.5.7 vs CI 2.5.8: same suites green on both.
+
 ## 2026-11-19 — Autonomy foundation: render + soak suites, queueing fix (C0079)
 - Local gate: **25/25 GREEN** on C0079 (Windows, Python 3.14.6, pygame-ce 2.5.7). Red first:
   `run_soak_tests.py` failed 2 thrash checks before the fix.

@@ -28,7 +28,7 @@ commit. New ideas get the next free `LF-###`; IDs are never reused.
 3. **The Studio** (department agents) works for Systems Design, QC and Engineering. World Building and
    Story/Lore have never been run.
 
-**Next (Autonomy Arc):** Shawn merges the policy PR (LF-170); Claude gets CI green (LF-171), then
+**Next (Autonomy Arc):** Shawn merges the policy PR (LF-170); CI is green on Linux (first run, 25/25); Claude
 backfills tests (LF-172), builds the QA and Art departments (LF-174/175), and starts Arc B autonomously
 (LF-177). LF-002 (live spot-checks) is now optional: the render and soak suites cover what it checked. If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
 
@@ -55,7 +55,6 @@ Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) �
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
 | LF-170 | **Merge the policy PR** (autonomy policy, testing doctrine, CI workflow, git hooks — C0080). Policy can't approve itself; this one is Shawn's. Then enable hooks: `git config core.hooksPath .githooks`. | S | Shawn | PR `autonomy/policy-and-ci` |
-| LF-171 | **First green hosted CI run** — prove pygame-ce installs on Linux with Python 3.14 (fall back to 3.13 if wheels are missing, recorded in verification). | S | in progress | `.github/workflows/lucentforge.yml` |
 | LF-172 | **Render tests for the modal screens** — combat, inventory, chest, pause, save/load draw through their own fonts and block on input; drive them headlessly (scripted events) and assert what they show. | M | ready | verification 2026-11-19 gaps |
 | LF-173 | **Acceptance examples in requirements** — adopt Smug Cat's requirements pattern: each new bible §-rule or BACKLOG item carries an observable acceptance example that a test reuses verbatim. Format change to doctrine docs → PR. | M | Shawn | smugcat `docs/requirements/template.md` |
 | LF-174 | **Studio: QA / Test department** — owns docs/testing.md; turns each design note into failing acceptance tests *before* Engineering builds (pipeline Systems Design → QA → Engineering → QC). | M | ready | Shawn 2026-11-19 |

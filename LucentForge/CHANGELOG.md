@@ -44,6 +44,7 @@ numbers — arcs are the release unit.
   strain live checks). `run_soak_tests.py`: 3 in-game days of invariants (ranges, thrashing, frozen
   movers, daily needs, determinism).
 - `docs/verification.md`: the chronological evidence log.
+- First hosted CI run green on Linux (25/25, Python 3.14, 54 s) on PR #1; screenshots uploaded as an artifact.
 
 **Fixed (C0079)**
 - NPCs thrashed IDLE↔MOVING every frame while their target tile was occupied (Ignarix 900 state
