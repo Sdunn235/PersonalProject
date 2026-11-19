@@ -1,0 +1,4 @@
+#!/bin/sh
+# LucentForge: full headless gate before pushing LucentForge changes. Logic: .githooks/lucentforge_hooks.py
+PY=$(command -v py || command -v python3 || command -v python)
+exec "$PY" "$(git rev-parse --show-toplevel)/.githooks/lucentforge_hooks.py" pre-push
