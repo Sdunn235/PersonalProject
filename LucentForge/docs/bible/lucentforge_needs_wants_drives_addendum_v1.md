@@ -135,19 +135,29 @@ system.
 > NPC decisions read need **zones** (`needs_system.get_priority_need`), not chemicals —
 > `Drive.compute_urgency()` and `Brain.get_priority_need_id()` only feed the HUD and inspector. A
 > chemical-boost-only want (like `affinity_strain` today) is therefore **visible but behaviorally
-> inert**. Wants must reach behavior through a **perceived-need receptor** (§W6.1).
+> inert**. **The doctrine above stands** (biochem §B1: "a decision that follows the strongest drive");
+> the code is behind it. Bringing decisions into line is BACKLOG LF-043. Until then, a want reaches
+> behavior through a **perceived-need receptor** (§W6.1) — an interim bridge, not the target design.
+> *(Note corrected 2026-11-19: the first version said wants "must" use a receptor, which promoted the
+> bridge over the doctrine.)*
 
-### §W6.1 — Rest/Fatigue want (built 2026-08-09; receptor added 2026-11-17)
-- **Emitter:** `ExertionEmitter` — MOVING / RAIDING / RELOCATING / PATROLLING push `fatigue` toward 1 at a
-  per-frame gain of `FATIGUE_BASE_GAIN / endurance(attrs)` (Constitution-led). Bed = restful (pulls to 0);
-  other loci neutral. Natural decay runs every frame, so **gain must beat decay for the hardiest
-  authored entity** (guarded by `run_fatigue_tests.py` §6).
-- **Receptor:** `biochem/receptor.py` writes `Need.perceived_pull = fatigue × FATIGUE_SLEEP_PULL` onto
-  the sleep need; `zone` reads `perceived_value`. A worn-out NPC feels sleep crossing WARNING sooner and
-  every decision path (idle pick, goblin behavior, patrol/relocate/raid exits) agrees. Max pull 30 < the
-  60 points between "just slept" and WARNING → no bed loop. Parity at fatigue ≤ floor.
-- **Kept:** the `fatigue → tiredness` boost (legibility in the drives panel); the sleeping-recovery
-  invariant (`FATIGUE_SLEEP_BOOST` < sleep decay 0.001).
+### §W6.1 — Rest/Fatigue want (built 2026-08-09; receptor added 2026-11-17; formulas 2026-11-19)
+- **Emitter:** `ExertionEmitter` — MOVING / RAIDING / RELOCATING / PATROLLING push `fatigue` toward 1; bed =
+  restful (pulls to 0); other loci neutral.
+- **Rates are authored in game terms and derived** (formulas, not numbers): for a *reference* entity — an
+  ordinary adult human, `endurance = ENDURANCE_REFERENCE` — exerting nonstop, fatigue levels off at
+  `FATIGUE_REF_PLATEAU` (⅔) and reaches 0.5 after `FATIGUE_REF_HALF_DAYS` (½ day). From
+  `f(t) = P·(1 − e^(−g·t))`, `P = 1 − fade/g`, the per-frame gain `g` and fade are solved in `settings.py`.
+  Each entity's gain is `g × ENDURANCE_REFERENCE / endurance(attrs)` (`derivation.fatigue_gain`,
+  Constitution-led per Foundation §4.1), so its plateau `1 − fade/gain` follows from its attributes —
+  asserted visible for every authored entity (`run_fatigue_tests.py` §9).
+- **Receptor (interim bridge — see the §W6 note):** `biochem/receptor.py` sets
+  `Need.perceived_pull = fatigue × FATIGUE_PULL_FRACTION × band(sleep)`, where
+  `band = NEED_FULL − warning_threshold` is authored per need in `needs.json`. `zone` reads
+  `perceived_value`, so every decision path agrees. A fraction < 1 keeps a just-satisfied need FINE by
+  construction (no bed loop). Parity at fatigue ≤ floor.
+- **Kept:** the `fatigue → tiredness` boost (legibility in the drives panel), now a fraction of tiredness's
+  sleep decay (`FATIGUE_TIREDNESS_BOOST_FRACTION`); fatigue + strain shares < 1 keeps sleeping recovery.
 - **Measured (headless kernel, same seed, one day):** patrolling goblins first sleep ~1/5 day sooner
   (Gruk frame 8,108 vs 12,087; Skrix 8,833 vs 12,001); idle-heavy villagers barely change.
 - **Deferred:** SP drain from exertion (Fatigue Arc 2).

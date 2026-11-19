@@ -23,7 +23,7 @@ import settings  # noqa: E402
 from Mechanics.biochem.chemical import Chemicals  # noqa: E402
 from Mechanics.biochem.emitter import ExertionEmitter, EXERTING_STATES  # noqa: E402
 from Mechanics.entities.attributes import Attributes  # noqa: E402
-from Mechanics.entities.derivation import endurance  # noqa: E402
+from Mechanics.entities.derivation import endurance, fatigue_gain  # noqa: E402
 
 _fails: list[str] = []
 
@@ -145,9 +145,10 @@ check("(3) SPECIAL-CASE: 50 sleeping ticks at fatigue=1.0 keep tiredness monoton
 
 # Sanity on the tuning invariant itself: max boost (fatigue=1) + max strain boost
 # must be strictly below the sleep-decay magnitude.
-max_boost = 1.0 * settings.FATIGUE_SLEEP_BOOST + 1.0 * settings.AFFINITY_STRAIN_NEED_BOOST
-check("(3) tuning invariant: max(fatigue+strain boost) < sleep-decay (_DECAY*5)",
-      max_boost < Chemicals._DECAY * 5)
+max_boost = (1.0 * settings.FATIGUE_TIREDNESS_BOOST_FRACTION * Chemicals._SLEEP_DECAY
+             + 1.0 * settings.AFFINITY_STRAIN_NEED_BOOST)
+check("(3) tuning invariant: max(fatigue+strain boost) < sleep-decay (_SLEEP_DECAY)",
+      max_boost < Chemicals._SLEEP_DECAY)
 
 # Contrast: while AWAKE (sleep urgent), the boost DOES elevate tiredness (the point
 # of the want). Urgent sleep uses the approach branch, not hard-decay.
@@ -264,11 +265,11 @@ try:
             pass
     ctx6 = _cgc(db_path=tmp_db6)
     roster = _can(ctx6)
-    decay = Chemicals._DECAY * settings.FATIGUE_DECAY_MULT
+    decay = settings.FATIGUE_FADE_PER_FRAME
     frames_per_day = int(settings.SIM_DAY_SECONDS * settings.FPS)  # controller runs per frame
     em6 = ExertionEmitter()
     for npc6 in roster:
-        gain0 = settings.FATIGUE_BASE_GAIN / endurance(npc6.attributes)
+        gain0 = fatigue_gain(npc6.attributes)
         check(f"(6) {npc6.name}: exertion gain beats natural decay "
               f"({gain0:.6f} > {decay:.6f}, endurance {endurance(npc6.attributes):.0f})",
               gain0 > decay)
@@ -292,7 +293,7 @@ except Exception as ex:  # noqa: BLE001
 # what every zone-based decision reads. Parity: no fatigue -> pull 0 -> zone unchanged.
 # ---------------------------------------------------------------------------
 print("-" * 64)
-from Mechanics.biochem.receptor import apply_perceived_pulls, fatigue_sleep_pull  # noqa: E402
+from Mechanics.biochem.receptor import apply_perceived_pulls, comfort_band, fatigue_sleep_pull  # noqa: E402
 from Mechanics.needs.need import NeedZone, make_default_needs  # noqa: E402
 from Mechanics.needs.needs_system import get_priority_need  # noqa: E402
 
@@ -306,8 +307,11 @@ check("(7) parity: fatigue 0 -> pull 0, sleep zone FINE, nothing prioritized",
       and get_priority_need(needs7) is None)
 ch7.set("fatigue", 0.5)
 apply_perceived_pulls(needs7, ch7)
-check("(7) fatigue 0.5 -> sleep pull = 0.5 x FATIGUE_SLEEP_PULL",
-      abs(sleep7.perceived_pull - 0.5 * settings.FATIGUE_SLEEP_PULL) < 1e-9)
+check("(7) fatigue 0.5 -> sleep pull = 0.5 x FATIGUE_PULL_FRACTION x sleep band",
+      abs(sleep7.perceived_pull
+          - 0.5 * settings.FATIGUE_PULL_FRACTION * comfort_band(sleep7)) < 1e-9)
+check("(7) band is authored per need: sleep band = full - warning threshold",
+      comfort_band(sleep7) == 100.0 - sleep7.warning_threshold)
 check("(7) fatigued NPC perceives sleep as WARNING and prioritizes it (actual value unchanged)",
       sleep7.zone == NeedZone.WARNING and get_priority_need(needs7) is sleep7
       and sleep7.current_value == sleep7.warning_threshold + 10.0)
@@ -319,11 +323,11 @@ apply_perceived_pulls(needs7, ch7)
 check("(7) no bed loop: just-slept NPC at max fatigue still perceives sleep FINE",
       sleep7.zone == NeedZone.FINE)
 ch7.set("fatigue", settings.FATIGUE_ACTIVE_FLOOR)
-check("(7) dead-band: fatigue at the floor -> no pull", fatigue_sleep_pull(ch7) == 0.0)
+check("(7) dead-band: fatigue at the floor -> no pull", fatigue_sleep_pull(ch7, sleep7) == 0.0)
 
 # ---------------------------------------------------------------------------
 # (8) FULL LOOP (live-gate check 4, headless) - the real SimulationKernel, same seed, one
-# in-game day, run twice: with the receptor and with FATIGUE_SLEEP_PULL = 0 (decisions then
+# in-game day, run twice: with the receptor and with FATIGUE_PULL_FRACTION = 0 (decisions then
 # ignore fatigue = the pre-receptor baseline). Hard-exerting goblins must bed down SOONER.
 # ---------------------------------------------------------------------------
 print("-" * 64)
@@ -340,8 +344,8 @@ try:
     from Mechanics.runtime.kernel import SimulationKernel
 
     def _first_sleep_frames(pull: float, frames: int) -> dict:
-        saved_pull = settings.FATIGUE_SLEEP_PULL
-        settings.FATIGUE_SLEEP_PULL = pull
+        saved_pull = settings.FATIGUE_PULL_FRACTION
+        settings.FATIGUE_PULL_FRACTION = pull
         try:
             random.seed(1234)
             db8 = os.path.join(tempfile.mkdtemp(), "lf_fatigue_loop.db")
@@ -363,10 +367,10 @@ try:
             ctx8.db.close()
             return first
         finally:
-            settings.FATIGUE_SLEEP_PULL = saved_pull
+            settings.FATIGUE_PULL_FRACTION = saved_pull
 
     day = int(settings.SIM_DAY_SECONDS * settings.FPS)
-    with_pull = _first_sleep_frames(settings.FATIGUE_SLEEP_PULL, day)
+    with_pull = _first_sleep_frames(settings.FATIGUE_PULL_FRACTION, day)
     no_pull = _first_sleep_frames(0.0, day)
     for gob in ("Gruk", "Skrix"):          # patrol/raid nonstop -> the exertion test cases
         a8, b8 = with_pull.get(gob), no_pull.get(gob)
@@ -376,6 +380,43 @@ except Exception as ex:  # noqa: BLE001
     import traceback
     traceback.print_exc()
     check(f"(8) full-loop sleep timing (exception: {ex})", False)
+
+# ---------------------------------------------------------------------------
+# (9) AUTHORED TARGETS HOLD - the per-frame rates are SOLVED from authored game-term targets
+# (reference human: plateau FATIGUE_REF_PLATEAU, reaches 0.5 in FATIGUE_REF_HALF_DAYS). Simulate
+# the reference through the real emitter + Chemicals.tick and confirm the derivation delivers them.
+# Also derive each authored entity's plateau from its attributes (content-computed invariant).
+# ---------------------------------------------------------------------------
+print("-" * 64)
+
+
+class _RefAttrs:   # endurance exactly ENDURANCE_REFERENCE (Constitution only, Physique 0)
+    constitution = settings.ENDURANCE_REFERENCE / settings.ENDURANCE_CON_WEIGHT
+    physique = 0
+
+
+check("(9) reference stand-in has reference endurance",
+      abs(endurance(_RefAttrs) - settings.ENDURANCE_REFERENCE) < 1e-9)
+ch9, needs9, em9 = Chemicals(), make_default_needs(), ExertionEmitter()
+half_frame = None
+for frame9 in range(int(3 * settings.FRAMES_PER_DAY)):
+    em9.emit(ch9, _RefAttrs, "PATROLLING", at_bed=False)
+    ch9.tick(needs9)
+    if half_frame is None and ch9.get("fatigue") >= 0.5:
+        half_frame = frame9 + 1
+half_days = (half_frame or 0) / settings.FRAMES_PER_DAY
+check(f"(9) reference human reaches 0.5 in ~FATIGUE_REF_HALF_DAYS ({half_days:.3f} vs "
+      f"{settings.FATIGUE_REF_HALF_DAYS})",
+      half_frame is not None and abs(half_days - settings.FATIGUE_REF_HALF_DAYS) < 0.02)
+check(f"(9) reference human levels off at ~FATIGUE_REF_PLATEAU ({ch9.get('fatigue'):.3f} vs "
+      f"{settings.FATIGUE_REF_PLATEAU:.3f})",
+      abs(ch9.get("fatigue") - settings.FATIGUE_REF_PLATEAU) < 0.02)
+try:
+    for npc9 in roster:      # from (6): the real authored roster
+        plateau9 = 1.0 - settings.FATIGUE_FADE_PER_FRAME / fatigue_gain(npc9.attributes)
+        check(f"(9) {npc9.name}: derived plateau {plateau9:.2f} is visible (> 0.1)", plateau9 > 0.1)
+except NameError:
+    check("(9) roster unavailable (section 6 failed)", False)
 
 print("=" * 64)
 if _fails:

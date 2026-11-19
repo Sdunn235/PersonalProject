@@ -6,6 +6,10 @@ from dataclasses import dataclass
 import settings
 
 
+# A need's full (just-satisfied) value. Bands, pulls and fills are measured against it.
+NEED_FULL = 100.0
+
+
 class NeedZone(Enum):
     FINE     = "FINE"
     WARNING  = "WARNING"

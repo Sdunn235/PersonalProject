@@ -8,6 +8,7 @@ class Chemicals:
     """Dict-based chemical store. Each key is a chemical name (often matching need.chemical)."""
 
     _DECAY = 0.0002
+    _SLEEP_DECAY = _DECAY * 5   # tiredness drop per frame while the sleep need is not urgent
 
     def __init__(self):
         # Need-driven chemicals (populated dynamically from need definitions)
@@ -43,7 +44,7 @@ class Chemicals:
 
             if need.need_id == "sleep":
                 if not need.is_urgent:
-                    self.set(chem_key, max(0.0, current - self._DECAY * 5))
+                    self.set(chem_key, max(0.0, current - self._SLEEP_DECAY))
                 else:
                     self.set(chem_key, current + (target - current) * 0.03)
             else:
@@ -53,11 +54,15 @@ class Chemicals:
         for key, decay_mult in [("pain", 1.0), ("fear", 1.0),
                                 ("anger", 0.5), ("loneliness", 0.3),
                                 ("comfort", 0.7), ("stress", 0.7),
-                                ("affinity_strain", 0.3),
-                                ("fatigue", settings.FATIGUE_DECAY_MULT)]:
+                                ("affinity_strain", 0.3)]:
             val = self.get(key)
             if val > 0:
                 self.set(key, max(0.0, val - self._DECAY * decay_mult))
+        # Fatigue fades at a DERIVED per-frame rate (settings: solved from the authored plateau +
+        # half-time for the reference human, §W6.1), not a hand-set multiplier.
+        fatigue_now = self.get("fatigue")
+        if fatigue_now > 0:
+            self.set("fatigue", max(0.0, fatigue_now - settings.FATIGUE_FADE_PER_FRAME))
 
         # Affinity strain → perceived need urgency (§B7). Additive: strain=0 → no effect.
         strain = self.get("affinity_strain")
@@ -73,16 +78,16 @@ class Chemicals:
         # clamped by set() → no runaway. Parity: fatigue=0 → no effect.
         #
         # ORDERING NOTE (QC major): `tiredness` has a dedicated sleep-decay branch in the
-        # need loop above (hard-decays at _DECAY*5=0.001 while NOT urgent, i.e. sleeping).
-        # This boost runs AFTER that branch, so it ADDS back. FATIGUE_SLEEP_BOOST is tuned
-        # conservatively (max add = fatigue*0.0003 ≤ 0.0003, plus strain ≤ 0.0002 → ≤ 0.0005)
-        # to stay BELOW the 0.001 sleep-decay, so a sleeping NPC with nonzero fatigue still
-        # nets `tiredness` DOWNWARD. Do not raise FATIGUE_SLEEP_BOOST above ~0.0007 without
-        # re-checking this invariant.
+        # need loop above (hard-decays at _SLEEP_DECAY while NOT urgent, i.e. sleeping).
+        # This boost runs AFTER that branch, so it ADDS back. It is expressed as a FRACTION of
+        # _SLEEP_DECAY (settings.FATIGUE_TIREDNESS_BOOST_FRACTION); keeping that fraction plus
+        # strain's share below 1 is what guarantees a sleeping, fatigued NPC still nets
+        # `tiredness` DOWNWARD (asserted in run_fatigue_tests.py §3).
         fatigue = self.get("fatigue")
         if fatigue > settings.FATIGUE_ACTIVE_FLOOR:
             self.set("tiredness", min(1.0, self.get("tiredness")
-                                      + fatigue * settings.FATIGUE_SLEEP_BOOST))
+                                      + fatigue * settings.FATIGUE_TIREDNESS_BOOST_FRACTION
+                                      * self._SLEEP_DECAY))
 
     def add_pain(self, amount: float) -> None:
         self.set("pain", min(1.0, self.get("pain") + amount))

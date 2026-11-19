@@ -47,7 +47,7 @@ def endurance(attrs: Attributes) -> float:
     """Stamina resistance = Constitution×CON_WEIGHT + Physique×PHY_WEIGHT (§W6/§M3).
 
     A capacity-style polymorphic strategy beside bit/byte_capacity: the ExertionEmitter
-    reads this to scale fatigue accrual (effective_gain = FATIGUE_BASE_GAIN / endurance).
+    reads this (via fatigue_gain) to scale fatigue accrual.
     Constitution (durability) leads, Physique (raw strength) is secondary. Clamped to
     ENDURANCE_MIN so effective_gain never divides by <1. Recompute from CURRENT attributes
     each tick — never freeze at spawn (§M9.1). When a dedicated Stamina attribute lands,
@@ -55,6 +55,16 @@ def endurance(attrs: Attributes) -> float:
     raw = (attrs.constitution * settings.ENDURANCE_CON_WEIGHT
            + attrs.physique * settings.ENDURANCE_PHY_WEIGHT)
     return max(settings.ENDURANCE_MIN, raw)
+
+
+def fatigue_gain(attrs: Attributes) -> float:
+    """Per-frame fatigue accrual rate for this entity (§W6.1).
+
+    The authored reference rate (settings.FATIGUE_REF_GAIN_PER_FRAME, solved from the reference
+    human's plateau + half-time) scaled by how this entity's endurance compares to that reference:
+    endurance 2× the reference → tires half as fast. Recomputed from live attributes every call."""
+    return (settings.FATIGUE_REF_GAIN_PER_FRAME
+            * settings.ENDURANCE_REFERENCE / endurance(attrs))
 
 
 def byte_capacity_parity(legacy_mp_max: int) -> int:

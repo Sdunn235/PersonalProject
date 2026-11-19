@@ -1,4 +1,5 @@
 # settings.py — Global tuning constants for LucentForge prototype
+import math
 
 # --- Display ---
 TILE_SIZE   = 32
@@ -178,35 +179,44 @@ COMFORT_CONTENT_THRESHOLD         = 0.4  # comfort at/above this dampens the dri
 AFFINITY_STRAIN_GAIN       = 0.0003  # per-tick approach toward discomfort target (~60s to ~50%)
 AFFINITY_STRAIN_NEED_BOOST = 0.0002  # per unit strain added to each need chemical per tick
 
-# --- Rest/Fatigue want (needs/wants addendum §W6, mirrors §B7 strain) ---
-# Activity-driven fatigue: a slow chemical that rises while an NPC exerts itself
-# (moving/raiding/relocating/patrolling) and relaxes at rest, elevating the PERCEIVED
-# urgency of the existing Sleep drive. No new need/bed; perceived-urgency only (no SP
-# drain in v1). Parity: fatigue=0 → boost loop is a no-op → behavior byte-identical.
+# --- Rest/Fatigue want (needs/wants addendum §W6.1) — AUTHORED in game terms, DERIVED per frame ---
+# Exertion (moving/raiding/relocating/patrolling) builds `fatigue`; sleeping at a bed clears it.
+# Fatigue makes sleep FEEL lower (receptor pull) so a worn-out NPC beds down sooner.
+# Parity: fatigue ≤ FATIGUE_ACTIVE_FLOOR → no boost, no pull → behavior byte-identical.
 #
-# Rates are PER FRAME (NPCController.update runs every frame at FPS=60; a 300 s day ≈ 18,000
-# frames). Natural decay (_DECAY 0.0002 × FATIGUE_DECAY_MULT = 0.00005/frame) runs EVERY frame,
-# including while exerting, so per-frame gain (BASE_GAIN / endurance) must beat it for the
-# HARDIEST authored entity or fatigue is silently inert — that was the 2026-11-17 live-gate
-# failure at BASE_GAIN=0.0003 (every NPC endurance ≥ 6 → gain ≤ decay).
-# Derivation (fatigue f approaches f* = 1 − decay/gain):
-#   human ref, endurance 10 → gain 0.00015, f* ≈ 0.67, reaches 0.5 in ≈ 9,200 frames ≈ ½ day
-#   frail goblin, endurance 6 → reaches 0.5 in ≈ 65 s;  dragon, endurance 23 → plateaus ≈ 0.23
-# Guarded by run_fatigue_tests.py §6 (every real NPC must out-gain decay and reach > 0.1 in a day).
-FATIGUE_BASE_GAIN     = 0.0015  # numerator of effective_gain; endurance divides it
+# Only the AUTHORED values below are tuning knobs; the per-frame rates are solved from them.
+# The controller runs once per FRAME, so a day is FRAMES_PER_DAY frames.
+FRAMES_PER_DAY = SIM_DAY_SECONDS * FPS
+
+# Authored design targets, stated for a REFERENCE entity: an ordinary adult human.
+ENDURANCE_REFERENCE   = 10.0         # endurance(attrs) of an ordinary adult human (Alder: CON 4, PHY 12)
+FATIGUE_REF_PLATEAU   = 2.0 / 3.0    # exerting nonstop, the reference human levels off at this fatigue
+FATIGUE_REF_HALF_DAYS = 0.5          # ...and reaches fatigue 0.5 after this many in-game days of it
+# Derived (do not tune directly). Fatigue under nonstop exertion follows f(t) = P·(1 − e^(−g·t)) with
+# plateau P = 1 − fade/g, so: g = −ln(1 − 0.5/P) / half_frames,  fade = g·(1 − P).
+# Natural fade runs every frame (even while exerting), so the plateau is where gain and fade balance.
+if not 0.5 < FATIGUE_REF_PLATEAU <= 1.0:
+    raise ValueError("FATIGUE_REF_PLATEAU must be in (0.5, 1]: the reference must be able to reach 0.5")
+FATIGUE_REF_GAIN_PER_FRAME = (-math.log(1.0 - 0.5 / FATIGUE_REF_PLATEAU)
+                              / (FATIGUE_REF_HALF_DAYS * FRAMES_PER_DAY))
+FATIGUE_FADE_PER_FRAME     = FATIGUE_REF_GAIN_PER_FRAME * (1.0 - FATIGUE_REF_PLATEAU)
+# Per-entity gain = REF_GAIN × ENDURANCE_REFERENCE / endurance(attrs)  (derivation.fatigue_gain):
+# hardier NPCs tire slower; their plateau 1 − fade/gain is lower. Tests assert every authored
+# entity still reaches a visible plateau (run_fatigue_tests.py §6/§9).
+
 EXERTION_TARGET_MAX   = 1.0     # fatigue target while in an exerting locus (0.0 otherwise)
-FATIGUE_DECAY_MULT    = 0.25    # natural-decay multiplier in Chemicals.tick (recovery out-rates accrual)
-FATIGUE_ACTIVE_FLOOR  = 0.01    # fatigue must exceed this to boost tiredness (dead-band, like strain's 0.01)
-FATIGUE_SLEEP_BOOST   = 0.0003  # per unit fatigue added to `tiredness` per tick (CONSERVATIVE — must stay
-                                # below the sleep-decay branch's _DECAY*5=0.001 so a sleeping, fatigued
-                                # NPC still nets tiredness DOWN)
-# Perceived-need receptor (2026-11-17): NPC decisions read need ZONES, not chemicals, so the
-# tiredness boost alone never changed behavior. Fatigue now lowers the sleep need's PERCEIVED
-# value by fatigue × PULL need-points (Need.perceived_pull), so a worn-out NPC crosses its
-# sleep WARNING line sooner. Sleep warning = 40: at fatigue 0.5 an NPC seeks bed at ≤ 55
-# instead of ≤ 40; max pull (fatigue 1.0) = 30 keeps a just-slept NPC (sleep 100) FINE → no
-# bed loop. Parity: fatigue ≤ FATIGUE_ACTIVE_FLOOR → pull 0 → zones byte-identical.
-FATIGUE_SLEEP_PULL    = 30.0    # need-points of perceived sleep loss per unit fatigue
+FATIGUE_ACTIVE_FLOOR  = 0.01    # dead-band: fatigue at/below this neither boosts nor pulls
+
+# Receptor (biochem/receptor.py): perceived sleep loss per unit fatigue, as a FRACTION of the sleep
+# need's comfort band (NEED_FULL − warning_threshold, from needs.json). A fraction < 1 means a
+# just-slept NPC (sleep = full) can never be pulled into WARNING → no bed loop, by construction.
+FATIGUE_PULL_FRACTION = 0.5     # sleep band 100 − 40 = 60 → full fatigue pulls 30 points
+
+# Display boost on `tiredness` (drives panel legibility), as a FRACTION of tiredness's sleep-time
+# decay (Chemicals._SLEEP_DECAY). Together with strain's boost it must stay < 1 so a sleeping,
+# fatigued NPC still nets tiredness DOWN (asserted in run_fatigue_tests.py §3).
+FATIGUE_TIREDNESS_BOOST_FRACTION = 0.3
+
 # Endurance formula (polymorphic strategy in derivation.py) resists fatigue accrual.
 # Constitution (durability) leads, Physique (raw strength) secondary — §M3/§W6, Q2.
 ENDURANCE_CON_WEIGHT  = 1.0     # Constitution weight (primary; > PHY weight)

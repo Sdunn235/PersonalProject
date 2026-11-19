@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import settings
 from Mechanics.entities.affinity import comfort_score
-from Mechanics.entities.derivation import endurance
+from Mechanics.entities.derivation import fatigue_gain
 
 # Active-exertion loci (needs/wants addendum §W6, Director Q1 2026-08-09). While the
 # controller is in one of these AI states, effort accrues `fatigue`. SATISFYING and IDLE
@@ -82,7 +82,7 @@ class ExertionEmitter:
         `at_bed` — True iff SATISFYING at a sleep/bed source (the one restful locus).
         Returns the current `fatigue` level for logging/observability.
         """
-        effective_gain = settings.FATIGUE_BASE_GAIN / endurance(attrs)
+        effective_gain = fatigue_gain(attrs)
         if state in EXERTING_STATES:
             _approach(chemicals, "fatigue", settings.EXERTION_TARGET_MAX, effective_gain)
         elif at_bed:
