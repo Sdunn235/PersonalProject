@@ -1,0 +1,60 @@
+# LucentForge CI — runs the headless gate (LucentForge/docs/testing.md) on hosted Linux.
+# Trusted check for the autonomy policy (LucentForge/docs/autonomy.md): Claude may merge code to
+# master only when this workflow's `verify` job is green. Actions are pinned to commit SHAs.
+name: LucentForge CI
+run-name: Verify LucentForge
+on:
+  push:
+    branches: [master]
+    paths: ["LucentForge/**", ".github/workflows/lucentforge.yml"]
+  pull_request:
+    paths: ["LucentForge/**", ".github/workflows/lucentforge.yml", ".githooks/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lucentforge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Headless gate (run_all_tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: LucentForge
+    env:
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run every suite (scratchpad/run_all_tests.py)
+        run: python scratchpad/run_all_tests.py
+      - name: Upload render evidence (screenshots)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lucentforge-screens
+          path: LucentForge/logs/screens/latest/
+          if-no-files-found: warn
+
+  verify:
+    name: verify
+    needs: [gate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject failed or skipped required jobs
+        run: |
+          if [ "${{ needs.gate.result }}" != "success" ]; then
+            echo "gate result: ${{ needs.gate.result }}"; exit 1
+          fi

@@ -17,6 +17,15 @@ Always read `context/session_state.md` first — it is the source of truth for w
 - `BACKLOG.md` — every open item as `LF-###` with a source link. Delete an item when it ships (and log it in the CHANGELOG); give new ideas the next free ID.
 - Headless gate before any commit that touches runtime: `py scratchpad/run_all_tests.py` (all green).
 
+## Test-first and autonomy
+
+- **Work test-first:** acceptance example → a test that fails for the right reason → code → full gate.
+  Anything you'd check by eye gets a test instead. How: [docs/testing.md](docs/testing.md).
+- **What you may do alone vs. what stops at a PR for Shawn:** [docs/autonomy.md](docs/autonomy.md).
+  In short: code within approved scope merges to `master` on a green gate + CI; doctrine, policy,
+  enforcement and Shawn's own material go through a PR.
+- Record results in [docs/verification.md](docs/verification.md) (dated, never rewritten).
+
 ## Project Master
 
 Full design context: `../../Caelum/Caelum_Framework_Shawn_2026-03-12_Workflow_Expansion/projects/lucent_forge_master.md`

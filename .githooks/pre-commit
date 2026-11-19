@@ -1,0 +1,4 @@
+#!/bin/sh
+# LucentForge: staged .py files must compile. Logic: .githooks/lucentforge_hooks.py
+PY=$(command -v py || command -v python3 || command -v python)
+exec "$PY" "$(git rev-parse --show-toplevel)/.githooks/lucentforge_hooks.py" pre-commit
