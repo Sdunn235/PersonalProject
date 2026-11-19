@@ -34,7 +34,10 @@ class MovingState:
         next_tile = controller.path[controller.path_index]
         is_goal = (controller.path_index == len(controller.path) - 1)
         if is_goal and next_tile in controller._occupied:
+            # Someone is using the source: queue nearby for a while instead of re-deciding next
+            # frame (soak finding 2026-11-19 — that thrashed IDLE<->MOVING every frame).
             controller._set_state("IDLE")
+            controller._current_state.hold(settings.OCCUPIED_SOURCE_WAIT_SECONDS)
             controller.path = []
             controller.path_index = 0
             return

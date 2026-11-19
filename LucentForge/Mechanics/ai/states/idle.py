@@ -17,6 +17,11 @@ class IdleState:
     def enter(self, controller) -> None:
         pass
 
+    def hold(self, seconds: float) -> None:
+        """Stay idle (no new decision) for at least `seconds` — e.g. queueing at an occupied
+        source. Uses the same cooldown the H5 'no viable source' path uses."""
+        self._wait_timer = max(self._wait_timer, seconds)
+
     def _try_relocate(self, controller) -> bool:
         """Drift toward the best remembered-comfortable region, if warranted (Phase B).
 

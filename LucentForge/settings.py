@@ -28,6 +28,7 @@ FPS         = 60
 # 1 sim-day = SIM_DAY_SECONDS real seconds (default 120 = 2 min per day)
 # Increase to slow down (e.g. 300 = 5 min/day), decrease to speed up
 SIM_DAY_SECONDS = 300
+REAL_SECONDS_PER_GAME_MINUTE = SIM_DAY_SECONDS / (24 * 60)   # derived: author durations in game time
 
 # =============================================================================
 # NEEDS SYSTEM — 3-Zone Design (Fine / Warning / Critical)
@@ -174,6 +175,13 @@ MEMORY_EMA_ALPHA       = 0.3     # exponential moving average weight for new obs
 COMFORT_RELOCATE_STRESS_THRESHOLD = 0.4  # sustained stress at/above this can trigger a drift
 COMFORT_RELOCATE_MARGIN           = 0.3  # best-remembered comfort must beat current by this
 COMFORT_CONTENT_THRESHOLD         = 0.4  # comfort at/above this dampens the drift (settle, stay)
+
+# --- Queueing at an occupied source (soak-test finding 2026-11-19) ---
+# When the tile an NPC is walking to is occupied (someone eating/sleeping there), it waits nearby
+# for this much GAME time before choosing again, instead of re-deciding every frame (which thrashed
+# IDLE<->MOVING ~15x/second and flooded the event feed).
+OCCUPIED_SOURCE_WAIT_GAME_MINUTES = 15
+OCCUPIED_SOURCE_WAIT_SECONDS = OCCUPIED_SOURCE_WAIT_GAME_MINUTES * REAL_SECONDS_PER_GAME_MINUTE
 
 # --- Affinity strain: see the AUTHORED/DERIVED block after the fatigue block (needs FRAMES_PER_DAY) ---
 
