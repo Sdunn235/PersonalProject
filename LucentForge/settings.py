@@ -175,9 +175,7 @@ COMFORT_RELOCATE_STRESS_THRESHOLD = 0.4  # sustained stress at/above this can tr
 COMFORT_RELOCATE_MARGIN           = 0.3  # best-remembered comfort must beat current by this
 COMFORT_CONTENT_THRESHOLD         = 0.4  # comfort at/above this dampens the drift (settle, stay)
 
-# --- Affinity strain → need urgency (biochem/affinity addendum §B7, Phase C) ---
-AFFINITY_STRAIN_GAIN       = 0.0003  # per-tick approach toward discomfort target (~60s to ~50%)
-AFFINITY_STRAIN_NEED_BOOST = 0.0002  # per unit strain added to each need chemical per tick
+# --- Affinity strain: see the AUTHORED/DERIVED block after the fatigue block (needs FRAMES_PER_DAY) ---
 
 # --- Rest/Fatigue want (needs/wants addendum §W6.1) — AUTHORED in game terms, DERIVED per frame ---
 # Exertion (moving/raiding/relocating/patrolling) builds `fatigue`; sleeping at a bed clears it.
@@ -222,6 +220,37 @@ FATIGUE_TIREDNESS_BOOST_FRACTION = 0.3
 ENDURANCE_CON_WEIGHT  = 1.0     # Constitution weight (primary; > PHY weight)
 ENDURANCE_PHY_WEIGHT  = 0.5     # Physique weight (secondary)
 ENDURANCE_MIN         = 1.0     # clamp floor so effective_gain never divides by <1 (guards frail NPCs)
+
+# --- Affinity strain (biochem/affinity addendum §B7) — AUTHORED in game terms, DERIVED per frame ---
+# Sustained hostile-affinity ground taxes the body: strain approaches the hostility of the ground
+# (target = max(0, −comfort_score)) and fades at rest. It reaches behavior through the receptor.
+# Resistance is Constitution ("physical resilience, pain tolerance", Foundation §4.1) via the
+# derivation.resilience strategy. Parity: strain ≤ its dead-band → no boost, no pull.
+RESILIENCE_CON_WEIGHT = 1.0     # Constitution weight in resilience(attrs)
+RESILIENCE_MIN        = 1.0     # clamp floor (guards the gain divisor)
+RESILIENCE_REFERENCE  = 4.0     # resilience of the same reference human (Alder: CON 4)
+# Authored targets for the reference human standing on hostile ground:
+STRAIN_REF_HALF_DAYS  = 0.125   # gets halfway to their strain level in this many in-game days
+STRAIN_TOLERANCE      = 0.05    # ground this mildly hostile (|comfort| ≤ this) causes no strain at all
+# Derived (do not tune directly). With s' = g·(T − s) − fade, strain settles at T − fade/g and
+# approaches it with half-life ln2/g, so: g = ln2 / half_frames,  fade = g · tolerance.
+# A hardier entity's gain is g × REFERENCE / resilience(attrs): it strains slower AND its dead-band
+# (fade / gain) widens — tolerance grows with Constitution from the one formula.
+STRAIN_REF_GAIN_PER_FRAME = math.log(2.0) / (STRAIN_REF_HALF_DAYS * FRAMES_PER_DAY)
+STRAIN_FADE_PER_FRAME     = STRAIN_REF_GAIN_PER_FRAME * STRAIN_TOLERANCE
+STRAIN_ACTIVE_FLOOR   = 0.01    # dead-band: strain at/below this neither boosts nor pulls
+
+# Receptor: perceived loss on EVERY survival need per unit strain, as a fraction of that need's band,
+# scaled by how strongly the NPC feels threat — the fearfulness trait ("fear sensitivity", §8.2).
+STRAIN_PULL_FRACTION  = 0.5
+STRAIN_FEAR_WEIGHT    = 1.0     # fearfulness 1.0 doubles the felt pull; fearfulness 0 feels the base
+# All receptor pulls on one need are summed, then capped at this fraction of the band (< 1), so a
+# just-satisfied need can never be perceived as WARNING, whatever combination of pressures.
+PULL_CAP_FRACTION     = 0.9
+
+# Display boost on every need chemical (drives panel legibility), as a fraction of tiredness's
+# sleep-time decay. Fatigue's + strain's fractions must stay < 1 (run_fatigue_tests.py §3).
+AFFINITY_STRAIN_BOOST_FRACTION = 0.2
 
 # --- Source Selection Weights (rebalanced in H5 for stock factor) ---
 SOURCE_DIST_WEIGHT     = 0.4     # weight for distance in source selection

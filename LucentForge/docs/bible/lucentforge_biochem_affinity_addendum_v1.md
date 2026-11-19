@@ -12,6 +12,8 @@
 
 LucentForge's biochem is a deliberate descendant of *Creatures* (1996): chemicals with decay, drives that read chemicals, a decision that follows the strongest drive. Creatures connected body-state to chemistry through **emitters** (a locus/state emits a chemical) and **receptors** (a chemical drives a locus). LucentForge already has the receptor half — `Drive.compute_urgency` reads a chemical and produces urgency. This addendum adds the **emitter** half, with affinity comfort as its first citizen.
 
+> *Code reality (2026-11-19):* the *intent* above stands — the decision should follow the strongest drive. In the code, `Drive.compute_urgency` produces urgency but **no decision reads it** (AI states pick by raw need zones). Until decisions follow drive urgency (BACKLOG LF-043), chemicals reach behavior through **perceived-need receptors** (`biochem/receptor.py`) — an interim bridge.
+
 **Improve where Creatures failed.** Creatures' primary failure was *opacity* — you could not see why a creature acted. Therefore: every chemical, drive, and comfort signal introduced here **must be legible** in the observation panel and run-logger. Legibility is a requirement, not polish.
 
 **Deferred (seeded, not built):** chemical *reactions* (`r1+r2 → p1+p2`) and *heritable genetics* (affinity from DNA / the Hob "innate spark"). These are the natural next Creatures layers; they are out of scope until a future planning session.
@@ -22,7 +24,7 @@ LucentForge's biochem is a deliberate descendant of *Creatures* (1996): chemical
 
 - **Emitter** — samples a *locus* (a world/body/relationship state) each tick and pushes a chemical toward a target concentration (gain-controlled). Creatures-faithful.
 - **Chemical** — a named concentration in `[0, 1]` with natural decay (half-life analog). Extensible dict store.
-- **Receptor** — reads a chemical and drives a *locus* (here: need urgency). Already embodied by `Drive.compute_urgency`.
+- **Receptor** — reads a chemical and drives a *locus* (here: need urgency). Already embodied by `Drive.compute_urgency`. *Code reality (2026-11-19):* that urgency is display-only today; the receptors that change behavior are in `biochem/receptor.py` (locus = a need's perceived value), see §B1 note.
 
 Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` anger/fear) are **legacy injectors** that will be re-expressed as emitters in a later, parity-gated phase — one cohesive mechanism, not N special cases.
 
@@ -71,18 +73,19 @@ Ad-hoc chemical injections that predate this model (`proximity` fear, `zone_ai` 
 
 **Mechanism.** A third affinity chemical, `affinity_strain`, builds slowly under sustained discomfort and decays slowly when comfort returns.
 
-- **Source:** `AffinityComfortEmitter.emit()` approaches `affinity_strain` toward `max(0, -comfort_score)` each tick at `AFFINITY_STRAIN_GAIN = 0.0003` (167× slower than `stress`'s 0.05 gain). A score of -0.8 with gain 0.0003 reaches ~50% strain after ~60 real seconds.
-- **Decay:** Natural chemical decay in `Chemicals.tick()` at `_DECAY × 0.3` per tick (slower than comfort/stress at 0.7×). Combined with the emitter's own approach-to-zero when score ≥ 0, strain falls off when the entity reaches comfort.
-- **Effect:** When `affinity_strain > 0.01`, `Chemicals.tick()` adds `strain × AFFINITY_STRAIN_NEED_BOOST` to each survival need chemical per tick. The brain reads a slightly elevated need chemical → `Drive.compute_urgency()` computes higher urgency → NPC acts on hunger/thirst/sleep sooner than the raw `current_value` alone would trigger.
+- **Source:** `AffinityComfortEmitter.emit()` approaches `affinity_strain` toward `max(0, -comfort_score)` each tick at `AFFINITY_STRAIN_GAIN = 0.0003` (167× slower than `stress`'s 0.05 gain). A score of -0.8 with gain 0.0003 reaches ~50% strain after ~60 real seconds. *(C0046 values — superseded by the Formulas bullet below, 2026-11-19.)*
+- **Decay:** Natural chemical decay in `Chemicals.tick()` at `_DECAY × 0.3` per tick (slower than comfort/stress at 0.7×). Combined with the emitter's own approach-to-zero when score ≥ 0, strain falls off when the entity reaches comfort. *(C0046 values — superseded by the Formulas bullet below, 2026-11-19.)*
+- **Effect:** When `affinity_strain > 0.01`, `Chemicals.tick()` adds `strain × AFFINITY_STRAIN_NEED_BOOST` to each survival need chemical per tick. The brain reads a slightly elevated need chemical → `Drive.compute_urgency()` computes higher urgency → NPC acts on hunger/thirst/sleep sooner than the raw `current_value` alone would trigger. *(C0046 values — superseded by the Formulas bullet below, 2026-11-19.)*
 - **Parity invariant:** `affinity_strain = 0` → the boost loop does nothing → behavior is byte-identical to C0044. Fully additive.
-- **⚠ Code gap (found 2026-11-17):** the "acts sooner" step does not happen. NPC decisions read need zones (`needs_system.get_priority_need`), and `Drive.compute_urgency()` only feeds the HUD/inspector, so strain is **visible but behaviorally inert**. The fix pattern now exists — a perceived-need receptor (`biochem/receptor.py`, needs/wants §W6.1). Wiring strain into it is BACKLOG LF-042.
+- **Code gap found 2026-11-17 → bridged 2026-11-19 (LF-042):** the "acts sooner" step did not happen — decisions read need zones and the boost above is display-only. Strain now reaches decisions through the perceived-need receptor: `pull = strain × STRAIN_PULL_FRACTION × (1 + fearfulness × STRAIN_FEAR_WEIGHT) × band(need)` on every survival need, `band = NEED_FULL − warning_threshold`, all receptor pulls on a need summed and capped at `PULL_CAP_FRACTION × band` (< 1, so a full need stays FINE). Fearfulness = Foundation §8.2 "fear sensitivity". This is the interim bridge (§B1 note).
+- **Formulas (2026-11-19), authored in game terms:** for the reference human (`resilience = RESILIENCE_REFERENCE`, Constitution-led per Foundation §4.1 "physical resilience"), strain gets halfway to its level after `STRAIN_REF_HALF_DAYS` and ground milder than `STRAIN_TOLERANCE` causes none. From `s' = g·(T − s) − fade`: `g = ln2 / half_frames`, `fade = g × tolerance`. Each entity's rate is `g × RESILIENCE_REFERENCE / resilience(attrs)`, so hardier entities strain slower *and* tolerate more. The old per-tick literals (`AFFINITY_STRAIN_GAIN 0.0003`, decay `_DECAY × 0.3`) left a 0.2 dead-band, which kept strain near zero for everyone. Measured (same-seed day): Alder/Elara peak strain 0.12/0.15 and bed down sooner (Elara frame 12,454 vs 13,131).
 
 **Design intent.** The effect is perceived urgency through the biochem layer, not raw need decay acceleration. The actual `need.current_value` decays at its normal rate; the entity only *feels* the need as more pressing. This matches the lived experience of stress-taxed biology and stays within the existing emitter/receptor abstraction. Physical decay acceleration is a future arc.
 
 **Observability.**
 - ZONE panel (observation_panel.py): when `affinity_strain > 0.01` and no active relocation, the suffix slot shows `s{strain:.2f}` (red). Relocation target always takes priority when RELOCATING.
 - npcs.csv (run_logger.py): `affinity_strain` column added alongside `comfort` and `stress`.
-- Settings knobs: `AFFINITY_STRAIN_GAIN`, `AFFINITY_STRAIN_NEED_BOOST` in settings.py near the existing `COMFORT_*` constants.
+- Settings knobs (authored): `RESILIENCE_REFERENCE`, `RESILIENCE_CON_WEIGHT`, `STRAIN_REF_HALF_DAYS`, `STRAIN_TOLERANCE`, `STRAIN_PULL_FRACTION`, `STRAIN_FEAR_WEIGHT`, `PULL_CAP_FRACTION`, `AFFINITY_STRAIN_BOOST_FRACTION`. Derived: `STRAIN_REF_GAIN_PER_FRAME`, `STRAIN_FADE_PER_FRAME`. *(Replaced `AFFINITY_STRAIN_GAIN` / `AFFINITY_STRAIN_NEED_BOOST`, 2026-11-19.)*
 
 ---
 

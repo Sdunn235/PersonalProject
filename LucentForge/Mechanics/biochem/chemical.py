@@ -53,21 +53,22 @@ class Chemicals:
         # Natural decay for reactive chemicals
         for key, decay_mult in [("pain", 1.0), ("fear", 1.0),
                                 ("anger", 0.5), ("loneliness", 0.3),
-                                ("comfort", 0.7), ("stress", 0.7),
-                                ("affinity_strain", 0.3)]:
+                                ("comfort", 0.7), ("stress", 0.7)]:
             val = self.get(key)
             if val > 0:
                 self.set(key, max(0.0, val - self._DECAY * decay_mult))
-        # Fatigue fades at a DERIVED per-frame rate (settings: solved from the authored plateau +
-        # half-time for the reference human, §W6.1), not a hand-set multiplier.
-        fatigue_now = self.get("fatigue")
-        if fatigue_now > 0:
-            self.set("fatigue", max(0.0, fatigue_now - settings.FATIGUE_FADE_PER_FRAME))
+        # Fatigue and strain fade at DERIVED per-frame rates (settings: solved from authored
+        # game-term targets, §W6.1 / §B7), not hand-set multipliers.
+        for key, fade in (("fatigue", settings.FATIGUE_FADE_PER_FRAME),
+                          ("affinity_strain", settings.STRAIN_FADE_PER_FRAME)):
+            val = self.get(key)
+            if val > 0:
+                self.set(key, max(0.0, val - fade))
 
         # Affinity strain → perceived need urgency (§B7). Additive: strain=0 → no effect.
         strain = self.get("affinity_strain")
-        if strain > 0.01:
-            boost = strain * settings.AFFINITY_STRAIN_NEED_BOOST
+        if strain > settings.STRAIN_ACTIVE_FLOOR:
+            boost = strain * settings.AFFINITY_STRAIN_BOOST_FRACTION * self._SLEEP_DECAY
             for need in needs:
                 chem_key = getattr(need, "chemical", "") or need.need_id + "_chem"
                 self.set(chem_key, min(1.0, self.get(chem_key) + boost))

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import settings
 from Mechanics.entities.affinity import comfort_score
-from Mechanics.entities.derivation import fatigue_gain
+from Mechanics.entities.derivation import fatigue_gain, strain_gain
 
 # Active-exertion loci (needs/wants addendum §W6, Director Q1 2026-08-09). While the
 # controller is in one of these AI states, effort accrues `fatigue`. SATISFYING and IDLE
@@ -54,11 +54,14 @@ class AffinityComfortEmitter:
         stress_target  = max(0.0, -score)   # negative part
         _approach(chemicals, "comfort", comfort_target, self.comfort_gain)
         _approach(chemicals, "stress",  stress_target,  self.stress_gain)
-        # Affinity strain — slow-building cost of sustained hostile exposure (§B7).
-        # Approaches the same magnitude as stress but 167× slower (0.0003 vs 0.05).
+        # Affinity strain — slow-building cost of sustained hostile exposure (§B7). Rate is the
+        # entity's derived strain_gain (authored reference half-time × resilience); entities
+        # without attributes (stubs) use the reference rate.
         # score >= 0 → strain_target = 0 → approach decays existing strain toward 0.
         strain_target = max(0.0, -score)
-        _approach(chemicals, "affinity_strain", strain_target, settings.AFFINITY_STRAIN_GAIN)
+        attrs = getattr(entity, "attributes", None)
+        gain = strain_gain(attrs) if attrs is not None else settings.STRAIN_REF_GAIN_PER_FRAME
+        _approach(chemicals, "affinity_strain", strain_target, gain)
         return score
 
 

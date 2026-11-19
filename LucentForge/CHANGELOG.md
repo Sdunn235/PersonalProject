@@ -22,6 +22,26 @@ numbers — arcs are the release unit.
   `agent/alignment-genesis-bootstrap` proposal; branch deleted.
 - Planet map as a navigable zoom: **decided no** (§S confirmed); a diegetic map view is iced as LF-166.
 
+**Changed — formulas, not numbers (C0077, Phase A)**
+- Fatigue's per-frame literals replaced by authored game-term targets: a reference human (endurance 10)
+  exerting nonstop levels off at ⅔ and reaches 0.5 in ½ day; per-frame gain and fade are solved from
+  them. Pull and display boost are fractions of authored bands. Rates +2.7% vs C0072 (the old literal
+  gave 0.513 days, not the stated ½).
+
+**Added — strain reaches behavior (C0078, LF-042)**
+- `resilience(attrs)` (Constitution, Foundation §4.1) and `strain_gain(attrs)`; strain rates authored
+  as `STRAIN_REF_HALF_DAYS` + `STRAIN_TOLERANCE` (the dead-band is now deliberate, not an accidental 0.2).
+- Strain receptor on every survival need, scaled by `fearfulness`; all pulls summed and capped below
+  each need's band (no loop, by construction). Alder/Elara now build real strain (0.12/0.15) and bed
+  down sooner (Elara frame 12,454 vs 13,131).
+- Tests: affinity suite §E (authored targets, Constitution resistance, content-derived plateaus for
+  every entity from `rooms.json`, receptor cap, same-seed kernel A/B).
+
+**Docs (Phase C)**
+- Dated code-reality notes on the bible's *factual* claims (§B1/§B2 receptor half, §W2, §W5's missing
+  structural step, §W7 `resilience` trait) and the Systems Design charter. Doctrine unchanged: the
+  decision should follow the strongest drive (§B1); receptors are an interim bridge (LF-043).
+
 ---
 
 ## C0069–C0073 — Return from break + the Rest/Fatigue want (2026-11-17 → 11-18)

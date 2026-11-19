@@ -67,6 +67,21 @@ def fatigue_gain(attrs: Attributes) -> float:
             * settings.ENDURANCE_REFERENCE / endurance(attrs))
 
 
+def resilience(attrs: Attributes) -> float:
+    """Resistance to environmental strain = Constitution × RESILIENCE_CON_WEIGHT (biochem §B7).
+
+    Foundation §4.1: Constitution is "physical resilience, pain tolerance". A swappable strategy
+    beside endurance; recomputed from live attributes. Clamped to RESILIENCE_MIN."""
+    return max(settings.RESILIENCE_MIN, attrs.constitution * settings.RESILIENCE_CON_WEIGHT)
+
+
+def strain_gain(attrs: Attributes) -> float:
+    """Per-frame strain approach rate for this entity: the authored reference rate scaled by
+    RESILIENCE_REFERENCE / resilience(attrs). Hardier → slower strain and a wider dead-band."""
+    return (settings.STRAIN_REF_GAIN_PER_FRAME
+            * settings.RESILIENCE_REFERENCE / resilience(attrs))
+
+
 def byte_capacity_parity(legacy_mp_max: int) -> int:
     """4.3 parity strategy (retired in 4.5): the Byte pool inherited the authored mp
     budget so combat magic was unchanged. Kept for reference / legacy callers."""

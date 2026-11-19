@@ -35,6 +35,10 @@ shape and the open questions. Read it; don't re-derive.
    invent a parallel sub-architecture (no separate "wants engine", no bolt-on urgency calc, no explicit
    Maslow gate — suppression falls out of `base_weight` arithmetic). Justify any new architecture; don't
    assume it.
+   *Code reality (2026-11-19):* decisions don't yet read drive urgency (BACKLOG LF-043), so a want
+   designed only as a drive is inert. Until LF-043 lands, every want design must also name its
+   **perceived-need receptor** (`biochem/receptor.py`) and author its rates in game terms (days, band
+   fractions, attribute/trait modulation) — see needs/wants §W5 note.
 3. **Bits/Bytes firewall.** Magic pools (`bit_pool` / `byte_pool`) and attribute-XP units
    (`attribute_bit` / `attribute_byte`) share only the 1 Byte = 8 Bits ratio. Never let one drain the
    other. Keep the two vocabularies distinct in any design.

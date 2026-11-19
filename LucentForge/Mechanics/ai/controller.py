@@ -131,9 +131,9 @@ class NPCController:
         self.fatigue = self._exertion_emitter.emit(
             self.brain.chemicals, self.npc.attributes, self.state, is_sleeping)
 
-        # 2d. Perceived-need receptor — fatigue makes sleep FEEL lower, so the zone-based
-        #     decisions below (state update) act on it. Parity: fatigue ≤ floor → pull 0.
-        apply_perceived_pulls(self.needs, self.brain.chemicals)
+        # 2d. Perceived-need receptors — fatigue (sleep) and strain (all survival needs) make
+        #     needs FEEL lower, so the zone-based decisions below act on them. Parity: ≤ floor → 0.
+        apply_perceived_pulls(self.needs, self.brain.chemicals, self.brain.traits)
 
         # 3. Log zone transitions
         self._logger.check_zone_changes(self.needs)

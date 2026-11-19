@@ -10,10 +10,10 @@ Dict-based registry keyed by string name. Three affinity chemicals emitted by th
 |---|---|---|---|
 | `comfort` | Positive affinity match signal | 0.05/tick | 0.7× |
 | `stress` | Negative affinity mismatch signal (instantaneous) | 0.05/tick | 0.7× |
-| `affinity_strain` | Accumulated cost of sustained hostile exposure (§B7) | 0.0003/tick | 0.3× |
+| `affinity_strain` | Accumulated cost of sustained hostile exposure (§B7) | `strain_gain(attrs)` (derived) | `STRAIN_FADE_PER_FRAME` (derived) |
 | `fatigue` | Activity-driven tiredness from sustained exertion (§W6.1) | `fatigue_gain(attrs)` (derived) | `FATIGUE_FADE_PER_FRAME` (derived) |
 
-Need-driven chemicals (`hunger_chem`, `thirst_chem`, `tiredness`) are populated dynamically from need definitions and updated in `tick()`. When `affinity_strain > 0.01`, a small boost (`strain × AFFINITY_STRAIN_NEED_BOOST`) is added to each survival need chemical per tick — making needs feel more urgent sooner without changing their physical decay rate.
+Need-driven chemicals (`hunger_chem`, `thirst_chem`, `tiredness`) are populated dynamically from need definitions and updated in `tick()`. When `affinity_strain > 0.01`, a small display boost (`strain × AFFINITY_STRAIN_BOOST_FRACTION × _SLEEP_DECAY`) is added to each survival need chemical per tick — making needs feel more urgent sooner without changing their physical decay rate.
 
 **Fatigue → sleep urgency (§W6).** *Behavior goes through the receptor below (`receptor.py`); this chemical boost is display-side.* When `fatigue > FATIGUE_ACTIVE_FLOOR`, a boost (`fatigue × FATIGUE_TIREDNESS_BOOST_FRACTION × _SLEEP_DECAY`) is added to **only** `tiredness` (the sleep chemical) — a worked NPC crosses into the sleep WARNING zone sooner via the *unchanged* Sleep drive. This boost runs AFTER the sleep-need branch (which hard-decays `tiredness` at `_DECAY×5` while an NPC sleeps); the fraction is kept < 1 (with strain's share) so a sleeping NPC with nonzero fatigue still nets `tiredness` **downward** (the decay dominates the boost). Additive with the strain boost, clamped to [0,1]. Parity: `fatigue = 0` → no effect.
 
@@ -34,7 +34,8 @@ need (`Need.perceived_pull`; `zone`/`is_urgent`/sorting read `Need.perceived_val
 receptor: **fatigue → sleep** — `pull = fatigue × FATIGUE_PULL_FRACTION × comfort_band(sleep)` need-points, where the band is `NEED_FULL − warning_threshold` from `needs.json` (0 at/below
 `FATIGUE_ACTIVE_FLOOR`), so a worn-out NPC crosses its sleep WARNING line sooner. A fraction < 1 keeps a
 just-slept NPC FINE by construction (no bed loop). Side effect by design: a perceived-urgent need also pauses HP/SP regen.
-`affinity_strain` does **not** have a receptor yet (BACKLOG LF-042).
+Second receptor: **strain → every survival need** — `pull = strain × STRAIN_PULL_FRACTION × (1 + fearfulness ×
+STRAIN_FEAR_WEIGHT) × band`. All pulls on a need are summed and capped at `PULL_CAP_FRACTION × band` (< 1).
 
 **This is an interim bridge.** Biochem §B1's intent is that "a decision follows the strongest drive" —
 `Drive.compute_urgency()` / `Brain.get_priority_need_id()` should decide, Creatures-style. Bringing the
@@ -47,8 +48,15 @@ AI states into line with that is BACKLOG LF-043; receptors are how chemistry rea
 ## Settings knobs (settings.py)
 
 ```
-AFFINITY_STRAIN_GAIN       = 0.0003   # per-tick approach rate (~60s to ~50% under full discomfort)
-AFFINITY_STRAIN_NEED_BOOST = 0.0002   # per unit strain added to each need chemical per tick
+# Strain — AUTHORED (tune these) ...
+RESILIENCE_REFERENCE  = 4.0      # resilience (Constitution) of the reference human
+STRAIN_REF_HALF_DAYS  = 0.125    # on hostile ground, the reference is halfway to its strain level in this long
+STRAIN_TOLERANCE      = 0.05     # ground this mildly hostile causes no strain for the reference
+STRAIN_PULL_FRACTION  = 0.5      # receptor pull per unit strain, fraction of each need's band
+STRAIN_FEAR_WEIGHT    = 1.0      # fearfulness 1 doubles the felt pull
+PULL_CAP_FRACTION     = 0.9      # all pulls on one need capped at this fraction of its band
+AFFINITY_STRAIN_BOOST_FRACTION = 0.2   # display boost, fraction of tiredness sleep decay
+# ... DERIVED (don't tune): STRAIN_REF_GAIN_PER_FRAME, STRAIN_FADE_PER_FRAME
 # Fatigue — AUTHORED (tune these) ...
 ENDURANCE_REFERENCE   = 10.0     # endurance of an ordinary adult human (the reference entity)
 FATIGUE_REF_PLATEAU   = 2/3      # exerting nonstop, the reference levels off here

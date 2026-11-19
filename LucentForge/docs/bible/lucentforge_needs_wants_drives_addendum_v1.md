@@ -53,6 +53,10 @@ exactly the same way as drives with lower base_weight, but they carry risk of se
 Implementation corollary: **a Tier 2 or Tier 3 drive's urgency is suppressed when Tier 1 needs
 are in the CRITICAL or WARNING zone.**
 
+> *Code reality (2026-11-19):* the rule above is the intended mechanism and stands. The next sentence is not yet
+> true of the code: drive urgency is display-only, so weight arithmetic does not yet gate anything
+> (BACKLOG LF-043). Today Tier 1 needs compete by raw zone, and receptors bend those zones.
+
 The drive architecture already supports this. `Drive.compute_urgency()` reads a chemical level and
 applies a fearfulness-weighted multiplier. Tier 1 need chemicals (`hunger_chem`, `thirst_chem`,
 `tiredness`) naturally spike first when physical resources are low — these commands cognitive
@@ -105,6 +109,12 @@ vital pool is a self-destructive want (§W3).
 
 The existing architecture (Brain → Chemicals → Drives → Drive.compute_urgency) can carry Tier 2
 and 3 wants without structural change. The recommended sequence for adding new wants:
+
+> *Code reality (2026-11-19):* one structural step is still missing — **decisions must consume drive urgency**
+> (BACKLOG LF-043). Until then, step 3 alone yields a want that shows in the HUD but never changes
+> behavior. Add a step **3b: register a perceived-need receptor** in `biochem/receptor.py` (a pull as a
+> fraction of the affected need's band, modulated by attributes/traits), and test it with a same-seed
+> kernel A/B. Author every rate in game terms (days, band fractions), never per-frame literals.
 
 1. **Add the chemical** in `Mechanics/biochem/chemical.py` `__init__()` (slow-building)
 2. **Add the emitter or trigger** that pushes the chemical toward a target (needs satisfaction,
@@ -182,3 +192,6 @@ aren't lost; implement when the next planning session scopes a behavioral arc.
 - Self-destructive compulsion example: **substance addiction** — a consumable or region provides
   a high-gain comfort/euphoria chemical but drains HP/SP over time; want drive builds on exposure
   history. Entities with high `fearfulness` + low `resilience` are more susceptible.
+  *Code reality (2026-11-19):* `resilience` is a designed trait not yet in `traits.py` (today: curiosity,
+  aggression, fearfulness, sociability). Distinct from the `resilience(attrs)` *attribute* strategy
+  (Constitution) that resists affinity strain.

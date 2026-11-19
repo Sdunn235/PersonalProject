@@ -146,7 +146,7 @@ check("(3) SPECIAL-CASE: 50 sleeping ticks at fatigue=1.0 keep tiredness monoton
 # Sanity on the tuning invariant itself: max boost (fatigue=1) + max strain boost
 # must be strictly below the sleep-decay magnitude.
 max_boost = (1.0 * settings.FATIGUE_TIREDNESS_BOOST_FRACTION * Chemicals._SLEEP_DECAY
-             + 1.0 * settings.AFFINITY_STRAIN_NEED_BOOST)
+             + 1.0 * settings.AFFINITY_STRAIN_BOOST_FRACTION * Chemicals._SLEEP_DECAY)
 check("(3) tuning invariant: max(fatigue+strain boost) < sleep-decay (_SLEEP_DECAY)",
       max_boost < Chemicals._SLEEP_DECAY)
 

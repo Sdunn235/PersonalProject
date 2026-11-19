@@ -19,18 +19,18 @@ commit. New ideas get the next free `LF-###`; IDs are never reused.
 
 ## Where you left off (2026-11-18)
 
-1. **Just shipped (C0073):** the Rest/Fatigue want works — exertion builds fatigue and worn-out NPCs go
-   to bed sooner (live gate passed). It also exposed that NPC decisions never read chemicals; the new
-   **perceived-need receptor** (`biochem/receptor.py`) is now the way any want reaches behavior.
-   Master is **23/23 green**.
+1. **Just shipped (C0077–C0078):** fatigue and affinity strain are authored in game terms (days, band
+   fractions, Constitution, fearfulness) instead of per-frame literals, and strain finally changes
+   behavior through the receptor bridge. NPC decisions still don't read drives — the bible's intent
+   (§B1) is that they should; that's LF-043. Master is **23/23 green**.
 2. **Arc B "The World Opens" is next on the roadmap.** Its world foundation (bible §W/§T/§S/§C) is
    written; nothing runnable has been built yet.
 3. **The Studio** (department agents) works for Systems Design, QC and Engineering. World Building and
    Story/Lore have never been run.
 
-**Recommended first pick when you have an evening:** LF-042 (give `affinity_strain` a receptor — same
-pattern as fatigue, so it's a short, satisfying win), then LF-002 (live spot-checks, ~30 min), then LF-010
-(map loader). If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
+**Recommended first pick when you have an evening:** LF-002 (live spot-checks, ~30 min, no code), then
+plan LF-043 (decisions follow the strongest drive — the doctrine the receptors are bridging toward) or
+start Arc B with LF-010 (map loader). If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
 
 ---
 
@@ -71,8 +71,9 @@ pattern as fatigue, so it's a short, satisfying win), then LF-002 (live spot-che
 | LF-038 | **Legacy-injector retrofit** — re-express `proximity.py` fear and `zone_ai.py` nudges as emitters; parity-gated, own phase. | M | ready | §B8, §B2 |
 | LF-039 | **Goblin scout → swarm escalation** — lone goblins scout; success draws more; swarms are the threat. | L | design | memory `project_goblin_lore` |
 | LF-040 | **Talent read by the Brain** — gifted-ness influences behavior. | M | idea | §M9 (§M3 seam) |
-| LF-042 | **Give `affinity_strain` a perceived-need receptor** — C0046's strain only boosts chemicals, which decisions never read, so it's inert. Add a pull (strain × a named constant) on all survival needs in `biochem/receptor.py`; same-seed kernel test like fatigue §8. | S–M | ready | biochem §B7 code-gap note; needs/wants §W6 |
-| LF-043 | **Decide: should the drive chain ever own decisions?** `Brain.get_priority_need_id` (chemicals pick the need, Creatures-style) is display-only today; receptors are the narrow bridge. Revisit when several wants exist. | Arc | design | 2026-11-18 session; §W6 |
+| LF-043 | **Bring NPC decisions into line with §B1: the strongest drive picks the need.** The bible's intent (Creatures lineage; `design/npc_mind_architecture.md` §4 "weighted drive urgency") is that `Brain.get_priority_need_id` decides. Today the AI states pick by raw need zones and drives are display-only — the code is behind the doctrine. Perceived-need receptors (fatigue, LF-042) are the interim bridge. Arc-sized: changes every NPC's decisions; needs its own plan + parity strategy. | Arc | design | biochem §B1; needs/wants §W2, §W5, §W6 note; 2026-11-19 review |
+| LF-044 | **Author the rest of the chemical table in game terms** — `Chemicals._DECAY 0.0002` and the pain/fear/anger/loneliness/comfort/stress decay multipliers, the 0.03/0.05 need-chemical approach rates, and `AffinityComfortEmitter`'s 0.05 comfort/stress gains are still per-frame literals. Re-express like fatigue/strain (half-lives in days, derived per frame), parity-first. | M | ready | design note `studio/systems_design/drafts/2026-11-19_perceived_need_receptors.md` §6 |
+| LF-045 | **Should strain bite harder?** It now works but is mild in play (Alder/Elara peak 0.12–0.15 because they don't linger on hostile ground). Tune the *authored* values (`STRAIN_REF_HALF_DAYS`, `STRAIN_TOLERANCE`, `STRAIN_PULL_FRACTION`) by feel, or let Arc B content put NPCs on harsher ground. | S | design | 2026-11-19 A/B measurement |
 
 ---
 

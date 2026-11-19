@@ -459,8 +459,158 @@ except Exception as ex:  # noqa: BLE001
     traceback.print_exc()
     check(f"§D region persistence (exception: {ex})", False)
 
+# ---------------------------------------------------------------------------
+# §E — Strain as formulas + perceived-need receptor (LF-042, 2026-11-19)
+# Rates are SOLVED from authored game-term targets; strain reaches decisions through
+# biochem/receptor.py (interim bridge to §B1). Integrated checks use the real roster + rooms.
+# ---------------------------------------------------------------------------
+print("-" * 64)
+try:
+    import settings as _st
+    from Mechanics.bootstrap import create_game_context as _cgcE
+    from Mechanics.entities.factory import create_all_npcs as _canE
+    from Mechanics.entities.derivation import resilience as _res, strain_gain as _sg
+    from Mechanics.biochem.receptor import (apply_perceived_pulls as _app,
+                                            comfort_band as _band, strain_need_pull as _snp)
+    from Mechanics.needs.need import NeedZone as _NZ, make_default_needs as _mdnE
+
+    class _RefE:     # resilience exactly RESILIENCE_REFERENCE
+        constitution = _st.RESILIENCE_REFERENCE / _st.RESILIENCE_CON_WEIGHT
+
+    # (E1) authored targets hold for the reference human on hostile ground: target T, settles at
+    #      T - tolerance, halfway there after STRAIN_REF_HALF_DAYS.
+    T = 0.4
+    chE = Chemicals()
+    plateau_ref = T - _st.STRAIN_FADE_PER_FRAME / _sg(_RefE)
+    half_frame = None
+    for f in range(int(2 * _st.FRAMES_PER_DAY)):
+        cur = chE.get("affinity_strain")
+        chE.set("affinity_strain", cur + (T - cur) * _sg(_RefE))   # the emitter's _approach
+        chE.tick([])                                                  # natural fade
+        if half_frame is None and chE.get("affinity_strain") >= plateau_ref / 2:
+            half_frame = f + 1
+    check(f"§E1 reference settles at T - STRAIN_TOLERANCE ({chE.get('affinity_strain'):.3f} vs "
+          f"{T - _st.STRAIN_TOLERANCE:.3f})",
+          abs(chE.get("affinity_strain") - (T - _st.STRAIN_TOLERANCE)) < 0.005)
+    check(f"§E1 reference is halfway after ~STRAIN_REF_HALF_DAYS "
+          f"({(half_frame or 0) / _st.FRAMES_PER_DAY:.3f} vs {_st.STRAIN_REF_HALF_DAYS})",
+          half_frame is not None
+          and abs(half_frame / _st.FRAMES_PER_DAY - _st.STRAIN_REF_HALF_DAYS) < 0.01)
+
+    # (E2) Constitution resists: hardier -> slower strain AND a wider dead-band (one formula).
+    class _Hardy:
+        constitution = 12
+
+    class _Frail:
+        constitution = 2
+    check("§E2 resilience is Constitution-led", _res(_Hardy) > _res(_Frail))
+    check("§E2 hardier entity strains slower", _sg(_Hardy) < _sg(_Frail))
+    check("§E2 hardier entity tolerates more (wider dead-band fade/gain)",
+          _st.STRAIN_FADE_PER_FRAME / _sg(_Hardy) > _st.STRAIN_FADE_PER_FRAME / _sg(_Frail))
+
+    # (E3) content-derived plateaus: every authored entity, on the harshest authored ground in
+    #      rooms.json, settles at T_worst - fade/gain. Any entity that has hostile ground beyond its
+    #      own dead-band must reach a visible plateau (a content change that makes strain inert fails).
+    dbE = os.path.join(tempfile.gettempdir(), "lf_strain_formula.db")
+    if os.path.exists(dbE):
+        try:
+            os.remove(dbE)
+        except OSError:
+            pass
+    ctxE = _cgcE(db_path=dbE)
+    rooms = [r for r in ctxE.rooms._rooms if r.affinity is not None]
+    for npcE in _canE(ctxE):
+        worst = min((comfort_score(npcE.affinity.effective(), r.affinity, r.affinity_intensity)
+                     for r in rooms), default=0.0)
+        T_worst = max(0.0, -worst)
+        deadband = _st.STRAIN_FADE_PER_FRAME / _sg(npcE.attributes)
+        if T_worst > deadband:
+            plateau = T_worst - deadband
+            check(f"§E3 {npcE.name}: harshest ground {worst:+.2f} -> visible plateau {plateau:.2f}",
+                  plateau > 0.1)
+    if hasattr(ctxE, "close"):
+        ctxE.close()
+
+    # (E4) receptor: parity, band fractions, fearfulness, combined cap.
+    needsE = _mdnE()
+    chE4 = Chemicals()
+    calm, fearful = Traits(fearfulness=0.0), Traits(fearfulness=1.0)
+    _app(needsE, chE4, fearful)
+    check("§E4 parity: no strain, no fatigue -> every pull 0",
+          all(n.perceived_pull == 0.0 for n in needsE))
+    chE4.set("affinity_strain", 0.4)
+    hunger = next(n for n in needsE if n.need_id == "hunger")
+    check("§E4 strain pull = strain x STRAIN_PULL_FRACTION x band (fearfulness 0)",
+          abs(_snp(chE4, hunger, calm) - 0.4 * _st.STRAIN_PULL_FRACTION * _band(hunger)) < 1e-9)
+    check("§E4 fearful NPCs feel strain more (x(1 + fearfulness x STRAIN_FEAR_WEIGHT))",
+          abs(_snp(chE4, hunger, fearful)
+              - _snp(chE4, hunger, calm) * (1 + _st.STRAIN_FEAR_WEIGHT)) < 1e-9)
+    _app(needsE, chE4, calm)
+    check("§E4 strain pulls EVERY survival need", all(n.perceived_pull > 0 for n in needsE))
+    chE4.set("affinity_strain", 1.0)
+    chE4.set("fatigue", 1.0)
+    for n in needsE:
+        n.current_value = 100.0
+    _app(needsE, chE4, fearful)
+    check("§E4 combined pulls capped at PULL_CAP_FRACTION x band",
+          all(abs(n.perceived_pull - _st.PULL_CAP_FRACTION * _band(n)) < 1e-9 for n in needsE))
+    check("§E4 no loop: max strain + max fatigue + max fear still leaves full needs FINE",
+          all(n.zone == _NZ.FINE for n in needsE))
+
+    # (E5) full loop: same-seed SimulationKernel day, strain pull on vs off. The AIR villagers
+    #      (the NPCs who cross hostile ground) must feel it: first sleep comes sooner.
+    import contextlib
+    import io
+    import random
+    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    import pygame
+    pygame.init()
+    pygame.display.set_mode((1, 1))
+    from Mechanics.world.tile_map import TileMap as _TME
+    from Mechanics.runtime.kernel import SimulationKernel as _SKE
+
+    def _first_sleep(fraction: float):
+        saved = _st.STRAIN_PULL_FRACTION
+        _st.STRAIN_PULL_FRACTION = fraction
+        try:
+            random.seed(1234)
+            ctx5 = _cgcE(db_path=os.path.join(tempfile.mkdtemp(), "lf_strain_loop.db"))
+            tm5 = _TME()
+            first, peak = {}, {}
+            with contextlib.redirect_stdout(io.StringIO()):
+                tm5.load_real_map()
+                k5 = _SKE.new_session(ctx5, tm5, tm5.get_need_sources())
+                dt5, now5 = 1.0 / _st.FPS, 0.0
+                for frame in range(int(_st.FRAMES_PER_DAY)):
+                    now5 += dt5
+                    k5.step(dt5, now5)
+                    for ent, ctl in k5.session.npc_list:
+                        peak[ent.name] = max(peak.get(ent.name, 0.0),
+                                             ctl.brain.chemicals.get("affinity_strain"))
+                        if (ctl.state == "SATISFYING" and ctl.target_source is not None
+                                and ctl.target_source.need_id == "sleep"):
+                            first.setdefault(ent.name, frame)
+            ctx5.db.close()
+            return first, peak
+        finally:
+            _st.STRAIN_PULL_FRACTION = saved
+
+    on_first, on_peak = _first_sleep(_st.STRAIN_PULL_FRACTION)
+    off_first, _ = _first_sleep(0.0)
+    for who in ("Alder", "Elara"):
+        check(f"§E5 {who} builds real strain in play (peak {on_peak.get(who, 0):.2f})",
+              on_peak.get(who, 0.0) > _st.STRAIN_ACTIVE_FLOOR * 5)
+        check(f"§E5 {who} beds down sooner when strain is felt "
+              f"(frame {on_first.get(who)} vs {off_first.get(who)} without)",
+              on_first.get(who) is not None and off_first.get(who) is not None
+              and on_first[who] < off_first[who])
+except Exception as ex:  # noqa: BLE001
+    import traceback
+    traceback.print_exc()
+    check(f"§E strain formulas/receptor (exception: {ex})", False)
+
 print("=" * 64)
 if _fails:
     print(f"{len(_fails)} FAIL: " + "; ".join(_fails))
     sys.exit(1)
-print("Affinity behavior smoke CLEAN — all §B6+§B7+§D checks pass")
+print("Affinity behavior smoke CLEAN — all §B6+§B7+§D+§E checks pass")
