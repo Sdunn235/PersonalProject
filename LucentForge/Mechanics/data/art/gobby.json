@@ -6,6 +6,5 @@
   "_lore": "Gobby: peaceful forest goblin of the northern Azure Woods; thin, small, empathetic outcast (Gobby_the_Goblin/Characters). Forest goblin, not River-tribe blue.",
   "genes": {"height": 0.58, "body_width": 0.28, "head_size": 0.40, "ear_length": 0.22,
             "limb_length": 0.30, "arm_length": 0.30, "stoop": 0.03, "eye_size": 0.12},
-  "palette": {"skin": [112, 156, 82], "skin_shadow": [78, 116, 58], "cloth": [120, 98, 64],
-              "cloth_shadow": [86, 70, 46], "outline": [26, 24, 20], "eye": [255, 236, 140]}
+  "palette": {"skin": [112, 156, 82], "cloth": [120, 98, 64], "eye": [255, 236, 140]}
 }

@@ -5,6 +5,5 @@
   "stage": 1.0,
   "_lore": "A worn stone from the Azure River banks.",
   "genes": {"size": 0.70, "roughness": 0.18, "flatness": 0.35, "facets": 9},
-  "palette": {"stone": [124, 128, 132], "stone_shadow": [88, 92, 98], "stone_light": [168, 172, 176],
-              "outline": [38, 40, 44]}
+  "palette": {"stone": [124, 128, 132]}
 }

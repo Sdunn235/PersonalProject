@@ -43,6 +43,14 @@ _GENES = {
         "facets":    (5.0, 12.0, 8.0),       # outline points (rounded)
     },
 }
+# Base material colors per kind (defaults). A genome's palette may only name these; every other shade
+# (shadow, light, outline) is grown from them by the house style (style.py), never stored.
+MATERIALS = {
+    "creature": {"skin": (96, 140, 70), "cloth": (110, 84, 60), "eye": (250, 230, 120)},
+    "tree": {"bark": (100, 72, 48), "leaf": (60, 120, 56)},
+    "rock": {"stone": (128, 126, 120)},
+}
+
 GENE_BOUNDS = {k: {g: (lo, hi) for g, (lo, hi, _d) in genes.items()} for k, genes in _GENES.items()}
 GENE_DEFAULTS = {k: {g: d for g, (_lo, _hi, d) in genes.items()} for k, genes in _GENES.items()}
 
@@ -76,7 +84,12 @@ class Genome:
             if not lo <= float(value) <= hi:
                 raise ValueError(f"{d['id']}: gene {name}={value} outside [{lo}, {hi}]")
             genes[name] = float(value)
-        palette = {role: tuple(rgb) for role, rgb in d.get("palette", {}).items()}
+        palette = {}
+        for role, rgb in d.get("palette", {}).items():
+            if role not in MATERIALS[kind]:
+                raise ValueError(f"{d['id']}: palette role {role!r} is not a {kind} material "
+                                 f"{sorted(MATERIALS[kind])} (shades are derived by style.py)")
+            palette[role] = tuple(int(c) for c in rgb)
         return Genome(id=d["id"], kind=kind, seed=int(d.get("seed", 0)),
                       stage=float(d.get("stage", 1.0)), genes=genes, palette=palette)
 

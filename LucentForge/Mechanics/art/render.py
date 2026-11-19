@@ -3,7 +3,9 @@
 Reads only a Genome (genome.py) and its own seed (a private random.Random — never the global RNG or the
 clock), so the same genome always renders the same pixels. Creatures render as the game's 3×4 walk sheet
 (rows down/left/right/up, 3 frames, 32-px cells); trees and rocks as one 32-px tile. Proportions come from
-genes; the only constants here are drawing conventions (outline width, frame offsets).
+genes; the only constants here are drawing conventions (outline width, frame offsets). Color and light
+come from the house style (style.py): drawing uses base colors + `OUTLINE` contours, then `apply()`
+lights each finished cell.
 
 Kept separate from genome.py so another renderer (isometric 64×32, the long-term target) can read the
 same genes.
@@ -17,42 +19,34 @@ import pygame
 
 import settings
 from Mechanics.art.genome import Genome
+from Mechanics.art.style import Style, apply, default_style, drawing_colors
 
 T = settings.TILE_SIZE
 DIRECTIONS = ("down", "left", "right", "up")      # sheet rows, as EntitySprite slices them
 FRAMES = 3                                       # frame 0 = idle, 1/2 = alternate steps
 
-_DEFAULT_PALETTE = {
-    "creature": {"skin": (96, 140, 70), "skin_shadow": (64, 100, 48), "cloth": (110, 84, 60),
-                 "cloth_shadow": (80, 60, 44), "outline": (24, 22, 20), "eye": (250, 230, 120)},
-    "tree": {"bark": (100, 72, 48), "bark_shadow": (70, 50, 34), "leaf": (60, 120, 56),
-             "leaf_shadow": (38, 86, 40), "leaf_light": (96, 156, 80), "outline": (22, 30, 20)},
-    "rock": {"stone": (128, 126, 120), "stone_shadow": (92, 90, 86), "stone_light": (170, 168, 160),
-             "outline": (40, 40, 40)},
-}
+def _colors(genome: Genome, style: Style | None = None) -> dict:
+    return drawing_colors(genome, style)
 
 
-def _colors(genome: Genome) -> dict:
-    pal = dict(_DEFAULT_PALETTE[genome.kind])
-    pal.update(genome.palette)
-    return {k: (*v[:3], 255) for k, v in pal.items()}
-
-
-def render(genome: Genome) -> pygame.Surface:
+def render(genome: Genome, style: Style | None = None) -> pygame.Surface:
+    """Genome -> lit pixels in the house style (style.py). `style` overrides the data style (tests)."""
+    style = style or default_style()
     if genome.kind == "creature":
-        return render_creature_sheet(genome)
+        return render_creature_sheet(genome, style)
     if genome.kind == "tree":
-        return render_tree(genome)
-    return render_rock(genome)
+        return apply(render_tree(genome, style), genome, style)
+    return apply(render_rock(genome, style), genome, style)
 
 
 # ── creatures ───────────────────────────────────────────────────────────────────────────────────────
-def render_creature_sheet(genome: Genome) -> pygame.Surface:
+def render_creature_sheet(genome: Genome, style: Style | None = None) -> pygame.Surface:
     sheet = pygame.Surface((FRAMES * T, len(DIRECTIONS) * T), pygame.SRCALPHA)
     for row, facing in enumerate(DIRECTIONS):
         for frame in range(FRAMES):
             cell = pygame.Surface((T, T), pygame.SRCALPHA)
-            _draw_creature(cell, genome, facing, frame)
+            _draw_creature(cell, genome, facing, frame, style)
+            apply(cell, genome, style)
             sheet.blit(cell, (frame * T, row * T))
     return sheet
 
@@ -62,8 +56,9 @@ def _ellipse(surf, color, outline, rect: pygame.Rect) -> None:
     pygame.draw.ellipse(surf, color, rect)
 
 
-def _draw_creature(surf: pygame.Surface, g: Genome, facing: str, frame: int) -> None:
-    c = _colors(g)
+def _draw_creature(surf: pygame.Surface, g: Genome, facing: str, frame: int,
+                   style: Style | None = None) -> None:
+    c = _colors(g, style)
     gn = g.genes
     scale = g.growth_scale
     height = max(8.0, gn["height"] * T * scale)                  # figure height in px
@@ -151,9 +146,9 @@ def _draw_creature(surf: pygame.Surface, g: Genome, facing: str, frame: int) -> 
 
 
 # ── props ───────────────────────────────────────────────────────────────────────────────────────────
-def render_tree(g: Genome) -> pygame.Surface:
+def render_tree(g: Genome, style: Style | None = None) -> pygame.Surface:
     surf = pygame.Surface((T, T), pygame.SRCALPHA)
-    c = _colors(g)
+    c = _colors(g, style)
     gn = g.genes
     s = g.growth_scale
     rng = random.Random(g.seed)
@@ -185,9 +180,9 @@ def render_tree(g: Genome) -> pygame.Surface:
     return surf
 
 
-def render_rock(g: Genome) -> pygame.Surface:
+def render_rock(g: Genome, style: Style | None = None) -> pygame.Surface:
     surf = pygame.Surface((T, T), pygame.SRCALPHA)
-    c = _colors(g)
+    c = _colors(g, style)
     gn = g.genes
     s = g.growth_scale
     rng = random.Random(g.seed)

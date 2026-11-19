@@ -1,0 +1,20 @@
+{
+  "_doc": "Lucent Light, the LucentForge house style (studio/art/direction.md). One light for the whole world; every shade is grown from one base color per material. Read by Mechanics/art/style.py. Change a value here and every grown asset follows.",
+  "light_from": [-1, -1],
+  "_light_from": "Direction the light comes FROM, in screen steps (x, y): up-left. Lit rims face it; form shadows fall away from it.",
+  "lightness_step": 0.11,
+  "_lightness_step": "HLS lightness between neighbouring shades (shadow <- base -> light).",
+  "outline_steps": 2.4,
+  "_outline_steps": "The outline sits this many lightness steps below the base: the material's own darkest shade, never black.",
+  "hue_shift_degrees": 10,
+  "_hue_shift_degrees": "Hue moved per step: shadows toward cool_hue, light toward warm_hue (hue-shifted ramps read as light, not as grey).",
+  "cool_hue_degrees": 235,
+  "warm_hue_degrees": 48,
+  "grey_tint_saturation": 0.12,
+  "_grey_tint_saturation": "Unsaturated materials (stone) borrow this much cool/warm tint so their shadows still read as shade.",
+  "form_light_until": 0.3,
+  "form_shadow_from": 0.6,
+  "_form": "Form shading, relative to the shape's own size: walk from a pixel toward the light and away from it to the shape's contour; t = distance-to-lit-edge / (sum). t below form_light_until catches the light, t from form_shadow_from on falls into shadow. A newborn and a giant shade alike.",
+  "flat_materials": ["eye"],
+  "_flat_materials": "Materials drawn flat (lit from within): eyes stay their base color."
+}

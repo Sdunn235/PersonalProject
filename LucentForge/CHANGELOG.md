@@ -60,6 +60,14 @@ numbers — arcs are the release unit.
   First genomes: Gobby, Grom, an Azure Woods oak and a river stone (in `assets/generated/`, not wired in).
 - Tests: `run_studio_tests.py`, `run_art_tests.py`.
 
+**Added — Lucent Light, the art house style (C0091):** every grown asset shares one light and colors
+grown by formula. Genomes now carry one base color per material (skin, cloth, eye; bark, leaf; stone);
+`Mechanics/art/style.py` grows each into an outline / shadow / base / light ramp (shadows lean cool,
+light leans warm), outlines take the material's own darkest shade (never black), and form shading is
+relative to each shape's size, so a newborn and a giant shade alike. The style is data
+(`Mechanics/data/art_style.json`): change it and every asset follows. Tests: `run_art_style_tests.py`
+(palette discipline, ramp order and hue shift, one light per cell with a no-light negative control).
+
 **Added — departments as skills (C0087, LF-176):** a thin `.claude/skills/lucentforge-<dept>/SKILL.md`
 per department (Workspace repo), routing to its charter; the studio suite checks every department has one.
 

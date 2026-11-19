@@ -6,6 +6,5 @@
   "_lore": "Grom: tanky goblin (STR 14, DEF 6, entities.json). Heavy, wide, stooped; small ears, small eyes.",
   "genes": {"height": 0.82, "body_width": 0.66, "head_size": 0.30, "ear_length": 0.10,
             "limb_length": 0.24, "arm_length": 0.38, "stoop": 0.12, "eye_size": 0.06},
-  "palette": {"skin": [84, 126, 60], "skin_shadow": [58, 92, 42], "cloth": [92, 74, 66],
-              "cloth_shadow": [64, 50, 44], "outline": [20, 18, 16], "eye": [230, 120, 60]}
+  "palette": {"skin": [84, 126, 60], "cloth": [92, 74, 66], "eye": [230, 120, 60]}
 }

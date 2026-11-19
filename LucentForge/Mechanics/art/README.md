@@ -8,9 +8,11 @@ by the Art department (`studio/art/charter.md`).
 |---|---|
 | `genome.py` | `Genome` (kind, seed, growth `stage`, bounded `genes`, `palette`); `GENE_BOUNDS` + defaults per kind; `load_all()`; `mutate(genome, rng, rate)` (stays in bounds); `grow(genome, stage)`. |
 | `render.py` | Genome → `pygame.Surface`. Creatures: the game's 3×4 walk sheet (rows down/left/right/up, 3 frames, 32-px cells). Trees/rocks: one 32-px tile. Deterministic from the genome's own seed. |
+| `style.py` | **Lucent Light**, the house style (data: `Mechanics/data/art_style.json`). `ramp(base)` grows outline / shadow / base / light from one base color (hue-shifted: shadows cool, light warm); `apply(cell, genome)` lights a finished cell: coloured outlines, lit rims facing `light_from`, size-relative form shading. |
 | `bake.py` | `py -m Mechanics.art.bake [ids]`: writes `assets/generated/<id>.png` and records it in `assets/registry.json` (genome + seed). Never touches `assets/images/`. |
 
-Genomes live in `Mechanics/data/art/*.json` (`gobby`, `grom`, `azure_oak`, `river_stone` to start). Any
+Genomes carry **one base color per material** (`genome.MATERIALS`: skin/cloth/eye, bark/leaf, stone);
+every other shade is grown by the style. Genomes live in `Mechanics/data/art/*.json` (`gobby`, `grom`, `azure_oak`, `river_stone` to start). Any
 extra keys (e.g. `_lore`) are notes for people and are ignored by the loader.
 
 **Rules:** genes are named for what they do and bounded; adding a gene means adding a default, so older
@@ -19,4 +21,4 @@ of adult size) to 1. Renderers read genes only, so an isometric renderer can com
 changing a single genome.
 
 **Not yet:** generated sheets are not wired into `entities.json` (Shawn's call), and nothing grows or
-evolves at runtime yet. That's the biology arc (BACKLOG LF-179). Tests: `scratchpad/run_art_tests.py`.
+evolves at runtime yet. That's the biology arc (BACKLOG LF-179). Tests: `scratchpad/run_art_tests.py`, `scratchpad/run_art_style_tests.py`.

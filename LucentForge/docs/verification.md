@@ -17,6 +17,18 @@ Entry template:
 
 ---
 
+## 2026-11-19 evening — Lucent Light house style (C0091)
+- Test-first: `run_art_style_tests.py` written first; red on import (no style module), then green.
+- Local gate: 31/31 GREEN (`run_all_tests.py`), including the re-baked `assets/generated/` matching fresh
+  renders in `run_art_tests.py`.
+- Hosted CI: see the run on C0091.
+- Live look: none (generated art is not wired into the game).
+- Evidence: `logs/screens/latest/art_style_sheet.png` (row block 1: the same genomes with no light;
+  block 2: Lucent Light; last row: five generations of Gobby's lineage, then Gobby growing up). Negative
+  control: with `light_from` (0, 0) the one-light check fails, so the check discriminates.
+- Gaps: "looks good" is not tested; the checks pin coherence (one light, grown ramps), not taste. The
+  style is a proposal from the Art department; Shawn decides whether it is the direction.
+
 ## 2026-11-19 ~01:35 — Panels as data (C0089, LF-010 step 1)
 - Local: `run_panel_data_tests.py` red first (no map file), then CLEAN: data Panel(0,0) == procedural in
   tiles, blocking, regions, rock/tree art, need sources and rendered pixels; runtime never calls the
