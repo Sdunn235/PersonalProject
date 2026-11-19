@@ -151,7 +151,6 @@ Legacy items from session_state's old known-issues list, each checked against th
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-046 | **Kernel still touches pygame** — `kernel.step()` calls `PlayerController.update`, which reads `pygame.key.get_pressed()`, breaking §RT "kernel imports no pygame". Move key reading to the shell as a Command/intent; headless tests then need no display. | S | ready | harness note 2026-11-19 |
 | LF-120 | **Headless background sim for off-screen panels** — "the world simulates without the player". | L | blocked by LF-010 | §RT8 |
 | LF-121 | **Replay determinism** — record a `Command` + `dt` stream and replay it headless as a regression test. | M | ready | §RT8 |
 | LF-122 | **`--ai-player` mode** — a state machine plays while you watch. | M | design | memory `project_lucentforge_vision` (Option 3) |

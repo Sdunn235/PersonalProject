@@ -60,6 +60,11 @@ numbers — arcs are the release unit.
   First genomes: Gobby, Grom, an Azure Woods oak and a river stone (in `assets/generated/`, not wired in).
 - Tests: `run_studio_tests.py`, `run_art_tests.py`.
 
+**Changed — the player moves by intent (C0086, LF-046, first QA→Engineering run)**
+- The sim no longer reads the keyboard: the shell turns arrow keys into `PlayerController.move_intent`, so
+  the kernel runs with no display at all (bible §RT invariant now true in code) and an AI player can drive
+  the player later. QA wrote `run_kernel_headless_tests.py` first (red: "video system not initialized").
+
 **Docs (Phase C)**
 - Dated code-reality notes on the bible's *factual* claims (§B1/§B2 receptor half, §W2, §W5's missing
   structural step, §W7 `resilience` trait) and the Systems Design charter. Doctrine unchanged: the

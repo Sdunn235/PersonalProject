@@ -62,12 +62,7 @@ def new_kernel(seed: int = SEED):
     from Mechanics.runtime.kernel import SimulationKernel
     from Mechanics.world.tile_map import TileMap
     random.seed(seed)
-    # Code gap (2026-11-19, BACKLOG LF-046): kernel.step() calls PlayerController.update, which
-    # reads pygame.key.get_pressed(), so even the "headless" kernel needs a display (§RT invariant
-    # says the kernel imports no pygame). A 1x1 dummy display satisfies it, as run_runtime_tests does.
-    pygame.init()
-    if pygame.display.get_surface() is None:
-        pygame.display.set_mode((1, 1))
+    # The kernel needs no display (LF-046 fixed 2026-11-19: the player moves by intent, set by the shell).
     with quiet():
         ctx = create_game_context(db_path=os.path.join(tempfile.mkdtemp(), "lf_test.db"))
         tile_map = TileMap()

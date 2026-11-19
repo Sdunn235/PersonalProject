@@ -1,6 +1,8 @@
-# player.py — Keyboard-controlled player entity with tile collision
-# noinspection PyPackageRequirements
-import pygame
+# player.py — Player entity driven by movement INTENT, with tile collision.
+#
+# The Ripple Kernel treats the player as one more agent (bible §RT): the sim never reads the keyboard.
+# The shell (or an AI player / replay) sets `move_intent` each frame; update() turns it into movement.
+# This module imports no pygame, so the kernel steps in a process with no display (LF-046).
 import settings
 from Mechanics.needs.needs_system import fill_need
 
@@ -16,6 +18,9 @@ class PlayerController:
         self.tile_map = tile_map
         self.needs    = needs   or []
         self.sources  = sources or []
+        # (dx, dy) in [-1, 1] each: where the player wants to go this frame. Set by the shell from the
+        # arrow keys (PresentationShell._apply_player_intent) or by any other driver.
+        self.move_intent: tuple[float, float] = (0.0, 0.0)
 
     def _blocked(self, x: float, y: float) -> bool:
         """Return True if world position (x, y) sits inside a blocked tile."""
@@ -34,11 +39,9 @@ class PlayerController:
                 self._blocked(cx + r, cy + r))
 
     def update(self, dt: float) -> None:
-        keys = pygame.key.get_pressed()
         speed = settings.NPC_SPEED * dt
 
-        raw_dx = keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]
-        raw_dy = keys[pygame.K_DOWN]  - keys[pygame.K_UP]
+        raw_dx, raw_dy = self.move_intent
 
         # Normalize diagonal movement to prevent sqrt(2) speed boost
         if raw_dx != 0 and raw_dy != 0:

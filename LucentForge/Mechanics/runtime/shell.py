@@ -114,6 +114,7 @@ class PresentationShell:
             dt = self.clock.tick(settings.FPS) / 1000.0
             self._handle_events()
             now = pygame.time.get_ticks() / 1000.0
+            self._apply_player_intent()
             if not self._paused_sim:
                 frame = kernel.step(dt, now)
                 if frame.sim_ticks > 0:
@@ -241,6 +242,15 @@ class PresentationShell:
         for npc, _ in self.session.npc_list:
             self.sprite_group.add(self.sprites[npc.entity_id])
         self._kill_defeated_sprites()
+
+    def _apply_player_intent(self) -> None:
+        """View → model: arrow keys become the player's movement intent (LF-046). The kernel never
+        reads the keyboard; any other driver (AI player, replay) can set the same intent."""
+        keys = pygame.key.get_pressed()
+        self.session.player_controller.move_intent = (
+            keys[pygame.K_RIGHT] - keys[pygame.K_LEFT],
+            keys[pygame.K_DOWN] - keys[pygame.K_UP],
+        )
 
     def _advance_one_tick(self, now: float) -> None:
         """Advance the frozen sim by exactly one clock tick, sub-stepped at frame dt

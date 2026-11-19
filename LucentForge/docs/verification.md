@@ -17,6 +17,11 @@ Entry template:
 
 ---
 
+## 2026-11-19 ~01:20 — LF-046 via QA→Engineering (C0086)
+- Local: `run_kernel_headless_tests.py` red first (video system not initialized), then 5/5. Full gate via
+  the pre-push hook (see the commit).
+- Gaps: arrow-key feel in the window isn't automated (shell-side, small change, code-reviewed).
+
 ## 2026-11-19 01:05–01:20 — Owner exception + QA/Art departments + art genome (C0083–C0085)
 - **Owner approval:** Shawn (in session, ~01:00): "merged, start on the QA and Art departments… full
   permissions to do what you need to build Lucent Forge and its studio and games", then explicitly:

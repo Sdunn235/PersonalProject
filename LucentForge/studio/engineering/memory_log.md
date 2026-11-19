@@ -38,6 +38,17 @@ Keep entries short — this is a build ledger, not project state (`active_contex
 - **Gotcha:** `affinity_strain` has the same inert-boost gap — reuse the receptor pattern (LF-042). Any new
   want must reach behavior through a receptor, not a chemical boost.
 
+## 2026-11-19 — LF-046: the player moves by intent; kernel needs no display (from QA's red tests)
+- **Built:** `PlayerController.move_intent` (dx, dy) replaces `pygame.key.get_pressed()` inside the sim;
+  `PresentationShell._apply_player_intent()` sets it from the arrow keys before each kernel step. Ripple
+  Kernel doctrine (§RT: the player is one more agent) now holds in code; an AI player or replay can drive
+  the same intent.
+- **Files:** `Mechanics/ai/player.py`, `Mechanics/runtime/shell.py`, `scratchpad/harness/headless.py`
+  (display workaround removed).
+- **Tests:** QA's `run_kernel_headless_tests.py` 5/5 (red first). Full gate on push.
+- **Gotcha:** `_advance_one_tick` (the `.` single-step) reuses the intent set by the last loop iteration,
+  which is fine: the loop sets it every frame before stepping.
+
 ## 2026-11-17 — Rest/Fatigue want v1: LIVE GATE FAILED (Director, after Shawn's `py main.py` check)
 - **Seen live:** fatigue row/suffix present but fatigue stayed 0.00 for every NPC; stepping (`.`) showed no change.
 - **Cause:** per-tick accrual `FATIGUE_BASE_GAIN / endurance` (0.0003 / 6–23 = 0.000013–0.000050) is
