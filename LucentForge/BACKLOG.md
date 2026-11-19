@@ -28,9 +28,9 @@ commit. New ideas get the next free `LF-###`; IDs are never reused.
 3. **The Studio** (department agents) works for Systems Design, QC and Engineering. World Building and
    Story/Lore have never been run.
 
-**Recommended first pick when you have an evening:** LF-002 (live spot-checks, ~30 min, no code), then
-plan LF-043 (decisions follow the strongest drive — the doctrine the receptors are bridging toward) or
-start Arc B with LF-010 (map loader). If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
+**Next (Autonomy Arc):** Shawn merges the policy PR (LF-170); Claude gets CI green (LF-171), then
+backfills tests (LF-172), builds the QA and Art departments (LF-174/175), and starts Arc B autonomously
+(LF-177). LF-002 (live spot-checks) is now optional: the render and soak suites cover what it checked. If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
 
 ---
 
@@ -43,6 +43,25 @@ start Arc B with LF-010 (map loader). If you'd rather do design than code, try L
 | LF-005 | Re-save `Gobby_the_Goblin/brain_dump.docx` in Word — the file isn't a valid docx, so it's unreadable. | S | ready | memory `project_gobby_world` |
 
 ---
+
+## Autonomy Arc (agreed 2026-11-19) — tests replace live gates; Claude builds alone
+
+Shawn's direction: test-first from now on, so he's phased out of routine quality checks and Claude (with
+Caelum as Director) can build the world, run the game and grow the Studio, burning tokens only when he
+says so. Model: enviz-crew (Smug Cat Games) governance. Policy: [docs/autonomy.md](docs/autonomy.md) ·
+[docs/testing.md](docs/testing.md) · evidence: [docs/verification.md](docs/verification.md).
+Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) → autonomous Arc B.
+
+| ID | Item | Size | Status | Source |
+|---|---|---|---|---|
+| LF-170 | **Merge the policy PR** (autonomy policy, testing doctrine, CI workflow, git hooks — C0080). Policy can't approve itself; this one is Shawn's. Then enable hooks: `git config core.hooksPath .githooks`. | S | Shawn | PR `autonomy/policy-and-ci` |
+| LF-171 | **First green hosted CI run** — prove pygame-ce installs on Linux with Python 3.14 (fall back to 3.13 if wheels are missing, recorded in verification). | S | in progress | `.github/workflows/lucentforge.yml` |
+| LF-172 | **Render tests for the modal screens** — combat, inventory, chest, pause, save/load draw through their own fonts and block on input; drive them headlessly (scripted events) and assert what they show. | M | ready | verification 2026-11-19 gaps |
+| LF-173 | **Acceptance examples in requirements** — adopt Smug Cat's requirements pattern: each new bible §-rule or BACKLOG item carries an observable acceptance example that a test reuses verbatim. Format change to doctrine docs → PR. | M | Shawn | smugcat `docs/requirements/template.md` |
+| LF-174 | **Studio: QA / Test department** — owns docs/testing.md; turns each design note into failing acceptance tests *before* Engineering builds (pipeline Systems Design → QA → Engineering → QC). | M | ready | Shawn 2026-11-19 |
+| LF-175 | **Studio: Art department** — asset specs from the sprite/tile conventions (3×4 sheets, 32 px tiles, isometric 64×32 later), placeholder generation, an asset registry with provenance/licence, and tests that validate sheet dimensions and references. | L | ready | Shawn 2026-11-19; memory isometric direction |
+| LF-176 | **Studio departments as skills** — thin `.claude/skills` adapters over each charter (Smug Cat `.agents/skills` pattern) so dispatch is one skill call; charters stay the owning docs. Charter/agent-definition edits → PR. | M | design | smugcat_market `.agents/skills` |
+| LF-177 | **First autonomous run: Arc B** (LF-010 onward) under docs/autonomy.md "Autonomous runs", once LF-170–LF-174 land. | Arc | blocked | docs/autonomy.md |
 
 ## Roadmap arcs (agreed 2026-07-25: A → B → C)
 
@@ -134,6 +153,7 @@ Legacy items from session_state's old known-issues list, each checked against th
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
+| LF-046 | **Kernel still touches pygame** — `kernel.step()` calls `PlayerController.update`, which reads `pygame.key.get_pressed()`, breaking §RT "kernel imports no pygame". Move key reading to the shell as a Command/intent; headless tests then need no display. | S | ready | harness note 2026-11-19 |
 | LF-120 | **Headless background sim for off-screen panels** — "the world simulates without the player". | L | blocked by LF-010 | §RT8 |
 | LF-121 | **Replay determinism** — record a `Command` + `dt` stream and replay it headless as a regression test. | M | ready | §RT8 |
 | LF-122 | **`--ai-player` mode** — a state machine plays while you watch. | M | design | memory `project_lucentforge_vision` (Option 3) |

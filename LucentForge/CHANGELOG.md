@@ -37,6 +37,18 @@ numbers — arcs are the release unit.
 - Tests: affinity suite §E (authored targets, Constitution resistance, content-derived plateaus for
   every entity from `rooms.json`, receptor cap, same-seed kernel A/B).
 
+**Added — autonomy foundation (C0079)**
+- Test harness (`scratchpad/harness/headless.py`): seeded isolated game, a real off-screen shell, drawn-text
+  capture, screenshot evidence.
+- `run_render_tests.py`: what the HUD, O panel and V inspector show, automated (replaces the fatigue and
+  strain live checks). `run_soak_tests.py`: 3 in-game days of invariants (ranges, thrashing, frozen
+  movers, daily needs, determinism).
+- `docs/verification.md`: the chronological evidence log.
+
+**Fixed (C0079)**
+- NPCs thrashed IDLE↔MOVING every frame while their target tile was occupied (Ignarix 900 state
+  changes a minute). They now queue nearby for 15 in-game minutes. Found by the new soak suite.
+
 **Docs (Phase C)**
 - Dated code-reality notes on the bible's *factual* claims (§B1/§B2 receptor half, §W2, §W5's missing
   structural step, §W7 `resilience` trait) and the Systems Design charter. Doctrine unchanged: the
