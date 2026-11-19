@@ -50,6 +50,16 @@ numbers — arcs are the release unit.
 - NPCs thrashed IDLE↔MOVING every frame while their target tile was occupied (Ignarix 900 state
   changes a minute). They now queue nearby for 15 in-game minutes. Found by the new soak suite.
 
+**Added — the Studio grows (C0083–C0085, tonight's owner-authorized autonomous run)**
+- PR #1 merged on Shawn's approval: `docs/autonomy.md`, `docs/testing.md`, CI on every push, git hooks
+  (pre-push runs the full gate).
+- **QA / Test department:** writes failing acceptance tests before Engineering builds; owns
+  `docs/testing.md`. **Art department:** art is grown, not painted.
+- **Art genome foundation** (`Mechanics/art/`): bounded genes, mutation, growth, a deterministic renderer
+  (creature walk sheets, tree and rock tiles), baking with automatic provenance (`assets/registry.json`).
+  First genomes: Gobby, Grom, an Azure Woods oak and a river stone (in `assets/generated/`, not wired in).
+- Tests: `run_studio_tests.py`, `run_art_tests.py`.
+
 **Docs (Phase C)**
 - Dated code-reality notes on the bible's *factual* claims (§B1/§B2 receptor half, §W2, §W5's missing
   structural step, §W7 `resilience` trait) and the Systems Design charter. Doctrine unchanged: the

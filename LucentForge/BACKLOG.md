@@ -28,7 +28,7 @@ commit. New ideas get the next free `LF-###`; IDs are never reused.
 3. **The Studio** (department agents) works for Systems Design, QC and Engineering. World Building and
    Story/Lore have never been run.
 
-**Next (Autonomy Arc):** Shawn merges the policy PR (LF-170); CI is green on Linux (first run, 25/25); Claude
+**Next (Autonomy Arc):** policy merged (C0083), CI green, QA + Art departments founded (C0084–C0085); Claude
 backfills tests (LF-172), builds the QA and Art departments (LF-174/175), and starts Arc B autonomously
 (LF-177). LF-002 (live spot-checks) is now optional: the render and soak suites cover what it checked. If you'd rather do design than code, try LF-004 (a first World Building or Story/Lore task).
 
@@ -54,13 +54,12 @@ Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) �
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-170 | **Merge the policy PR** (autonomy policy, testing doctrine, CI workflow, git hooks — C0080). Policy can't approve itself; this one is Shawn's. Then enable hooks: `git config core.hooksPath .githooks`. | S | Shawn | PR `autonomy/policy-and-ci` |
 | LF-172 | **Render tests for the modal screens** — combat, inventory, chest, pause, save/load draw through their own fonts and block on input; drive them headlessly (scripted events) and assert what they show. | M | ready | verification 2026-11-19 gaps |
 | LF-173 | **Acceptance examples in requirements** — adopt Smug Cat's requirements pattern: each new bible §-rule or BACKLOG item carries an observable acceptance example that a test reuses verbatim. Format change to doctrine docs → PR. | M | Shawn | smugcat `docs/requirements/template.md` |
-| LF-174 | **Studio: QA / Test department** — owns docs/testing.md; turns each design note into failing acceptance tests *before* Engineering builds (pipeline Systems Design → QA → Engineering → QC). | M | ready | Shawn 2026-11-19 |
-| LF-175 | **Studio: Art department** — asset specs from the sprite/tile conventions (3×4 sheets, 32 px tiles, isometric 64×32 later), placeholder generation, an asset registry with provenance/licence, and tests that validate sheet dimensions and references. | L | ready | Shawn 2026-11-19; memory isometric direction |
 | LF-176 | **Studio departments as skills** — thin `.claude/skills` adapters over each charter (Smug Cat `.agents/skills` pattern) so dispatch is one skill call; charters stay the owning docs. Charter/agent-definition edits → PR. | M | design | smugcat_market `.agents/skills` |
 | LF-177 | **First autonomous run: Arc B** (LF-010 onward) under docs/autonomy.md "Autonomous runs", once LF-170–LF-174 land. | Arc | blocked | docs/autonomy.md |
+| LF-178 | **Wire generated art into the game** — point Grom (now sharing the player's sheet) at `assets/generated/grom.png`, and use the oak/stone genomes for map props. Changes what the game shows → Shawn's call. | S | Shawn | Art dept 2026-11-19 |
+| LF-179 | **The art biology arc** — genomes that grow and evolve *at runtime*: growth stage tied to age, mutation at birth (pairs with biochem §B1 heritable genetics / Hob spark), biome-driven tree/rock genomes from Genesis, an isometric renderer reading the same genes. | Arc | design | Shawn's goal 2026-11-19; Mechanics/art/README.md |
 
 ## Roadmap arcs (agreed 2026-07-25: A → B → C)
 

@@ -17,6 +17,20 @@ Entry template:
 
 ---
 
+## 2026-11-19 01:05–01:20 — Owner exception + QA/Art departments + art genome (C0083–C0085)
+- **Owner approval:** Shawn (in session, ~01:00): "merged, start on the QA and Art departments… full
+  permissions to do what you need to build Lucent Forge and its studio and games", then explicitly:
+  merge PR #1 for him; **owner exception for tonight** (charters, agent definitions, Studio README merge on a
+  green gate; bible doctrine/canon and docs/autonomy.md still PR); run until 04:00 or session 100%.
+  PR #1 merged as C0083 under that approval.
+- Local gate: 26/26 GREEN via the pre-push hook on C0084 (the first hook-enforced push). Studio suite red
+  first (missing qa/art). Art suite red first (no `Mechanics.art`), then CLEAN on the first build.
+- Hosted CI: runs on every master push now (workflow merged).
+- Evidence: `logs/screens/latest/art_contact_sheet.png` (Gobby, Grom walk sheets; oak; stone). Gobby renders
+  22 px wide vs Grom's 29; growth heights rise with stage (Gobby 12→15→19 px).
+- Gaps: generated art is not wired into the game (Shawn's choice, LF-178); art quality and look are
+  Shawn's call, which the tests can't judge; the existing ten sheets' sources are unknown (registry flags them).
+
 ## 2026-11-19 — First hosted CI run (PR #1 head 28ecccd = C0079–C0081 + C0080 policy)
 - Local gate: 25/25 GREEN (Windows, Python 3.14.6, pygame-ce 2.5.7).
 - Hosted CI: **25/25 GREEN** on ubuntu-latest, Python 3.14, pygame-ce **2.5.8** (installed from wheels;

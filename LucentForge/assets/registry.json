@@ -1,0 +1,103 @@
+{
+  "_doc": "Provenance for character/prop art (studio/art/references/art_standards.md). Map layers keep their own registries under assets/maps/world_map/registries/.",
+  "assets": [
+    {
+      "path": "assets/generated/azure_oak.png",
+      "kind": "tree",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "azure_oak",
+      "seed": 3003
+    },
+    {
+      "path": "assets/generated/gobby.png",
+      "kind": "creature",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "gobby",
+      "seed": 1001
+    },
+    {
+      "path": "assets/generated/grom.png",
+      "kind": "creature",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "grom",
+      "seed": 2002
+    },
+    {
+      "path": "assets/generated/river_stone.png",
+      "kind": "rock",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "river_stone",
+      "seed": 4004
+    },
+    {
+      "path": "assets/images/devil_demon.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/goblin_archer.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/goblin_axeman.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/goblin_king.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/goblin_mage.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/goblin_spearman.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/human_corrupt_lord.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/human_jacked_o_lantern.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/human_mystic.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/human_shadow_warrior.png",
+      "kind": "creature-sheet",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (pre-dates the registry; likely a free sprite pack via the Tower Defense prototype)"
+    },
+    {
+      "path": "assets/images/level01.png",
+      "kind": "map-background",
+      "source": "unknown",
+      "licence": "unknown \u2014 ask Shawn (Tower Defense prototype level art; no longer drawn, the map is procedural)"
+    }
+  ]
+}
