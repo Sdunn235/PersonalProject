@@ -1,6 +1,9 @@
 # tile_map.py — Tile map loader and renderer
 from __future__ import annotations
 import csv
+import json
+import os
+
 # noinspection PyPackageRequirements
 import pygame
 import settings
@@ -20,6 +23,15 @@ FORAGE = 9    # Goblin camp food — weak, finite (Heartbeat-4)
 SILO   = 10   # Storage silo placeholder (Heartbeat-5 visual, non-functional)
 RBANK  = 11   # Riverbank — walkable tile adjacent to river, thirst source
 CHEST  = 12   # Interactive chest — always blocks (Phase 2.7)
+
+# Panel data (Arc B): tile names and their one-character codes in Mechanics/data/panels/*.json.
+TILE_NAMES = {FLOOR: "floor", WALL: "wall", FOOD: "food", WATER: "water", SLEEP: "sleep",
+              RIVER: "river", BRIDGE: "bridge", FOOD2: "food2", SLEEP2: "sleep2", FORAGE: "forage",
+              SILO: "silo", RBANK: "riverbank", CHEST: "chest"}
+TILE_BY_NAME = {name: code for code, name in TILE_NAMES.items()}
+TILE_CHARS = {"floor": ".", "wall": "#", "food": "F", "water": "W", "sleep": "S", "river": "~",
+              "bridge": "=", "food2": "f", "sleep2": "s", "forage": "g", "silo": "O",
+              "riverbank": ",", "chest": "C"}
 
 _TILE_COLORS = {
     FLOOR:  settings.TILE_FLOOR,
@@ -131,7 +143,54 @@ class TileMap:
         (16, 0), (17, 3), (17, 10), (16, 17), (8, 17),
     ]
 
-    def load_real_map(self) -> None:
+    # --- Panels as data (Arc B, LF-010) ---
+
+    def load_real_map(self, panel_x: int = 0, panel_y: int = 0) -> None:
+        """Load a panel's map from data: panels.json → its "map" file (Mechanics/data/panels/).
+
+        Every panel is content, not code. Panel(0,0) was exported from the old procedural builder
+        (kept below as `build_procedural_panel_0_0`, used only as the parity golden in
+        scratchpad/run_panel_data_tests.py).
+        """
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        with open(os.path.join(data_dir, "panels.json"), encoding="utf-8") as f:
+            panels = json.load(f)
+        entry = next((p for p in panels
+                      if p["panel_x"] == panel_x and p["panel_y"] == panel_y), None)
+        if entry is None or not entry.get("map"):
+            raise FileNotFoundError(f"panels.json has no map for Panel({panel_x},{panel_y})")
+        with open(os.path.join(data_dir, entry["map"]), encoding="utf-8") as f:
+            self.load_panel_data(json.load(f))
+
+    def load_panel_data(self, data: dict) -> None:
+        """Apply a panel data dict (see to_panel_data): tiles, region tags, rock-vs-tree art."""
+        tiles, regions = data["tiles"], data["regions"]
+        if len(tiles) != self.rows or any(len(r) != self.cols for r in tiles):
+            raise ValueError(f"panel {data.get('id')} must be {self.rows}x{self.cols}")
+        char_to_tile = {ch: TILE_BY_NAME[name] for ch, name in data["tile_legend"].items()}
+        for r, row in enumerate(tiles):
+            for c, ch in enumerate(row):
+                self._set(c, r, char_to_tile[ch])
+        legend = data["region_legend"]
+        self.regions = [[legend[ch] for ch in row] for row in regions]
+        self._RIVER_ROCKS_SET = {(c, r) for c, r in data.get("rocks", [])}
+
+    def to_panel_data(self, panel_id: str, name: str) -> dict:
+        """Serialize this map as panel data (readable rows + legends)."""
+        tile_legend = {ch: name_ for name_, ch in TILE_CHARS.items()}
+        region_names = sorted({reg for row in self.regions for reg in row})
+        region_chars = {reg: chr(ord("a") + i) for i, reg in enumerate(region_names)}
+        return {
+            "id": panel_id,
+            "name": name,
+            "tile_legend": tile_legend,
+            "tiles": ["".join(TILE_CHARS[TILE_NAMES[t]] for t in row) for row in self.grid],
+            "region_legend": {ch: reg for reg, ch in region_chars.items()},
+            "regions": ["".join(region_chars[reg] for reg in row) for row in self.regions],
+            "rocks": sorted([list(rc) for rc in self._RIVER_ROCKS_SET]),
+        }
+
+    def build_procedural_panel_0_0(self) -> None:
         """
         Build the procedural map (Heartbeat-2):
         - Region-colored ground (no background image)

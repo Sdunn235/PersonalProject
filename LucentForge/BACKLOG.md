@@ -63,7 +63,7 @@ Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) �
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-010 | **Arc B — data-driven map loader:** existing zones become real panels with transitions (`PanelLoader.can_transition`, `panels.json`). | Arc | ready | session_state Arc A "Next"; §R1–§R8 |
+| LF-010 | **Arc B — data-driven map loader.** Step 1 DONE (C0089): panels are data — `panels.json` → `Mechanics/data/panels/panel_0_0.json` (readable tile/region rows), identical to the old procedural map. **Next:** (2) a second panel + real edge transitions (`PanelLoader.can_transition` → load the neighbour, move entities across) — needs World Building + Story/Lore to decide what lies beyond the starting area; (3) off-screen panels keep simulating (LF-120). | Arc | ready (step 2 needs WB/Lore) | session_state Arc A "Next"; §R1–§R8 |
 | LF-011 | **Arc B — dialogue / choice system** (greenfield). TheMaze Java dialog in `ReferenceFilesAndCode/` is a pattern source. | Arc | design | session_state Arc A "Next" |
 | LF-012 | **Arc B — first Forge story-arc panels** (TheForge dungeon: Inn → Erasmus, 7 rooms, as one region of the Gobby world). | L | blocked by LF-010 | memory `project_gobby_world` |
 | LF-013 | **Arc C "Living Violence" — real-time ATB combat:** cooldowns gated by SP + Bytes, mouse point-and-click + hotbar, reusing the damage/ability/cost resolvers. | Arc | blocked by Arc B | Caelum `lucentforge_active.md` (Arc A entry) |

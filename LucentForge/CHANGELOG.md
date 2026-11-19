@@ -63,6 +63,12 @@ numbers — arcs are the release unit.
 **Added — departments as skills (C0087, LF-176):** a thin `.claude/skills/lucentforge-<dept>/SKILL.md`
 per department (Workspace repo), routing to its charter; the studio suite checks every department has one.
 
+**Added — Arc B begins: panels are data (C0089, LF-010 step 1):** the starting panel's map lives in
+`Mechanics/data/panels/panel_0_0.json` (18 readable rows of tiles and regions, plus rock art) and
+`TileMap.load_real_map()` loads panels from `panels.json`. It is identical to the old procedural map in
+tiles, blocking, regions, sources and rendered pixels (`run_panel_data_tests.py`). New panels are content
+now, not code.
+
 **Added — menu and combat screens tested (C0088, LF-172):** `harness/modal.py` scripts the blocking
 screens' input and records what they draw; `run_modal_render_tests.py` covers pause, inventory, chest,
 load (launch and Pause → Load "saved only", C0056), save and combat, with screenshots.

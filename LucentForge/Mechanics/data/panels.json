@@ -4,6 +4,7 @@
     "name": "Starting Area",
     "panel_x": 0,
     "panel_y": 0,
+    "map": "panels/panel_0_0.json",
     "edges": {
       "NORTH": null,
       "SOUTH": null,

@@ -17,6 +17,12 @@ Entry template:
 
 ---
 
+## 2026-11-19 ~01:35 — Panels as data (C0089, LF-010 step 1)
+- Local: `run_panel_data_tests.py` red first (no map file), then CLEAN: data Panel(0,0) == procedural in
+  tiles, blocking, regions, rock/tree art, need sources and rendered pixels; runtime never calls the
+  procedural builder. Full gate via the pre-push hook.
+- Gaps: no second panel and no transitions yet (that needs world/lore decisions).
+
 ## 2026-11-19 ~01:30 — Modal render tests + §A2 carry-load fix (C0088)
 - Local: `run_modal_render_tests.py` CLEAN (pause, inventory, chest, load x2, save, combat; 6 screenshots).
   Red first on the load check (inventory screen 24.0 vs service 4.0 → `take_from` ignored worn gear).
