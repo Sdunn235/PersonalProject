@@ -23,7 +23,9 @@ studio/<dept>/
 ```
 
 The department's agent definition (`.claude/agents/lucentforge-<dept>.md`) instructs it to read
-these first. So the department walks in knowing its standards and its own history — because it
+these first. Each department also has a thin **skill** (`.claude/skills/lucentforge-<dept>/SKILL.md`, the
+Smug Cat pattern) that routes to the same charter, so dispatch can be one skill call. Charters stay the
+owning documents; adapters stay thin. So the department walks in knowing its standards and its own history — because it
 reads them, not because the harness remembers.
 
 **Persistence is a write-discipline, not magic.** Reading the log on startup is automatic.
