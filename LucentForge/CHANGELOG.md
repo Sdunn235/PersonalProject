@@ -63,6 +63,15 @@ numbers — arcs are the release unit.
 **Added — departments as skills (C0087, LF-176):** a thin `.claude/skills/lucentforge-<dept>/SKILL.md`
 per department (Workspace repo), routing to its charter; the studio suite checks every department has one.
 
+**Added — menu and combat screens tested (C0088, LF-172):** `harness/modal.py` scripts the blocking
+screens' input and records what they draw; `run_modal_render_tests.py` covers pause, inventory, chest,
+load (launch and Pause → Load "saved only", C0056), save and combat, with screenshots.
+
+**Fixed — carry load ignored worn gear when taking from chests (C0088):** items addendum §A2 counts bag
+*and* equipped items toward capacity. The inventory screen did (24/40), but `take_from` and the chest
+header counted only the bag (4), so a geared-up player could over-carry. Found by the new modal suite;
+`EquipmentService.equipped_weight()` now feeds both.
+
 **Changed — the player moves by intent (C0086, LF-046, first QA→Engineering run)**
 - The sim no longer reads the keyboard: the shell turns arrow keys into `PlayerController.move_intent`, so
   the kernel runs with no display at all (bible §RT invariant now true in code) and an AI player can drive

@@ -53,17 +53,18 @@ class InventoryService:
         return self.carried_weight(entity_id) > self.capacity(str_stat)
 
     def take_from(self, chest, entity_id: str, item: Item, qty: int = 1,
-                  str_stat: int = 0) -> bool:
+                  str_stat: int = 0, equipped_weight: float = 0.0) -> bool:
         """Move qty of item from chest.contents into entity's inventory.
 
-        Returns False without mutating if the item isn't in the chest or
-        the added weight would exceed capacity.
+        Returns False without mutating if the item isn't in the chest or the added weight would exceed
+        capacity. Capacity counts bag AND worn gear (items addendum §A2): pass `equipped_weight`
+        (EquipmentService.equipped_weight) — this service doesn't own equipment.
         """
         stack = next((s for s in chest.contents if s.item.id == item.id), None)
         if stack is None or stack.qty < qty:
             return False
         weight_add = item.weight * qty
-        if self.carried_weight(entity_id) + weight_add > self.capacity(str_stat):
+        if self.carried_weight(entity_id) + equipped_weight + weight_add > self.capacity(str_stat):
             return False
         stack.qty -= qty
         if stack.qty == 0:

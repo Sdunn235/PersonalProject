@@ -39,6 +39,11 @@ class EquipmentService:
             inv_svc.add_item(entity_id, item)
         return item
 
+    def equipped_weight(self, entity_id: str) -> float:
+        """Weight of everything worn. Items addendum §A2: equipped items count toward carry capacity."""
+        equip_set = self.get_equipment(entity_id)
+        return sum(i.weight for i in equip_set.all_equipped()) if equip_set else 0.0
+
     def gear_mods(self, entity_id: str) -> dict[str, int]:
         """Combined stat mods from equipped items (canonical fields).
         Phase 2.4 replaces resolve_equipment() with this."""

@@ -28,6 +28,11 @@ _TITLE_H = 44
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+def _worn(equip_svc, player) -> float:
+    """Weight of worn gear; it counts toward carry capacity (items addendum §A2)."""
+    return equip_svc.equipped_weight(player.entity_id) if equip_svc is not None else 0.0
+
+
 def _fire_trap(chest, player) -> str:
     dmg = chest.trap_damage
     player.hp = max(1, player.hp - dmg)
@@ -72,7 +77,7 @@ def _build_options(chest, player, inv_svc, item_repo) -> list[tuple[str, bool, s
 
 
 def _execute(action: str, chest, player, inv_svc, item_repo,
-             resolver: OutcomeResolver) -> tuple[str, bool]:
+             resolver: OutcomeResolver, equip_svc=None) -> tuple[str, bool]:
     """Perform action. Returns (message, success)."""
 
     # --- Use specific key ---
@@ -151,7 +156,8 @@ def _execute(action: str, chest, player, inv_svc, item_repo,
         if stack is None:
             return ("Item no longer in chest.", False)
         ok = inv_svc.take_from(chest, player.entity_id, stack.item, 1,
-                               str_stat=player.stats.STR)
+                               str_stat=player.stats.STR,
+                               equipped_weight=_worn(equip_svc, player))
         chest.is_opened = True
         if ok:
             return (f"Took {stack.item.name}.", True)
@@ -163,7 +169,8 @@ def _execute(action: str, chest, player, inv_svc, item_repo,
         skipped: list[str] = []
         for stack in list(chest.contents):
             ok = inv_svc.take_from(chest, player.entity_id, stack.item, stack.qty,
-                                   str_stat=player.stats.STR)
+                                   str_stat=player.stats.STR,
+                               equipped_weight=_worn(equip_svc, player))
             chest.is_opened = True
             if ok:
                 taken.append(stack.item.name)
@@ -181,7 +188,7 @@ def _execute(action: str, chest, player, inv_svc, item_repo,
 def _draw_panel(screen: pygame.Surface, font: pygame.font.Font,
                 chest, player, inv_svc,
                 options: list[tuple[str, bool, str]],
-                cursor: int, msg: str, msg_ok: bool) -> None:
+                cursor: int, msg: str, msg_ok: bool, equip_svc=None) -> None:
     n = len(options)
     msg_rows = 1 if msg else 0
     modal_h = _TITLE_H + n * _ROW_H + _PAD * 3 + msg_rows * _ROW_H
@@ -216,7 +223,7 @@ def _draw_panel(screen: pygame.Surface, font: pygame.font.Font,
 
     # Player weight info
     if hasattr(player, "stats"):
-        carried = inv_svc.carried_weight(player.entity_id)
+        carried = inv_svc.carried_weight(player.entity_id) + _worn(equip_svc, player)   # §A2
         cap     = inv_svc.capacity(player.stats.STR)
         wt_txt  = font.render(f"{carried:.0f}/{cap:.0f}wt", True, _HINT)
         screen.blit(wt_txt, (mx + _W - wt_txt.get_width() - _PAD, my + _TITLE_H - wt_txt.get_height() - 2))
@@ -287,7 +294,7 @@ def run_chest_menu(screen: pygame.Surface, clock: pygame.time.Clock,
                         prev_locked  = chest.locked
                         prev_trapped = chest.is_trapped
                         msg, msg_ok = _execute(
-                            action, chest, player, inv_svc, item_repo, resolver
+                            action, chest, player, inv_svc, item_repo, resolver, equip_svc
                         )
                         # Reset cursor when chest state changes
                         if chest.locked != prev_locked or chest.is_trapped != prev_trapped:
@@ -296,5 +303,5 @@ def run_chest_menu(screen: pygame.Surface, clock: pygame.time.Clock,
                         msg    = "You don't have what's needed."
                         msg_ok = False
 
-        _draw_panel(screen, font, chest, player, inv_svc, options, cursor, msg, msg_ok)
+        _draw_panel(screen, font, chest, player, inv_svc, options, cursor, msg, msg_ok, equip_svc)
         pygame.display.flip()

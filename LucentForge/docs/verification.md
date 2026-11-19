@@ -17,6 +17,13 @@ Entry template:
 
 ---
 
+## 2026-11-19 ~01:30 — Modal render tests + §A2 carry-load fix (C0088)
+- Local: `run_modal_render_tests.py` CLEAN (pause, inventory, chest, load x2, save, combat; 6 screenshots).
+  Red first on the load check (inventory screen 24.0 vs service 4.0 → `take_from` ignored worn gear).
+  Full gate via the pre-push hook.
+- Gaps: navigation *inside* menus (equip/unequip, lockpick outcomes, spell submenus) isn't scripted yet;
+  combat is only opened and closed, not fought.
+
 ## 2026-11-19 ~01:20 — LF-046 via QA→Engineering (C0086)
 - Local: `run_kernel_headless_tests.py` red first (video system not initialized), then 5/5. Full gate via
   the pre-push hook (see the commit).

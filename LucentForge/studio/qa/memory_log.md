@@ -14,6 +14,16 @@ Append-only history of the tests this department wrote and what they caught. New
 
 ---
 
+## 2026-11-19 — Modal screens render-tested (BACKLOG LF-172)
+- **Acceptance examples:** each modal shows its title, options and real data (the player's items, the
+  real chest, real saves), and exits cleanly; Pause → Load lists only real saves (C0056).
+- **Tests:** `scratchpad/run_modal_render_tests.py` + `scratchpad/harness/modal.py` (scripted
+  `pygame.event.get`, `SysFont` spies, a frame guard so a hung loop raises instead of hanging).
+- **Caught:** the inventory screen (24.0) and `InventoryService.carried_weight` (4.0) disagreed. Bible
+  §A2 says worn gear counts, so the screen was right and `take_from` / the chest header were wrong
+  (over-carry possible). Fixed in the same change.
+- **Not established:** in-menu navigation and actual combat turns.
+
 ## 2026-11-19 — Kernel runs with no display; player moves by intent (BACKLOG LF-046)
 - **Acceptance examples:** (1) a fresh process that never initializes pygame builds a game and steps the
   kernel; (2) intent (1,0) moves the player right, (0,0) leaves them still: the sim never reads keys;
