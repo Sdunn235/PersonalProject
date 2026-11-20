@@ -12,7 +12,7 @@ WorldSim ticks drive the simulation; `tile_map.py` owns the spatial grid.
 | `resource_state.py` | `ResourceState` — aggregates food_total from finite source stocks; ticks regen |
 | `goblin_threat.py` | `GoblinThreat` — hunger-driven 0-100 threat, PASSIVE/RAIDING/CROSSING stage transitions |
 | `town.py` | `Town` — STABLE/STRAINED/COLLAPSING derived from food, population, threat |
-| `tile_map.py` | Procedural 18×18 tile map, river, bridges, region tags, obstacle placement, `place_chests()`; tile constants include `CHEST=12` (Stage 2, Phase 2.7) |
+| `tile_map.py` | Procedural 18×18 tile map, river, bridges, region tags, obstacle placement, `place_chests()`; tile constants include `CHEST=12` (Stage 2, Phase 2.7). Wall tiles draw grown props (LF-178): `prop_genome(col, row)` picks the panel's tree or rock genome (by river bank when the panel gives `{"west", "east"}`), drawn from `assets/generated/<id>.png`; `DEFAULT_PROPS` is the home biome's. |
 | `pathfinder.py` | `bfs_path()` — 8-directional BFS used by NPC controllers |
 | `rooms.py` | `RoomType` enum, `RoomDefinition` dataclass, `RoomRegistry` — Stage 3 room data layer (Phase 3.1) |
 | `world_coord.py` | `WorldPos` dataclass, `PanelEdge` enum, `PanelConfig` dataclass, `PanelLoader` stub — Stage 3 world coordinate + panel registry (Phase 3.2) |

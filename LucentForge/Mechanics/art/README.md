@@ -23,5 +23,6 @@ genomes stay valid. Growth scales size-like features from `GROWTH_NEWBORN_SCALE`
 of adult size) to 1. Renderers read genes only, so an isometric renderer can come later without
 changing a single genome.
 
-**Not yet:** generated sheets are not wired into `entities.json` (Shawn's call), and nothing grows or
-evolves at runtime yet. That's the biology arc (BACKLOG LF-179). Tests: `scratchpad/run_art_tests.py`, `scratchpad/run_art_style_tests.py`.
+**In the game (LF-178, 2026-11-19):** Grom wears `assets/generated/grom.png` (`entities.json`), and every
+panel's trees and rocks are drawn from the genomes its data names (`"props"`, see `Mechanics/world/README.md`).
+**Not yet:** nothing grows or evolves at runtime, and a stand's trees are identical (LF-185). That's the biology arc (BACKLOG LF-179). Tests: `scratchpad/run_art_tests.py`, `scratchpad/run_art_style_tests.py`.

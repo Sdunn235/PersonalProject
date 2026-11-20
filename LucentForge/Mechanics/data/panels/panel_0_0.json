@@ -44,5 +44,6 @@
     "cccccffiiiiiiiiiii",
     "ccccccffiiiiiiiiii"
   ],
-  "rocks": [[3, 2], [3, 7], [3, 9], [3, 15]]
+  "rocks": [[3, 2], [3, 7], [3, 9], [3, 15]],
+  "props": {"tree": "azure_oak", "rock": "river_stone"}
 }

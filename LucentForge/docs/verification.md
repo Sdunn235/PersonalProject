@@ -17,6 +17,25 @@ Entry template:
 
 ---
 
+## 2026-11-19 night — The grown art in the game (C0101, LF-178)
+- Owner go: Shawn, "Wire the grown art into the game."
+- Test-first: `run_art_wiring_tests.py` red for the right reasons (Grom on the player's sheet; no panel
+  props; walls drawn as flat squares), then green.
+- **Found while greening:** the tree at (3,13) on Panel(0,0) mismatched by 42 px. The "Goblins" zone label
+  is drawn over it. Labels are a separate layer, so the prop check draws with labels off, and the evidence
+  screenshot keeps them on.
+- **Re-pointed (not weakened):** the art suite read the game's species from the sprite filename prefix
+  (`human_*`). Grom's grown sheet is `grom.png`, so it now reads the entity's declared `subtype`, with a
+  control that Grom's species is known (human). Same strictness.
+- Local gate: 33/33 GREEN. Hosted CI: see the run on C0101.
+- Evidence (looked at by eye): `logs/screens/latest/art_wired_panel_0_0.png`, `art_wired_panel_0_-1.png`,
+  `art_wired_grom_in_game.png`. The trees read clearly as obstacles. Stones are smaller than the old grey
+  squares but still read as blocked. Grom reads as a broad human, distinct from the player.
+- Gaps: the fidelity gap is visible. Grom is simple and flat beside the detailed hand-made sprites, and shows
+  none of his sword or armour (Art's open questions 1 and 3). Same-genome trees are identical clones
+  (LF-185). Grom's 32-px cells are scaled to the game's 30-px sprite size (nearest neighbour, as for every
+  sheet), so the odd outline pixel drops. No live look by Shawn yet.
+
 ## 2026-11-19 night — Upper-reach genomes (C0100, LF-184)
 - Owner go: Shawn, "Start LF-184, grow the upper reach genomes."
 - Test-first: the art suite went red for the right reasons (the three genomes missing; `load_all` accepted

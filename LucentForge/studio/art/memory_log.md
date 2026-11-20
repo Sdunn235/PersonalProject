@@ -36,3 +36,12 @@ Newest at the top.
   upright twin (same seed, no lean) is the honest reference, and the upright control is what showed it.
 - **Open:** a trunk tilt (today only the canopy leans); per-tree variety on the same bank (runtime mutation,
   LF-179); the upper reach's shadier ground (no ground genome kind yet).
+
+## 2026-11-19 night — The grown art goes into the game (LF-178, C0101)
+- **Shawn's call** (open question 4 answered): "Wire the grown art into the game." Grom wears his grown
+  sheet; every panel's trees and rocks are its grown props, named in the panel's data.
+- **Seen in game:** the trees read clearly, and the upper reach looks like a real wood leaning toward its river. The
+  stones read smaller but still as obstacles. Grom reads as himself, not the player.
+- **Learned:** in the game, our flat first-steps look sits right beside the detailed originals. The gap is
+  now a question Shawn can see (LF-186), not one we describe. A stand of one genome is visibly clones (LF-185).
+

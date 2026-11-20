@@ -75,6 +75,17 @@ top of the starting area and you arrive on its south edge in the same column; st
   "every edge is null" now pin the new truth (NORTH → Panel(0,-1); the others still null); the
   closed-edge message is checked on the SOUTH edge.
 
+**Added — the grown art is in the game (C0101, LF-178):** Shawn: "Wire the grown art into the game."
+- **Grom** walks in his own grown sheet (`assets/generated/grom.png`), no longer the player's twin.
+- **Trees and rocks** are no longer flat squares: every wall tile shows its panel's grown prop. Panel(0,0)
+  has the Azure Woods oak and river stone. The upper reach has its oaks, picked by bank so each leans
+  toward the river, and its less-worn stone. Panels name their props in data (`"props"` in
+  `Mechanics/data/panels/*.json`); a panel naming a prop with no baked art is refused at load.
+- Tests: `run_art_wiring_tests.py` (red first): Grom's in-game frame is his grown cell; every wall tile shows
+  the expected genome pixel-for-pixel (chosen independently from the panel rows); the wrong oak fails;
+  an unbaked prop is refused. The art suite's species check now reads the game's `subtype`, not the
+  sprite filename prefix, which Grom's grown sheet no longer carries. Same check, more direct source.
+
 **Added — the upper reach grows its own props (C0100, LF-184):** following World Building's biome sheet
 (proposal §9), three genomes are grown from the existing ones. `reach_oak_west` and `reach_oak_east` are
 mature oaks from `azure_oak`: taller trunks and wider canopies, each leaning toward the river on its own

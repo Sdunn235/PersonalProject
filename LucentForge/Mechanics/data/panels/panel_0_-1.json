@@ -44,5 +44,6 @@
     "ccccccffiiiiiiiiii",
     "ccccccffiiiiiiiiii"
   ],
-  "rocks": [[10, 2], [7, 6], [10, 6], [9, 8], [8, 12]]
+  "rocks": [[10, 2], [7, 6], [10, 6], [9, 8], [8, 12]],
+  "props": {"tree": {"west": "reach_oak_west", "east": "reach_oak_east"}, "rock": "reach_stone"}
 }

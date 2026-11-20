@@ -63,6 +63,28 @@ _SOURCE_TYPES = {
 # CSV files and game grid are both 18×18 — direct 1:1 mapping, no scaling needed.
 
 
+# Grown props (LF-178): wall tiles show baked art genomes (Mechanics/art, assets/generated/<id>.png).
+# A panel's data names its props; this is the home biome's, used when a panel names none.
+DEFAULT_PROPS = {"tree": "azure_oak", "rock": "river_stone"}
+_GENERATED_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                              "assets", "generated")
+_PROP_CACHE: dict[str, pygame.Surface] = {}
+
+
+def _prop_path(genome_id: str) -> str:
+    return os.path.join(_GENERATED_DIR, f"{genome_id}.png")
+
+
+def _prop_sprite(genome_id: str) -> pygame.Surface:
+    sprite = _PROP_CACHE.get(genome_id)
+    if sprite is None:
+        sprite = pygame.image.load(_prop_path(genome_id))
+        if pygame.display.get_surface() is not None:
+            sprite = sprite.convert_alpha()
+        _PROP_CACHE[genome_id] = sprite
+    return sprite
+
+
 class TileMap:
     def __init__(self, cols: int = settings.COLS, rows: int = settings.ROWS,
                  tile_size: int = settings.TILE_SIZE):
@@ -76,6 +98,7 @@ class TileMap:
         self._font: pygame.font.Font | None = None
         # Fast lookup set for rock vs tree rendering
         self._RIVER_ROCKS_SET: set[tuple[int, int]] = set(self._RIVER_ROCKS)
+        self.props: dict = dict(DEFAULT_PROPS)          # wall art genomes; a panel's data may override
 
     # --- Map building ---
 
@@ -174,6 +197,23 @@ class TileMap:
         legend = data["region_legend"]
         self.regions = [[legend[ch] for ch in row] for row in regions]
         self._RIVER_ROCKS_SET = {(c, r) for c, r in data.get("rocks", [])}
+        props = data.get("props", DEFAULT_PROPS)
+        for kind in ("tree", "rock"):
+            spec = props.get(kind, DEFAULT_PROPS[kind])
+            for gid in (spec.values() if isinstance(spec, dict) else [spec]):
+                if not os.path.isfile(_prop_path(gid)):
+                    raise ValueError(f"panel {data.get('id')}: {kind} prop {gid!r} has no grown art "
+                                     f"({_prop_path(gid)}; bake it with py -m Mechanics.art.bake)")
+        self.props = {k: props.get(k, DEFAULT_PROPS[k]) for k in ("tree", "rock")}
+
+    def prop_genome(self, col: int, row: int) -> str:
+        """The art genome a wall tile shows (LF-178): a rock if listed in `rocks`, else a tree. A
+        {"west": id, "east": id} spec picks by river bank: the side of that row's river the tile is on."""
+        spec = self.props["rock" if (col, row) in self._RIVER_ROCKS_SET else "tree"]
+        if not isinstance(spec, dict):
+            return spec
+        river_cols = [c for c in range(self.cols) if self.grid[row][c] in (RIVER, BRIDGE)]
+        return spec["west"] if river_cols and col < min(river_cols) else spec["east"]
 
     def to_panel_data(self, panel_id: str, name: str) -> dict:
         """Serialize this map as panel data (readable rows + legends)."""
@@ -188,6 +228,7 @@ class TileMap:
             "region_legend": {ch: reg for reg, ch in region_chars.items()},
             "regions": ["".join(region_chars[reg] for reg in row) for row in self.regions],
             "rocks": sorted([list(rc) for rc in self._RIVER_ROCKS_SET]),
+            "props": dict(self.props),
         }
 
     def build_procedural_panel_0_0(self) -> None:
@@ -498,10 +539,8 @@ class TileMap:
                     s.fill((*_special_colors[t], 200))
                     surface.blit(s, rect)
                 elif t == WALL:
-                    # Obstacles: trees (forest) or rocks (near river)
-                    is_rock = (c, r) in self._RIVER_ROCKS_SET
-                    color = settings.ROCK_COLOR if is_rock else settings.TREE_COLOR
-                    pygame.draw.rect(surface, color, rect)
+                    # Obstacles: the panel's grown trees and rocks (art genomes, LF-178)
+                    surface.blit(_prop_sprite(self.prop_genome(c, r)), rect)
 
                 # Subtle grid lines
                 pygame.draw.rect(surface, (0, 0, 0, 40), rect, 1)

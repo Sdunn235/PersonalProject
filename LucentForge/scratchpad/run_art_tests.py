@@ -134,10 +134,12 @@ else:
 
 # --- A genome that portrays a game character agrees with the game about what it is. ------------------
 # Found by Story/Lore 2026-11-19: the first Grom genome was a goblin, but entities.json's Grom (npc_03)
-# is a human. The species is read from the game sprite's prefix (human_*, goblin_*), the only species
-# signal entities.json carries today.
-game_species = {e["name"].lower(): os.path.basename(e["sprite"]).split("_")[0]
-                for e in entities if e.get("sprite") and e.get("name")}
+# is a human. The game's species is the entity's `subtype` (human, goblin, dragon). Until LF-178 this
+# read the sprite's file prefix (human_*, goblin_*); once Grom wore his grown sheet (grom.png) that
+# signal was gone, so it reads the declared field instead: same check, a more direct source.
+game_species = {e["name"].lower(): e["subtype"] for e in entities if e.get("subtype") and e.get("name")}
+check("Grom's species is known to the game (control: the check has something to compare)",
+      game_species.get("grom") == "human", str(game_species.get("grom")))
 for g in creatures:
     check(f"{g.id}: declares its species", bool(getattr(g, "species", "")))
     if g.id in game_species:

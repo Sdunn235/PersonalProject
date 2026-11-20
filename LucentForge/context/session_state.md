@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-11-19 night (upper-reach genomes)
+# Session State — Last updated: 2026-11-19 night (the grown art is in the game)
 
 ## Where you left off — read this first
 
@@ -17,10 +17,12 @@
   home and keep living; saves remember the panel. Upriver has no residents yet (LF-183).
 - **PR #2 merged** by Shawn (department directions, WORKING_TOGETHER, EPICS). **Upper-reach genomes (C0100,
   LF-184):** `reach_oak_west`/`reach_oak_east`/`reach_stone`, grown from the oak and stone via the new
-  `parent` field; baked, not wired in (LF-178).
+  `parent` field. **The grown art is in the game (C0101, LF-178):** Grom wears his grown sheet; every
+  tree and rock is its panel's grown prop (panels name `"props"` in data). Open: LF-185 (clone trees),
+  LF-186 (Grom's look vs. the hand-made sprites, Shawn).
 - **Shared working tree:** parallel sessions share this checkout. Use a sparse `git worktree` for
   parallel work (one working tree, one session; skip `ReferenceFilesAndCode/` for the Windows path limit).
-- **Health:** `py scratchpad/run_all_tests.py` → **32/32 green** (C0095); CI green on Linux; the pre-push
+- **Health:** `py scratchpad/run_all_tests.py` → **33/33 green** (C0101); CI green on Linux; the pre-push
   hook runs the full gate on every push (`git config core.hooksPath .githooks` is set on this machine).
 - **Tonight (C0083–C0089), Claude alone under Shawn's owner exception:** PR #1 merged; **QA** and **Art**
   departments; the **art genome** (`Mechanics/art/`: art is grown from data; Gobby/Grom/oak/stone in

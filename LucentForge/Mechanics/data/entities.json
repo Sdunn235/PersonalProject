@@ -200,7 +200,7 @@
       "col": 10,
       "row": 10
     },
-    "sprite": "assets/images/human_shadow_warrior.png",
+    "sprite": "assets/generated/grom.png",
     "is_enemy": true,
     "abilities": [ "strike", "crush", "guard" ],
     "spells": [],
