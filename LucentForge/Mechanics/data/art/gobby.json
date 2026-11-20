@@ -1,6 +1,7 @@
 {
   "id": "gobby",
   "kind": "creature",
+  "species": "goblin",
   "seed": 1001,
   "stage": 1.0,
   "_lore": "Gobby: peaceful forest goblin of the northern Azure Woods; thin, small, empathetic outcast (Gobby_the_Goblin/Characters). Forest goblin, not River-tribe blue.",

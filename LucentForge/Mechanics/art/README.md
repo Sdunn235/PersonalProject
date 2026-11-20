@@ -6,7 +6,7 @@ by the Art department (`studio/art/charter.md`).
 
 | File | Role |
 |---|---|
-| `genome.py` | `Genome` (kind, seed, growth `stage`, bounded `genes`, `palette`); `GENE_BOUNDS` + defaults per kind; `load_all()`; `mutate(genome, rng, rate)` (stays in bounds); `grow(genome, stage)`. |
+| `genome.py` | `Genome` (kind, `species`, seed, growth `stage`, bounded `genes`, `palette`); `GENE_BOUNDS` + defaults per kind; `load_all()`; `mutate(genome, rng, rate)` (stays in bounds); `grow(genome, stage)`. |
 | `render.py` | Genome → `pygame.Surface`. Creatures: the game's 3×4 walk sheet (rows down/left/right/up, 3 frames, 32-px cells). Trees/rocks: one 32-px tile. Deterministic from the genome's own seed. |
 | `style.py` | **Lucent Light**, the house style (data: `Mechanics/data/art_style.json`). `ramp(base)` grows outline / shadow / base / light from one base color (hue-shifted: shadows cool, light warm); `apply(cell, genome)` lights a finished cell: coloured outlines, lit rims facing `light_from`, size-relative form shading. |
 | `bake.py` | `py -m Mechanics.art.bake [ids]`: writes `assets/generated/<id>.png` and records it in `assets/registry.json` (genome + seed). Never touches `assets/images/`. |

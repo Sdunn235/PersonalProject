@@ -131,7 +131,7 @@ def _draw_creature(surf: pygame.Surface, g: Genome, facing: str, frame: int,
 
     # Spots: deterministic per individual (its seed), same in every frame.
     rng = random.Random(g.seed)
-    for _ in range(2):
+    for _ in range(int(round(gn["skin_marks"]))):
         sx = head.left + 1 + rng.random() * max(1, head.width - 3)
         sy = head.top + 1 + rng.random() * max(1, head.height * 0.4)
         surf.set_at((int(sx), int(sy)), c["skin_shadow"])

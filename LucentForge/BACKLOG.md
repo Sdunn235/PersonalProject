@@ -40,7 +40,6 @@ backfills tests (LF-172), builds the QA and Art departments (LF-174/175), and st
 |---|---|---|---|---|
 | LF-002 | **Unconfirmed July live checks**: goblin relocates home (`RELO`) when stressed; region comfort survives save → reload; Grace entities build (player neutral + LIGHT_TOUCHED). Never eyeballed in a window. | S | ready | session_state (Affinity / Grace sections) |
 | LF-004 | **First real job for World Building and Story/Lore** — their first task is their proof (e.g., the §T3 workshop prep for World Building; Gobby's Act 1 people for Story/Lore). | M | ready | `studio/README.md` |
-| LF-005 | Re-save `Gobby_the_Goblin/brain_dump.docx` in Word — the file isn't a valid docx, so it's unreadable. | S | ready | memory `project_gobby_world` |
 
 ---
 
@@ -56,7 +55,7 @@ Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) �
 |---|---|---|---|---|
 | LF-173 | **Acceptance examples in requirements** — adopt Smug Cat's requirements pattern: each new bible §-rule or BACKLOG item carries an observable acceptance example that a test reuses verbatim. Format change to doctrine docs → PR. | M | Shawn | smugcat `docs/requirements/template.md` |
 | LF-177 | **First autonomous run: Arc B** (LF-010 onward) under docs/autonomy.md "Autonomous runs", once LF-170–LF-174 land. | Arc | blocked | docs/autonomy.md |
-| LF-178 | **Wire generated art into the game** — point Grom (now sharing the player's sheet) at `assets/generated/grom.png`, and use the oak/stone genomes for map props. Changes what the game shows → Shawn's call. | S | Shawn | Art dept 2026-11-19 |
+| LF-178 | **Wire generated art into the game** — point Grom (a human, now sharing the player's sheet) at `assets/generated/grom.png`, and use the oak/stone genomes for map props. Changes what the game shows → Shawn's call. | S | Shawn | Art dept 2026-11-19 |
 | LF-179 | **The art biology arc** — genomes that grow and evolve *at runtime*: growth stage tied to age, mutation at birth (pairs with biochem §B1 heritable genetics / Hob spark), biome-driven tree/rock genomes from Genesis, an isometric renderer reading the same genes. | Arc | design | Shawn's goal 2026-11-19; Mechanics/art/README.md |
 
 ## Roadmap arcs (agreed 2026-07-25: A → B → C)

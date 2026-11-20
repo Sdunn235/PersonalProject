@@ -1,10 +1,12 @@
 {
   "id": "grom",
   "kind": "creature",
+  "species": "human",
   "seed": 2002,
   "stage": 1.0,
-  "_lore": "Grom: tanky goblin (STR 14, DEF 6, entities.json). Heavy, wide, stooped; small ears, small eyes.",
-  "genes": {"height": 0.82, "body_width": 0.66, "head_size": 0.30, "ear_length": 0.10,
-            "limb_length": 0.24, "arm_length": 0.38, "stoop": 0.12, "eye_size": 0.06},
-  "palette": {"skin": [84, 126, 60], "cloth": [92, 74, 66], "eye": [230, 120, 60]}
+  "_lore": "Grom (entities.json npc_03): a human of the starting town, the tank (STR 14, DEF 6). Broad and heavy but upright; human ears, small eyes, dark gear. Corrected 2026-11-19: the first genome made him a goblin (found by Story/Lore).",
+  "genes": {"height": 0.84, "body_width": 0.60, "head_size": 0.27, "ear_length": 0.0,
+            "limb_length": 0.30, "arm_length": 0.36, "stoop": 0.02, "eye_size": 0.06,
+            "skin_marks": 0},
+  "palette": {"skin": [198, 152, 118], "cloth": [104, 106, 128], "eye": [60, 52, 46]}
 }

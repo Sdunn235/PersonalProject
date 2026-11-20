@@ -68,6 +68,12 @@ relative to each shape's size, so a newborn and a giant shade alike. The style i
 (`Mechanics/data/art_style.json`): change it and every asset follows. Tests: `run_art_style_tests.py`
 (palette discipline, ramp order and hue shift, one light per cell with a no-light negative control).
 
+**Fixed — Grom is a human (C0092):** the first Grom genome grew a goblin, but the game's Grom
+(`entities.json` npc_03) is a human. Found by Story/Lore's first run. Genomes now declare a `species`,
+and the art suite checks it against the game's sprite; Grom is regrown as a broad, upright human. A new
+`skin_marks` gene makes goblin mottling heritable instead of drawn on everyone. LF-005 closed:
+`Gobby_the_Goblin/brain_dump.docx` is plain UTF-8 text with a .docx name, and it reads fine.
+
 **Added — departments as skills (C0087, LF-176):** a thin `.claude/skills/lucentforge-<dept>/SKILL.md`
 per department (Workspace repo), routing to its charter; the studio suite checks every department has one.
 

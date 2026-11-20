@@ -132,6 +132,18 @@ if "gobby" in by_id and "grom" in by_id:
 else:
     check("gobby and grom genomes exist", False)
 
+# --- A genome that portrays a game character agrees with the game about what it is. ------------------
+# Found by Story/Lore 2026-11-19: the first Grom genome was a goblin, but entities.json's Grom (npc_03)
+# is a human. The species is read from the game sprite's prefix (human_*, goblin_*), the only species
+# signal entities.json carries today.
+game_species = {e["name"].lower(): os.path.basename(e["sprite"]).split("_")[0]
+                for e in entities if e.get("sprite") and e.get("name")}
+for g in creatures:
+    check(f"{g.id}: declares its species", bool(getattr(g, "species", "")))
+    if g.id in game_species:
+        check(f"{g.id}: species matches the game's {g.id} ({game_species[g.id]})",
+              getattr(g, "species", "") == game_species[g.id], f"genome says {getattr(g, 'species', '')!r}")
+
 # --- Provenance: every character/prop image is registered; generated art matches its genome. ---------
 registry = json.load(open(os.path.join(ROOT, "assets", "registry.json"), encoding="utf-8"))
 entries = {e["path"]: e for e in registry["assets"]}

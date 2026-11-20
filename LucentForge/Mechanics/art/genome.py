@@ -28,6 +28,7 @@ _GENES = {
         "arm_length":  (0.20, 0.50, 0.32),   # arms, fraction of figure height
         "stoop":       (0.00, 0.25, 0.05),   # forward hunch, fraction of the cell (side views)
         "eye_size":    (0.05, 0.15, 0.08),   # fraction of the cell
+        "skin_marks":  (0.0, 4.0, 2.0),      # mottling spots on the head (rounded count; goblins mottle)
     },
     "tree": {
         "trunk_height":  (0.20, 0.60, 0.35),
@@ -64,6 +65,7 @@ class Genome:
     kind: str
     seed: int
     stage: float = 1.0                       # 0 = newborn / sapling / pebble, 1 = grown
+    species: str = ""                        # who it is (Story/Lore): "goblin", "human", "oak" ...
     genes: dict = field(default_factory=dict)
     palette: dict = field(default_factory=dict)
 
@@ -91,10 +93,12 @@ class Genome:
                                  f"{sorted(MATERIALS[kind])} (shades are derived by style.py)")
             palette[role] = tuple(int(c) for c in rgb)
         return Genome(id=d["id"], kind=kind, seed=int(d.get("seed", 0)),
-                      stage=float(d.get("stage", 1.0)), genes=genes, palette=palette)
+                      stage=float(d.get("stage", 1.0)), species=str(d.get("species", "")),
+                      genes=genes, palette=palette)
 
     def to_dict(self) -> dict:
         return {"id": self.id, "kind": self.kind, "seed": self.seed, "stage": self.stage,
+                "species": self.species,
                 "genes": dict(self.genes), "palette": {k: list(v) for k, v in self.palette.items()}}
 
 

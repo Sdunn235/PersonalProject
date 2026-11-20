@@ -17,6 +17,16 @@ Entry template:
 
 ---
 
+## 2026-11-19 evening — Grom regrown as a human; skin_marks gene (C0092)
+- Test-first: species-agreement check added to `run_art_tests.py`; red (`grom: species matches the
+  game's grom (human)`, genome said ''), then green.
+- Local gate: see the pre-push run on C0092. Hosted CI on C0091: green.
+- Evidence: `logs/screens/latest/art_contact_sheet.png`. A first regrowth with dark cloth (70, 72, 84)
+  passed every test but its legs vanished against the dark background (value too close). Fixed by
+  lifting the cloth's value. Not covered by a test yet (see the Gaps line).
+- Gaps: no test checks value contrast (readability); "species" is read from sprite filename prefixes,
+  because entities.json has no species field.
+
 ## 2026-11-19 evening — Lucent Light house style (C0091)
 - Test-first: `run_art_style_tests.py` written first; red on import (no style module), then green.
 - Local gate: 31/31 GREEN (`run_all_tests.py`), including the re-baked `assets/generated/` matching fresh
