@@ -19,6 +19,12 @@ Keep entries short — this is a craft ledger, not project state (that lives in 
 
 ---
 
+## 2026-11-19 — Direction written (no design note this run)
+- Next design candidates named in `direction.md`: LF-043 (decisions follow the strongest drive), the
+  shared gene contract with Art (one biology or two, LF-179), LF-044.
+- Waiting on: Story/Lore's character seeds for the river clan (in `story_lore/drafts/2026-11-19_beyond_panel_0_0.md`),
+  once Shawn decides canon.
+
 ## 2026-08-04 — Rest / Fatigue want
 - **Intent:** activity-driven fatigue that makes the *existing* time-based sleep loop fire sooner for NPCs who've been exerting themselves.
 - **Shape:** new `fatigue` chemical + `ExertionEmitter` reading AI-state as locus (exerting states raise it, restful states/sleep discharge it); it boosts the existing `tiredness` chemical so the existing Sleep Drive perceives higher urgency. No new need/source/state/bed. Mirrors the `affinity_strain` pattern exactly.

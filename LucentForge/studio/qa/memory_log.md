@@ -14,6 +14,29 @@ Append-only history of the tests this department wrote and what they caught. New
 
 ---
 
+## 2026-11-19 — Panel transitions red-first (LF-010 step 2)
+- **Tests:** `run_panel_transition_tests.py`. The edge contract is checked from the data (independent of
+  engine code); crossing, return, background life, no reach across edges, save/load, render; New Game.
+- **Red:** "Panel(0,-1) is not defined", then 12 behavior checks once the data existed → green.
+- **Own bugs caught before the build** (each surfaced by a control, so the controls paid for themselves):
+  - A render probe read text drawn in a font the spy can't see. It passed vacuously; the positive
+    control exposed it.
+  - "Arrives" was measured after walking on.
+  - A fresh map lacked the live map's chest tiles.
+  - A stale intent walked the player home after loading.
+- **Learned:** characterization suites pin facts that canon can change. When the owner changes the fact,
+  re-point each check at the new truth with the same strictness, and say so in the verification log.
+
+## 2026-11-19 — Style invariants + studio direction checks (Director acting as QA)
+- **Tests:** `run_art_style_tests.py` (red: no style module → green). Art suite: species agreement (red:
+  Grom genome said '' vs the game's human → green). Studio suite: every department has `direction.md` with
+  six sections, its handoffs name every other department, and `WORKING_TOGETHER.md` has a handoff map whose
+  ends are real departments (red: 5 directions missing → green).
+- **Negative controls:** no-light render fails the one-light check; removing Art from QA's own handoffs
+  fails the handoff check (verified by hand, restored).
+- **Learned:** the pre-push hook runs the gate on the working tree, so red work-in-progress blocks an
+  unrelated push. Stash the WIP, push, pop.
+
 ## 2026-11-19 — Modal screens render-tested (BACKLOG LF-172)
 - **Acceptance examples:** each modal shows its title, options and real data (the player's items, the
   real chest, real saves), and exits cleanly; Pause → Load lists only real saves (C0056).

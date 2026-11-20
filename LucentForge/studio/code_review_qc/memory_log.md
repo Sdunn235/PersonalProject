@@ -18,6 +18,11 @@ ledger, not project state and not a lesson.
 
 ---
 
+## 2026-11-19 — Direction written; open review items from the first world-loop run
+- No formal review run today. Queued for QC: World Building's region proposal and Story/Lore's lore note
+  (both `PROPOSAL`, pending canon review), and the bible's double `§W` numbering (needs/wants addendum and
+  world foundation), which makes a bare "§W3" ambiguous.
+
 ## 2026-11-17 — Ruling added after the fatigue live gate failed
 - **Stage x domain:** Implementation x Systems Design (retro).
 - **Finding QC missed:** the 2026-08-09 PASS WITH NOTES verified the sleep-side invariant (boost < sleep

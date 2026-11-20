@@ -25,6 +25,9 @@ One entry per image under `assets/`: `path`, `kind`, `source` (`hand-made` / `th
 are `unknown` until Shawn says where they came from.
 
 ## Palette
-Earthy, readable at 32 px: 2-3 shades per material (shadow / base / highlight) plus a dark outline.
+Earthy, readable at 32 px. A genome names **one base color per material**; the house style
+(`Mechanics/data/art_style.json`, `Mechanics/art/style.py`, Lucent Light) grows outline / shadow / base /
+light from it. Never store a shadow or outline color in a genome. Check value against the ground: a
+material whose shadow sits near the tile colors disappears (Grom's first regrowth).
 Goblin skin greens; River-goblin blue tint (Gobby lore: Azure River pigmentation); keep UI semantic colors
 (red/amber/green) out of creature palettes.

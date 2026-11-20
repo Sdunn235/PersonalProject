@@ -7,6 +7,11 @@ Seven departments exist (2026-11-19). The studio is the engine of LucentForge's 
 (`../docs/autonomy.md`): the build is test-first (`../docs/testing.md`), so the QA department writes the
 tests before Engineering builds, and green tests rather than Shawn's eyes carry the trust.
 
+**Start here:** [WORKING_TOGETHER.md](WORKING_TOGETHER.md) holds the studio's shared values, the feature
+and world loops, and the handoff map. Each department's own groove (values, craft, signature,
+handoffs, beyond 2D) is in `<dept>/direction.md`. The Director's record of each epic is
+[EPICS.md](EPICS.md).
+
 ---
 
 ## The core idea: departments are mini-Caelums, not cold contractors
@@ -18,6 +23,7 @@ way Caelum loads its identity/memory at session start:
 ```
 studio/<dept>/
   charter.md      ← who this department is, its authority, its standards, its bible slices
+  direction.md    ← its groove: values, craft, signature, handoffs, how it survives beyond 2D
   memory_log.md   ← append-only running history of what it has produced/reviewed
   references/     ← its own working docs (checklists, rules, pointers into the bible)
 ```
@@ -93,7 +99,8 @@ project state or a durable lesson, it belongs in Caelum memory instead.
 
 **Pipeline for a feature:** Systems Design (note) → **QA (failing tests)** → Engineering (green) → QC (review)
 → Director commits under `docs/autonomy.md`. Proven: Systems Design + QC (2026-08-04), Engineering (2026-08-09).
-QA and Art founded 2026-11-19; World Building and Story/Lore not yet run — their first task is their first proof.
+QA and Art founded 2026-11-19. World Building and Story/Lore had their first runs 2026-11-19, in
+parallel, on what lies beyond Panel(0,0) (see EPICS.md).
 
 ## Lane boundaries (so departments don't collide)
 - **Systems Design** = mechanics *design* (numbers-as-formulas, needs/drives/combat) — produces a note, not code.
@@ -110,5 +117,5 @@ Story/Lore gives its people and history, Systems Design gives any mechanics — 
 ## Scaling further (after each new department's first run holds)
 - Only staff a department that has real work. **Animation** stays unstaffed until the Art genome
   renderer needs more than walk cycles. **Genesis Development** is docs-only today, so it would be a design-only department.
-- If epics become routine, add `studio/EPICS.md` where the Director records each epic's decomposition
-  and which departments ran.
+- The Director records each epic's decomposition, the departments that ran and the reconciliation in
+  [EPICS.md](EPICS.md) (started 2026-11-19).
