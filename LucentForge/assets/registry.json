@@ -26,6 +26,30 @@
       "seed": 2002
     },
     {
+      "path": "assets/generated/reach_oak_east.png",
+      "kind": "tree",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "reach_oak_east",
+      "seed": 3104
+    },
+    {
+      "path": "assets/generated/reach_oak_west.png",
+      "kind": "tree",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "reach_oak_west",
+      "seed": 3103
+    },
+    {
+      "path": "assets/generated/reach_stone.png",
+      "kind": "rock",
+      "source": "generated",
+      "licence": "project-owned (generated from an art genome)",
+      "genome": "reach_stone",
+      "seed": 4104
+    },
+    {
       "path": "assets/generated/river_stone.png",
       "kind": "rock",
       "source": "generated",

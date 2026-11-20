@@ -1,0 +1,10 @@
+{
+  "id": "reach_oak_west",
+  "kind": "tree",
+  "seed": 3103,
+  "stage": 1.0,
+  "parent": "azure_oak",
+  "_lore": "A mature oak of the upper reach, an uncut stand on the west bank, leaning toward the water. Grown from azure_oak per World Building's biome sheet (proposal 2026-11-19 \u00a79).",
+  "genes": {"trunk_height": 0.37, "trunk_width": 0.17, "canopy_radius": 0.37, "canopy_lumps": 6, "lean": 0.07},
+  "palette": {"bark": [98, 72, 50], "leaf": [58, 116, 70]}
+}

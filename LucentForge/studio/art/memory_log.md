@@ -25,3 +25,14 @@ Newest at the top.
   cloth, and his legs vanished against a dark background while every test was green. Next invariant to
   give QA: value contrast between a figure's main shades and typical ground tiles.
 - **Open:** direction, chibi vs lean proportions, a gear layer, wiring (all in `direction.md`).
+
+## 2026-11-19 night — The upper reach's props (LF-184, C0100)
+- **Grown:** from World Building's biome sheet (§9), `reach_oak_west` and `reach_oak_east` (mature, leaning
+  toward the water) from `azure_oak`, and `reach_stone` (less worn) from `river_stone`. This is the department's
+  first biome brief turned into genomes.
+- **Genes:** no new genes. New genome field `parent` (lineage; orphans are refused). New invariant: props fit
+  their tile.
+- **Learned:** a seed's lobes are lopsided, so "leans" can't be measured against the tile centre. The
+  upright twin (same seed, no lean) is the honest reference, and the upright control is what showed it.
+- **Open:** a trunk tilt (today only the canopy leans); per-tree variety on the same bank (runtime mutation,
+  LF-179); the upper reach's shadier ground (no ground genome kind yet).

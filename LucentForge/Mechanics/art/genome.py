@@ -66,6 +66,7 @@ class Genome:
     seed: int
     stage: float = 1.0                       # 0 = newborn / sapling / pebble, 1 = grown
     species: str = ""                        # who it is (Story/Lore): "goblin", "human", "oak" ...
+    parent: str = ""                         # the genome id this one was grown from (lineage), or ""
     genes: dict = field(default_factory=dict)
     palette: dict = field(default_factory=dict)
 
@@ -94,11 +95,11 @@ class Genome:
             palette[role] = tuple(int(c) for c in rgb)
         return Genome(id=d["id"], kind=kind, seed=int(d.get("seed", 0)),
                       stage=float(d.get("stage", 1.0)), species=str(d.get("species", "")),
-                      genes=genes, palette=palette)
+                      parent=str(d.get("parent", "")), genes=genes, palette=palette)
 
     def to_dict(self) -> dict:
         return {"id": self.id, "kind": self.kind, "seed": self.seed, "stage": self.stage,
-                "species": self.species,
+                "species": self.species, "parent": self.parent,
                 "genes": dict(self.genes), "palette": {k: list(v) for k, v in self.palette.items()}}
 
 
@@ -108,8 +109,14 @@ def load(path: str) -> Genome:
 
 
 def load_all(data_dir: str = DATA_DIR) -> list[Genome]:
+    """Every genome in data_dir. A genome's `parent` must be another genome there, of the same kind."""
     files = sorted(f for f in os.listdir(data_dir) if f.endswith(".json"))
-    return [load(os.path.join(data_dir, f)) for f in files]
+    genomes = [load(os.path.join(data_dir, f)) for f in files]
+    kinds = {g.id: g.kind for g in genomes}
+    for g in genomes:
+        if g.parent and kinds.get(g.parent) != g.kind:
+            raise ValueError(f"{g.id}: parent {g.parent!r} is not a {g.kind} genome in {data_dir}")
+    return genomes
 
 
 def mutate(genome: Genome, rng, rate: float) -> Genome:

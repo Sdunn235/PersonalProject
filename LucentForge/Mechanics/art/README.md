@@ -6,13 +6,16 @@ by the Art department (`studio/art/charter.md`).
 
 | File | Role |
 |---|---|
-| `genome.py` | `Genome` (kind, `species`, seed, growth `stage`, bounded `genes`, `palette`); `GENE_BOUNDS` + defaults per kind; `load_all()`; `mutate(genome, rng, rate)` (stays in bounds); `grow(genome, stage)`. |
+| `genome.py` | `Genome` (kind, `species`, `parent`, seed, growth `stage`, bounded `genes`, `palette`); `GENE_BOUNDS` + defaults per kind; `load_all()` (refuses a missing or wrong-kind parent); `mutate(genome, rng, rate)` (stays in bounds); `grow(genome, stage)`. |
 | `render.py` | Genome → `pygame.Surface`. Creatures: the game's 3×4 walk sheet (rows down/left/right/up, 3 frames, 32-px cells). Trees/rocks: one 32-px tile. Deterministic from the genome's own seed. |
 | `style.py` | **Lucent Light**, the house style (data: `Mechanics/data/art_style.json`). `ramp(base)` grows outline / shadow / base / light from one base color (hue-shifted: shadows cool, light warm); `apply(cell, genome)` lights a finished cell: coloured outlines, lit rims facing `light_from`, size-relative form shading. |
 | `bake.py` | `py -m Mechanics.art.bake [ids]`: writes `assets/generated/<id>.png` and records it in `assets/registry.json` (genome + seed). Never touches `assets/images/`. |
 
 Genomes carry **one base color per material** (`genome.MATERIALS`: skin/cloth/eye, bark/leaf, stone);
-every other shade is grown by the style. Genomes live in `Mechanics/data/art/*.json` (`gobby`, `grom`, `azure_oak`, `river_stone` to start). Any
+every other shade is grown by the style. Genomes live in `Mechanics/data/art/*.json`: `gobby`, `grom`, `azure_oak` and `river_stone` to start;
+the upper reach's `reach_oak_west`, `reach_oak_east` and `reach_stone` (LF-184) are grown from them.
+**Lineage:** a variant names its `parent` and changes only the genes its biome sheet asks for, so "which gene
+made this?" also answers "why does it differ from its parent?". Any
 extra keys (e.g. `_lore`) are notes for people and are ignored by the loader.
 
 **Rules:** genes are named for what they do and bounded; adding a gene means adding a default, so older

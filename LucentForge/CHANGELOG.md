@@ -75,6 +75,17 @@ top of the starting area and you arrive on its south edge in the same column; st
   "every edge is null" now pin the new truth (NORTH → Panel(0,-1); the others still null); the
   closed-edge message is checked on the SOUTH edge.
 
+**Added — the upper reach grows its own props (C0100, LF-184):** following World Building's biome sheet
+(proposal §9), three genomes are grown from the existing ones. `reach_oak_west` and `reach_oak_east` are
+mature oaks from `azure_oak`: taller trunks and wider canopies, each leaning toward the river on its own
+side. `reach_stone`, from `river_stone`, is less worn: rougher, more facets, less flat, larger. They are baked to
+`assets/generated/` and not wired in (LF-178).
+- Genomes can name a `parent` (lineage); `load_all` refuses a parent that doesn't exist or is another kind.
+- Every tree and rock must fit its tile, with nothing cut off at the top or sides.
+- Tests (red first): each gene moves the way the biome sheet says; the lean shows in the render (each
+  oak's mass moves at least 0.5 px toward the water versus its upright twin), with a negative control
+  (an oak leaning away fails); an orphan-parent negative control. Evidence: `logs/screens/latest/art_upper_reach.png`.
+
 **Added — Lucent Light, the art house style (C0091):** every grown asset shares one light and colors
 grown by formula. Genomes now carry one base color per material (skin, cloth, eye; bark, leaf; stone);
 `Mechanics/art/style.py` grows each into an outline / shadow / base / light ramp (shadows lean cool,

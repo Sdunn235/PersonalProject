@@ -1,0 +1,10 @@
+{
+  "id": "reach_stone",
+  "kind": "rock",
+  "seed": 4104,
+  "stage": 1.0,
+  "parent": "river_stone",
+  "_lore": "An angular stone of the upper reach: it hasn't travelled far, so the river has not yet worn it round. Grown from river_stone per World Building's biome sheet (proposal 2026-11-19 \u00a79).",
+  "genes": {"size": 0.84, "roughness": 0.34, "flatness": 0.22, "facets": 11},
+  "palette": {"stone": [124, 128, 132]}
+}

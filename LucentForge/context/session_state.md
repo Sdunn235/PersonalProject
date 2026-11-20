@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-11-19 evening (the world opens upriver)
+# Session State — Last updated: 2026-11-19 night (upper-reach genomes)
 
 ## Where you left off — read this first
 
@@ -15,8 +15,11 @@
   the upper reach opens first. Walk off the top of the starting area (anywhere that isn't a tree or the
   river) to reach **Panel(0,-1), The Upper Reach**; walk off its bottom edge to come home. Villagers stay
   home and keep living; saves remember the panel. Upriver has no residents yet (LF-183).
-- **Shared working tree:** a parallel session (`art/chibi-proportions`) shares this checkout. Use
-  `git worktree` for parallel work (one working tree, one session).
+- **PR #2 merged** by Shawn (department directions, WORKING_TOGETHER, EPICS). **Upper-reach genomes (C0100,
+  LF-184):** `reach_oak_west`/`reach_oak_east`/`reach_stone`, grown from the oak and stone via the new
+  `parent` field; baked, not wired in (LF-178).
+- **Shared working tree:** parallel sessions share this checkout. Use a sparse `git worktree` for
+  parallel work (one working tree, one session; skip `ReferenceFilesAndCode/` for the Windows path limit).
 - **Health:** `py scratchpad/run_all_tests.py` → **32/32 green** (C0095); CI green on Linux; the pre-push
   hook runs the full gate on every push (`git config core.hooksPath .githooks` is set on this machine).
 - **Tonight (C0083–C0089), Claude alone under Shawn's owner exception:** PR #1 merged; **QA** and **Art**

@@ -17,6 +17,22 @@ Entry template:
 
 ---
 
+## 2026-11-19 night — Upper-reach genomes (C0100, LF-184)
+- Owner go: Shawn, "Start LF-184, grow the upper reach genomes."
+- Test-first: the art suite went red for the right reasons (the three genomes missing; `load_all` accepted
+  an orphan parent), then green.
+- **My own test bug, found by its control:** the first lean check compared each oak's centroid with the
+  tile centre. The upright control failed: an oak with no lean sits at x 14.98, because a seed's canopy
+  lobes aren't symmetric. That check was measuring the seed, not the lean. It now compares each oak with
+  its upright twin (same seed, lean 0): west +2.14 px, east +1.94 px toward the water. The negative control
+  (the west oak leaned away) gives −2.19 px and fails the check.
+- Local gate: 32/32 GREEN. Hosted CI: see the run on C0100.
+- Evidence: `logs/screens/latest/art_upper_reach.png` (each parent beside its child, plus a riverbank
+  strip), looked at by eye. The canopies lean visibly but subtly. The stone is larger and more angular.
+- Gaps: only the canopy leans (the trunk stays upright; the renderer has no trunk tilt). Same-bank oaks
+  are clones until runtime mutation exists (LF-179). The ground colour in the evidence image is a stand-in,
+  not the game's tile, so value contrast against real ground is untested (LF-180). Not wired in (LF-178).
+
 ## 2026-11-19 evening — The world opens upriver (C0095, LF-010 step 2)
 - Owner decision: Shawn, "The river flows north to south, open upriver first" (LF-182).
 - Test-first: `run_panel_transition_tests.py` red for the right reason (Panel(0,-1) undefined), then the
