@@ -20,4 +20,12 @@ Keep entries short — this is a craft ledger, not project state (`active_contex
 
 ---
 
-<!-- First entry lands with this department's first task. -->
+## 2026-11-19 — Beyond Panel(0,0) (first run) + department direction
+- **Intent:** give Panel(0,0) a story reason and propose who lives in the neighbouring panels for Arc B (LF-010 step 2). Also wrote `direction.md`, the department's groove.
+- **Content:** Panel(0,0) read as an Alexandrite supply hamlet encroaching on river-clan water. The goblin camp is a clan outpost and the bridges are contested tiles. Three candidates: **A** clan home water (upriver), **B** deep woods / "The Dark Boundary" (Gobby's road, forest tribe), **C** merchant trail and frontier (Bear Company, caravans, bandits). **Recommended A**, then C, then B. Draft: `drafts/2026-11-19_beyond_panel_0_0.md`.
+- **Source basis:** River Tribes, Azure Woods and Alexandrite rows (Worldbuilding); Characters; Outline Act 1; The Beginning; brain_dump (readable as plain text). *Proposed:* the hamlet, the outpost reading, the fishers as dissenters, the river surface as the Veil, the mist as a Colloidal field, misattributed raids.
+- **Ripple filter:** clan hunger and grievance, patrol duty and bandit greed all run with no player. Gobby counts as an agent only if he gets hunger, want and threshold seeds.
+- **Sim hook:** GoblinThreat driven by clan hunger and grievance; water comfort that keeps raids short; bridge crossings raising grievance; Gobby's witnessed-harm threshold; misattribution (belief vs fact).
+- **QC verdict:** pending.
+- **Status:** proposal, not canon until Shawn decides.
+- **Open question left:** Outline vs brain_dump authority (knight's name Rhiener/Roland/Reihner; Clara the merchant's daughter vs a princess); whether Bog, Beetle and the knight may be live agents; Grom human vs goblin (art `_lore` vs entities.json).

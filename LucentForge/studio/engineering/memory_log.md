@@ -19,6 +19,14 @@ Keep entries short — this is a build ledger, not project state (`active_contex
 
 ---
 
+## 2026-11-19 — Lucent Light style engine (from Art's style direction, QA's red suite)
+- **Built:** `Mechanics/art/style.py` (ramp formula, `apply` post-pass: coloured outlines, lit rims, form
+  shading by relative position between lit and shadow contours), `art_style.json`, `MATERIALS` + palette
+  validation in `genome.py`; render runs every cell through `apply`. `OUTLINE` contour marker = alpha 254.
+- **Gate:** 31/31 (C0091, C0092); CI green on C0091.
+- **Kick-back noted:** the charter still says Engineering doesn't commit "(Shawn's gate)". Autonomy policy
+  moved commits to the Director on a green gate, so the charter needs a PR edit.
+
 ## 2026-11-17/18 — Rest/Fatigue want v1.1 FIX (LF-001; Director-implemented with Shawn present)
 - **Built:** (1) per-frame tuning `FATIGUE_BASE_GAIN` 0.0003 -> 0.0015, derived from "human ref (endurance 10)
   reaches 0.5 in ~1/2 day"; every authored NPC now out-gains natural decay. (2) **Perceived-need receptor**:
