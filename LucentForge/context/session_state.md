@@ -1,11 +1,17 @@
-# Session State — Last updated: 2026-11-19 01:25 (first autonomous run)
+# Session State — Last updated: 2026-11-19 evening (the studio finds its groove)
 
 ## Where you left off — read this first
 
 - **Shipped history:** [CHANGELOG.md](../CHANGELOG.md). **Open work:** [BACKLOG.md](../BACKLOG.md).
   **Evidence:** [docs/verification.md](../docs/verification.md). **Rules:** [docs/autonomy.md](../docs/autonomy.md)
   (what Claude may do alone) and [docs/testing.md](../docs/testing.md) (test-first).
-- **Health:** `py scratchpad/run_all_tests.py` → **30/30 green** (C0089); CI green on Linux; the pre-push
+- **2026-11-19 evening (C0091–C0093):** **Lucent Light** art house style on master (C0091: one light,
+  ramps grown from base colors, coloured outlines; data in `Mechanics/data/art_style.json`). **Grom is a
+  human** (C0092, found by Story/Lore; genomes declare `species`). **PR #2** (open, Shawn's call): every
+  department's `direction.md`, `studio/WORKING_TOGETHER.md`, `studio/EPICS.md`, and the first World
+  Building + Story/Lore runs. Both independently propose the river's upper reach, Panel(0,-1), as the
+  first neighbour (LF-182 waits on Shawn).
+- **Health:** `py scratchpad/run_all_tests.py` → **31/31 green** (C0092); CI green on Linux; the pre-push
   hook runs the full gate on every push (`git config core.hooksPath .githooks` is set on this machine).
 - **Tonight (C0083–C0089), Claude alone under Shawn's owner exception:** PR #1 merged; **QA** and **Art**
   departments; the **art genome** (`Mechanics/art/`: art is grown from data; Gobby/Grom/oak/stone in
@@ -16,7 +22,7 @@
   decide → LF-043); controller rates are per frame; generated art is deterministic across platforms.
 - **Roadmap position:** Arc A (Glass Box) done → **Arc B "The World Opens"** foundation docs done
   (C0067), implementation not started → Arc C (real-time combat) after.
-- **Studio:** Systems Design, QC and Engineering proven; World Building and Story/Lore never run yet.
+- **Studio:** all seven departments have run. World Building and Story/Lore had their first runs 2026-11-19 (proposals in PR #2).
 - The sections below are the historical arc record, kept as-is. The old "Known issues" list moved to
   BACKLOG.md.
 

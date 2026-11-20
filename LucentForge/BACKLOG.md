@@ -57,6 +57,9 @@ Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) �
 | LF-177 | **First autonomous run: Arc B** (LF-010 onward) under docs/autonomy.md "Autonomous runs", once LF-170–LF-174 land. | Arc | blocked | docs/autonomy.md |
 | LF-178 | **Wire generated art into the game** — point Grom (a human, now sharing the player's sheet) at `assets/generated/grom.png`, and use the oak/stone genomes for map props. Changes what the game shows → Shawn's call. | S | Shawn | Art dept 2026-11-19 |
 | LF-179 | **The art biology arc** — genomes that grow and evolve *at runtime*: growth stage tied to age, mutation at birth (pairs with biochem §B1 heritable genetics / Hob spark), biome-driven tree/rock genomes from Genesis, an isometric renderer reading the same genes. | Arc | design | Shawn's goal 2026-11-19; Mechanics/art/README.md |
+| LF-180 | **Value-contrast invariant for grown art**: a test that a figure's main shades stand apart from the ground tiles they walk on. Grom's first human regrowth passed every test while his legs vanished against dark ground. Give the threshold a stated rationale (QA direction value 5). | S | ready | Art memory log 2026-11-19; verification C0092 |
+| LF-181 | **Engineering charter: the Director commits.** The charter still says "does not commit (Shawn's gate)"; `docs/autonomy.md` moved commits to the Director on a green gate. Charter edit, so it's a PR. | S | Shawn (PR) | `studio/engineering/direction.md` Open questions |
+| LF-182 | **Arc B first neighbour: canon decision.** River direction (World Building recommends N→S) and whether the upper reach, Panel(0,-1) (the river clan's home water), opens first. Unblocks LF-010 transitions, edge contract tests EC1–EC6, and Art's biome props. | S | Shawn | PR #2; `studio/EPICS.md` |
 
 ## Roadmap arcs (agreed 2026-07-25: A → B → C)
 
