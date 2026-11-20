@@ -19,6 +19,14 @@ Keep entries short — this is a craft ledger, not project state (`active_contex
 
 ---
 
+## 2026-11-19 — The upper reach became canon and was built (C0095)
+- Shawn decided: the river flows **north to south**; **Panel(0,-1)** opens first. §6.1's tiles, regions and
+  rocks became `Mechanics/data/panels/panel_0_-1.json` unchanged.
+- The edge contract (§8, EC1–EC6) is now QA's test for every pair of neighbours. All six pass on the
+  (0,0)|(0,-1) seam, including Panel(0,0)'s own river once bridges count as river for EC4.
+- Open: the provisional physical room names; the ID scheme decided by Engineering (`panel_0_-1`, room
+  prefix `panel0m1_`); Q2 (panel scale), Q4 (§W3 exception for the starting area), Q5 (resolved by EC2 hard).
+
 ## 2026-11-19 — First run: direction + "beyond Panel(0,0)" proposal
 - **Intent:** Find the department's working groove (`direction.md`) and propose what lies past Panel(0,0)'s null edges (LF-010 step 2).
 - **Added:** `direction.md` (values, craft, artifacts: World Note / Panel Proposal / Edge Contract / Frontier Sheet / Biome Sheet / Place Sheet; provenance tags [CANON]/[DERIVED]/[PROPOSED]/[OPEN]). `proposals/2026-11-19_beyond_panel_0_0.md`: recommends **one** neighbour, Panel(0,-1) as the upstream river reach (assuming N→S flow), with full tile/region/rocks sketch in the live legend; option B Panel(0,1) as the floodplain; frontier intents for E/W; Edge Contract EC1–EC6; biome sheets (upstream stone rougher, downstream smoother); place-sheet questions for Story/Lore.

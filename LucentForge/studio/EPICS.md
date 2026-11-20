@@ -5,6 +5,36 @@ the top. (README "Scaling further": started 2026-11-19, when the world loop firs
 
 ---
 
+## 2026-11-19 (later) — The world loop's first full turn: upriver opens (C0095, LF-010 step 2)
+
+**Shawn's canon decision:** "The river flows north to south, open upriver first." (LF-182, recorded in
+`design/design_decisions_log.md`.)
+
+| Department | Ran as | Task | Output |
+|---|---|---|---|
+| World Building | its proposal (§6.1, §8) | Panel(0,-1) content + the edge contract | `Mechanics/data/panels/panel_0_-1.json`, EC1–EC6 |
+| QA | Director acting under the charter | Red tests from the edge contract and the bible (§R6, §R8) | `scratchpad/run_panel_transition_tests.py` |
+| Engineering | Director acting under the charter | Transitions until green | `kernel._cross_panel_edge`, `WorldSession.panel_maps` / `enter_panel`, panel-aware occupancy, combat, zones, chests, drawing, saves |
+
+**Reconciliation:**
+- The design kept to the bible: entities are panel-local (§R8: no migration yet), and the panel the
+  player leaves keeps simulating (§R6). Each NPC controller already held its own map reference, so home
+  keeps living at no extra cost.
+- Four Stage-3 characterization suites pinned "every edge is null". They now pin the new truth with the
+  same strictness. This is not a weakened check (recorded in `docs/verification.md`).
+- Room names upriver are **provisional and physical** ("Upper Reach Woods", "The Upper Reach",
+  "Outskirts' Edge"). Story/Lore may rename them when the river clan is decided (LF-183).
+
+**Incident:** another session created `art/chibi-proportions` in the shared working tree 38 seconds before
+the C0095 commit, so the commit landed on that branch. Fixed without rewriting anything: master was
+fast-forwarded to C0095 by refspec, the other session was told, and the Director's later git work moved to
+separate worktrees. Lesson: one working tree, one session. Parallel sessions need worktrees.
+
+**Next in the loop:** LF-183 (who lives upriver: Shawn decides on Story/Lore's river clan), LF-184 (Art's
+upper-reach genomes).
+
+---
+
 ## 2026-11-19 — The studio finds its groove + Arc B "what lies beyond Panel(0,0)"
 
 **Shawn's ask:** "Start the studio and go to work… each department needs to find its values and direction

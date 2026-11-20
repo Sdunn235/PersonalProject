@@ -19,6 +19,19 @@ Keep entries short — this is a build ledger, not project state (`active_contex
 
 ---
 
+## 2026-11-19 — Panel transitions (LF-010 step 2, C0095)
+- **Built:**
+  - `WorldSession.panel_maps` (a live map per visited panel), `map_for` / `sources_on` / `chests_on` /
+    `enter_panel`.
+  - `kernel._cross_panel_edge` (on an edge, pushing outward, neighbour defined → same column, far edge).
+  - Panel-aware occupancy, combat, zones, trap perception, chest stamping and drawing; `Chest.panel_x/y`.
+  - Saves write `entity_state.panel_x/y` (the columns existed since m0006).
+- **Design note:** NPC controllers already held their own `tile_map`, so the departing panel keeps
+  simulating without new machinery (§R6).
+- **Gate:** 32/32.
+- **Watch:** off-screen panels run at full fidelity. Fine for two panels; §R6 reduced scope when there are
+  many (LF-120).
+
 ## 2026-11-19 — Lucent Light style engine (from Art's style direction, QA's red suite)
 - **Built:** `Mechanics/art/style.py` (ramp formula, `apply` post-pass: coloured outlines, lit rims, form
   shading by relative position between lit and shadow contours), `art_style.json`, `MATERIALS` + palette

@@ -20,6 +20,11 @@ Keep entries short — this is a craft ledger, not project state (`active_contex
 
 ---
 
+## 2026-11-19 — Candidate A chosen (upriver), people still open
+- Shawn opened the upper reach first, the place our Candidate A put the river clan's home water. The panel
+  exists now (C0095) with **no residents** and provisional physical room names. Who lives there is LF-183,
+  waiting on Shawn's canon call on our draft.
+
 ## 2026-11-19 — Beyond Panel(0,0) (first run) + department direction
 - **Intent:** give Panel(0,0) a story reason and propose who lives in the neighbouring panels for Arc B (LF-010 step 2). Also wrote `direction.md`, the department's groove.
 - **Content:** Panel(0,0) read as an Alexandrite supply hamlet encroaching on river-clan water. The goblin camp is a clan outpost and the bridges are contested tiles. Three candidates: **A** clan home water (upriver), **B** deep woods / "The Dark Boundary" (Gobby's road, forest tribe), **C** merchant trail and frontier (Bear Company, caravans, bandits). **Recommended A**, then C, then B. Draft: `drafts/2026-11-19_beyond_panel_0_0.md`.
