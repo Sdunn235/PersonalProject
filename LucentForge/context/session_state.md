@@ -1,4 +1,4 @@
-# Session State — Last updated: 2026-11-19 evening (the studio finds its groove)
+# Session State — Last updated: 2026-11-19 evening (the world opens upriver)
 
 ## Where you left off — read this first
 
@@ -11,7 +11,13 @@
   department's `direction.md`, `studio/WORKING_TOGETHER.md`, `studio/EPICS.md`, and the first World
   Building + Story/Lore runs. Both independently propose the river's upper reach, Panel(0,-1), as the
   first neighbour (LF-182 waits on Shawn).
-- **Health:** `py scratchpad/run_all_tests.py` → **31/31 green** (C0092); CI green on Linux; the pre-push
+- **The world opens upriver (C0095, LF-010 step 2):** Shawn's canon: the river flows north to south;
+  the upper reach opens first. Walk off the top of the starting area (anywhere that isn't a tree or the
+  river) to reach **Panel(0,-1), The Upper Reach**; walk off its bottom edge to come home. Villagers stay
+  home and keep living; saves remember the panel. Upriver has no residents yet (LF-183).
+- **Shared working tree:** a parallel session (`art/chibi-proportions`) shares this checkout. Use
+  `git worktree` for parallel work (one working tree, one session).
+- **Health:** `py scratchpad/run_all_tests.py` → **32/32 green** (C0095); CI green on Linux; the pre-push
   hook runs the full gate on every push (`git config core.hooksPath .githooks` is set on this machine).
 - **Tonight (C0083–C0089), Claude alone under Shawn's owner exception:** PR #1 merged; **QA** and **Art**
   departments; the **art genome** (`Mechanics/art/`: art is grown from data; Gobby/Grom/oak/stone in
