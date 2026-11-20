@@ -17,6 +17,27 @@ Entry template:
 
 ---
 
+## 2026-11-19 evening — The world opens upriver (C0095, LF-010 step 2)
+- Owner decision: Shawn, "The river flows north to south, open upriver first" (LF-182).
+- Test-first: `run_panel_transition_tests.py` red for the right reason (Panel(0,-1) undefined), then the
+  data made the edge contract pass, then 12 behavior checks red (no transition engine) → green.
+- Test fixes made before the build, recorded here: (1) the "villagers drawn" probe read drawn text,
+  but name labels use another font, so it passed vacuously upriver and failed its home control; replaced
+  by recording which sprites the shell draws. (2) "Arrives on the edge" measured after 20 frames of
+  walking on; the walk now stops on the crossing frame. (3) Home-map comparisons used a fresh map
+  without chest tiles; regions identify the panel instead. (4) After loading, the test still held the
+  last "walk south" intent and walked home; it now clears the intent (the live shell sets it from keys
+  every frame).
+- Characterization updates: `smoke_phase32.py`, `smoke_phase36.py`, `run_runtime_tests.py` (and
+  `run_stage3_tests.py`, which runs them) pinned "all edges null". Each check now pins the new truth with
+  the same strictness; the closed-edge message moved to the SOUTH edge and a NORTH entry must now log
+  nothing.
+- Local gate: 32/32 GREEN. Hosted CI: see the run on C0095.
+- Evidence: `logs/screens/latest/20_upper_reach.png` (the player alone upriver),
+  `21_back_home.png`. Panel(0,0)'s NPCs moved and their needs changed over 600 frames with the player away.
+- Gaps: no live look yet. Upriver has no residents and only the riverbank's water as a need source.
+  Off-screen panels run at full fidelity (fine at 2 panels; §R6 reduced scope comes with more).
+
 ## 2026-11-19 evening — Grom regrown as a human; skin_marks gene (C0092)
 - Test-first: species-agreement check added to `run_art_tests.py`; red (`grom: species matches the
   game's grom (human)`, genome said ''), then green.

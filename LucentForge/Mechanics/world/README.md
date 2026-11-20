@@ -72,14 +72,16 @@ WorldSim ticks drive the simulation; `tile_map.py` owns the spatial grid.
 | `PanelLoader` | Panel registry; `can_transition()` / `get_adjacent_panel()` / `load_panel()` stubs |
 
 `ctx.panel_loader` — `PanelLoader` instance (loaded from `Mechanics/data/panels.json`) owned by `GameContext`.
-`ctx.current_panel` — `(panel_x, panel_y)` tuple tracking the active panel (always `(0, 0)` in Stage 3).
+`ctx.current_panel` — `(panel_x, panel_y)` of the panel the player is on (set by `WorldSession.enter_panel`).
 
 **Stage 3 stub behavior:**
-- `PanelLoader.can_transition()` — always `False`; Panel(0,0) has four null edges in `panels.json`.
-- `PanelLoader.get_adjacent_panel()` — always `None`.
+- `PanelLoader.can_transition()` — `True` where `panels.json` names a neighbour. Since 2026-11-19 (Arc B canon): Panel(0,0) NORTH → Panel(0,-1), the upper reach; every other edge is null.
+- `PanelLoader.get_adjacent_panel()` — the neighbour's `PanelConfig`, or `None`.
 - `PanelLoader.load_panel(px, py)` — returns the `PanelConfig` if defined, `None` for undefined coords. Contains background-simulation blueprint comment (Stage 3.5+: `SimulationScope.ACTIVE` vs `SimulationScope.BACKGROUND`).
 
-**Edge detection (Phase 3.6):** `main.py` checks player tile position each non-combat frame. When the player enters an edge tile (col 0/17 or row 0/17), calls `can_transition()` once (edge-triggered via `_last_at_edge` identity check). Currently always logs `[PANEL] Player at EDGE edge of Panel(0,0) — no adjacent panel defined.` No transition fires. `_last_at_edge` reset on New Game.
+**Panel transitions (Arc B, LF-010 step 2, 2026-11-19):** the kernel (`_cross_panel_edge`) moves the player onto the neighbour when they stand on an edge tile and push outward. They land on the facing edge in the same column (or row), and `SimFrame.panel_changed` reports it. Entities are panel-local (`panel_x`/`panel_y`). `WorldSession.panel_maps` keeps one live `TileMap` per visited panel. NPCs keep their own map, so the panel the player leaves keeps simulating (§R6). Occupancy, combat, zones, chests and drawing all compare panels; saves record each entity's panel. Seam rules (edge contract EC1–EC6, World Building): `scratchpad/run_panel_transition_tests.py`.
+
+**Edge detection (Phase 3.6, historical):** `main.py` checks player tile position each non-combat frame. When the player enters an edge tile (col 0/17 or row 0/17), calls `can_transition()` once (edge-triggered via `_last_at_edge` identity check). Currently always logs `[PANEL] Player at EDGE edge of Panel(0,0) — no adjacent panel defined.` No transition fires. `_last_at_edge` reset on New Game.
 
 ## Room system (Stage 3, Phase 3.1+)
 

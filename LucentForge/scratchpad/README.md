@@ -28,6 +28,9 @@ run it green *before and after every stage* to prove behavior was preserved.
 | `run_affinity_behavior_tests.py` | Affinity emitter/receptor + region-comfort memory + persistence (§B6/§D). |
 | `run_fatigue_tests.py` | Rest/Fatigue want (§W6): fatigue=0 parity, exertion accrual + rest decay, the sleeping-with-fatigue → tiredness-still-down special case, save round-trip, endurance strategy. |
 | `run_stage2_tests.py` / `run_stage3_tests.py` | Consolidated Stage 2 (items) / Stage 3 (rooms-as-zones) suites. |
+| `run_panel_data_tests.py` / `run_panel_transition_tests.py` | Arc B: panels are data (Panel(0,0) identical to the old procedural map); the edge contract EC1–EC6 for every pair of neighbours, walking upriver and back, NPCs staying home and living, no reach across edges, saves remembering the panel. |
+| `run_art_tests.py` / `run_art_style_tests.py` | Art genomes (determinism, bounds, growth, provenance, species) and the Lucent Light house style (palette discipline, one light, grown ramps). |
+| `run_studio_tests.py` | Every Studio department is complete, listed, loadable, and (with PR #2) has its direction. |
 | `test_attr_parity.py` / `test_combat_parity.py` | Attribute-derivation and combat behavior parity guards. |
 | `smoke_phase3x.py` / `smoke_phase4x.py` | Historical per-phase smokes (superseded by the consolidated runners but kept green). |
 | `test_chest_bfs.py` / `test_chest_flows.py` / `test_outcome_resolver.py` | Chest placement/pathing, chest interaction flows, §12.2 outcome resolver. |

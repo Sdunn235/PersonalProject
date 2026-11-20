@@ -60,6 +60,21 @@ numbers — arcs are the release unit.
   First genomes: Gobby, Grom, an Azure Woods oak and a river stone (in `assets/generated/`, not wired in).
 - Tests: `run_studio_tests.py`, `run_art_tests.py`.
 
+**Added — the world opens upriver (C0095, LF-010 step 2):** Shawn's canon: the river flows north to
+south and the upper reach opens first. Panel(0,-1), **The Upper Reach** (World Building's design:
+uncleared woodland on both banks, the same channel, no crossing, angular stone), is walkable: step off the
+top of the starting area and you arrive on its south edge in the same column; step back to return.
+- Entities are panel-local. The villagers and goblins stay home **and keep living** while you are away
+  (each NPC walks its own panel's map; §R6). Nothing reaches across an edge: no fights, no blocking, no
+  chests, no drawing of another panel's people.
+- Saves remember which panel everyone is on; New Game starts at home.
+- Seams follow World Building's edge contract (EC1–EC6: the river crosses at the same columns, blocked
+  matches blocked, compatible regions, no stranded water, no sealed pockets, legend only), checked from
+  the data for every pair of neighbours.
+- Tests: `run_panel_transition_tests.py` (red first). Four Stage-3 characterization suites that pinned
+  "every edge is null" now pin the new truth (NORTH → Panel(0,-1); the others still null); the
+  closed-edge message is checked on the SOUTH edge.
+
 **Added — Lucent Light, the art house style (C0091):** every grown asset shares one light and colors
 grown by formula. Genomes now carry one base color per material (skin, cloth, eye; bark, leaf; stone);
 `Mechanics/art/style.py` grows each into an outline / shadow / base / light ramp (shadows lean cool,

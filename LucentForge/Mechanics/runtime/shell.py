@@ -333,7 +333,7 @@ class PresentationShell:
         prow = int(s.player.y // settings.TILE_SIZE)
         adj = None
         for dc, dr in ((0, -1), (0, 1), (-1, 0), (1, 0)):
-            adj = next((c for c in s.chest_reg.values()
+            adj = next((c for c in s.chests_on(s.player_panel).values()
                         if c.col == pcol + dc and c.row == prow + dr), None)
             if adj:
                 break
@@ -403,11 +403,13 @@ class PresentationShell:
         screen = self.screen
         screen.fill(settings.BG_COLOR)
         s.tile_map.draw(screen)
-        draw_trap_markers(screen, s.chest_reg, self.font)   # Phase 4.2 (§M8)
+        here = s.player_panel                              # Arc B: draw the player's panel only
+        draw_trap_markers(screen, s.chests_on(here), self.font)   # Phase 4.2 (§M8)
 
         # Source labels (skip those duplicating a zone label; FARM overlaps "Farm").
         _zone_label_names = {"FARM"}
-        for src in s.sources:
+        panel_sources = s.sources_on(here)
+        for src in panel_sources:
             if src.label in _zone_label_names:
                 continue
             lbl = self.label_font.render(f"[{src.label}]", True, (255, 255, 255))
@@ -415,7 +417,7 @@ class PresentationShell:
                               src.world_y + settings.LEVEL_Y - lbl.get_height() // 2))
 
         # H5: source stock bars for finite sources.
-        for src in s.sources:
+        for src in panel_sources:
             if src.is_finite:
                 bar_x = src.world_x + settings.LEVEL_X
                 bar_y = src.world_y + settings.LEVEL_Y + settings.SOURCE_BAR_OFFSET_Y
@@ -428,8 +430,10 @@ class PresentationShell:
                               width=settings.SOURCE_BAR_WIDTH,
                               height=settings.SOURCE_BAR_HEIGHT)
 
-        self.sprite_group.draw(screen)
-        for sprite in self.sprite_group:
+        visible = [sp for sp in self.sprite_group if s.panel_of(sp.entity) == here]
+        for sprite in visible:
+            screen.blit(sprite.image, sprite.rect)
+        for sprite in visible:
             sprite.draw_overlays(screen)
 
         _e, _ctrl, _lbl = self._hud_subjects[self.hud_index]

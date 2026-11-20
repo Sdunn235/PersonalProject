@@ -48,6 +48,22 @@ Without persistence, nothing matters.
 
 ---
 
+## Decision: The World Opens Upriver (2026-11-19, Shawn)
+
+The river flows north to south. The first panel beyond the starting area is its upper reach,
+Panel(0,-1), opened before any other neighbour. Proposed by World Building and Story/Lore
+independently (studio/EPICS.md); decided by Shawn.
+
+WHY:
+The river is the one feature that must cross an edge, so proving the seam there proves it everywhere;
+upriver is the river clan's home water, the best-sourced people in the Gobby story.
+
+Trade-off:
+East (the merchant trail) and west (the deep woods) wait, and the upper reach opens with no residents
+until Story/Lore's people are decided.
+
+---
+
 ## Rejected Approaches
 
 - Fully procedural reset worlds

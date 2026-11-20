@@ -59,13 +59,14 @@ Order (Shawn's pick): foundation → backfill + CI/hooks → Studio (QA + Art) �
 | LF-179 | **The art biology arc** — genomes that grow and evolve *at runtime*: growth stage tied to age, mutation at birth (pairs with biochem §B1 heritable genetics / Hob spark), biome-driven tree/rock genomes from Genesis, an isometric renderer reading the same genes. | Arc | design | Shawn's goal 2026-11-19; Mechanics/art/README.md |
 | LF-180 | **Value-contrast invariant for grown art**: a test that a figure's main shades stand apart from the ground tiles they walk on. Grom's first human regrowth passed every test while his legs vanished against dark ground. Give the threshold a stated rationale (QA direction value 5). | S | ready | Art memory log 2026-11-19; verification C0092 |
 | LF-181 | **Engineering charter: the Director commits.** The charter still says "does not commit (Shawn's gate)"; `docs/autonomy.md` moved commits to the Director on a green gate. Charter edit, so it's a PR. | S | Shawn (PR) | `studio/engineering/direction.md` Open questions |
-| LF-182 | **Arc B first neighbour: canon decision.** River direction (World Building recommends N→S) and whether the upper reach, Panel(0,-1) (the river clan's home water), opens first. Unblocks LF-010 transitions, edge contract tests EC1–EC6, and Art's biome props. | S | Shawn | PR #2; `studio/EPICS.md` |
+| LF-183 | **Who lives upriver**: Story/Lore's river clan (draft in PR #2, `story_lore/drafts/2026-11-19_beyond_panel_0_0.md`) → Shawn decides → Art grows them, Systems Design turns character seeds into needs/traits, QA tests, Engineering spawns them on Panel(0,-1) (first residents off the home panel). Also open: need sources upriver (only the riverbank's water today). | M | Shawn (canon) | LF-010 step 3 |
+| LF-184 | **Upper-reach biome genomes** (World Building's biome sheet): a less-worn river stone (rougher, more facets, larger) and a mature oak stand leaning toward the water. Grown and baked, not wired in (see LF-178). | S | ready | WB proposal §9 |
 
 ## Roadmap arcs (agreed 2026-07-25: A → B → C)
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-010 | **Arc B — data-driven map loader.** Step 1 DONE (C0089): panels are data — `panels.json` → `Mechanics/data/panels/panel_0_0.json` (readable tile/region rows), identical to the old procedural map. **Next:** (2) a second panel + real edge transitions (`PanelLoader.can_transition` → load the neighbour, move entities across) — needs World Building + Story/Lore to decide what lies beyond the starting area; (3) off-screen panels keep simulating (LF-120). | Arc | ready (step 2 needs WB/Lore) | session_state Arc A "Next"; §R1–§R8 |
+| LF-010 | **Arc B — the world opens.** Step 1 DONE (C0089): panels are data. Step 2 DONE (C0095): Panel(0,-1), the upper reach, and real edge transitions (the player crosses; entities are panel-local; saves remember the panel; edge contract EC1–EC6 tested). **Next:** (3) who lives upriver (LF-183); (4) the next neighbours (east: merchant trail; west: deep woods; south: floodplain), each through the world loop. | Arc | ready | session_state Arc A "Next"; §R1–§R8; `studio/EPICS.md` |
 | LF-011 | **Arc B — dialogue / choice system** (greenfield). TheMaze Java dialog in `ReferenceFilesAndCode/` is a pattern source. | Arc | design | session_state Arc A "Next" |
 | LF-012 | **Arc B — first Forge story-arc panels** (TheForge dungeon: Inn → Erasmus, 7 rooms, as one region of the Gobby world). | L | blocked by LF-010 | memory `project_gobby_world` |
 | LF-013 | **Arc C "Living Violence" — real-time ATB combat:** cooldowns gated by SP + Bytes, mouse point-and-click + hotbar, reusing the damage/ability/cost resolvers. | Arc | blocked by Arc B | Caelum `lucentforge_active.md` (Arc A entry) |
@@ -151,7 +152,7 @@ Legacy items from session_state's old known-issues list, each checked against th
 
 | ID | Item | Size | Status | Source |
 |---|---|---|---|---|
-| LF-120 | **Headless background sim for off-screen panels** — "the world simulates without the player". | L | blocked by LF-010 | §RT8 |
+| LF-120 | **Background sim for off-screen panels**: "the world simulates without the player". Basic form works since C0095: every entity ticks on its own panel's map at full fidelity wherever the player is. Remaining: reduced-fidelity BACKGROUND scope (§R6) once there are many panels, and NPC migration across edges (§R8). | L | ready | §RT8, §R6 |
 | LF-121 | **Replay determinism** — record a `Command` + `dt` stream and replay it headless as a regression test. | M | ready | §RT8 |
 | LF-122 | **`--ai-player` mode** — a state machine plays while you watch. | M | design | memory `project_lucentforge_vision` (Option 3) |
 | LF-123 | **Periodic JSON state export** for long-run analysis. | S | ready | same (Option 4) |

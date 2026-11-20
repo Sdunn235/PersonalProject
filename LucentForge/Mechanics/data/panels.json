@@ -6,8 +6,21 @@
     "panel_y": 0,
     "map": "panels/panel_0_0.json",
     "edges": {
-      "NORTH": null,
+      "NORTH": "panel_0_-1",
       "SOUTH": null,
+      "EAST":  null,
+      "WEST":  null
+    }
+  },
+  {
+    "id": "panel_0_-1",
+    "name": "The Upper Reach",
+    "panel_x": 0,
+    "panel_y": -1,
+    "map": "panels/panel_0_-1.json",
+    "edges": {
+      "NORTH": null,
+      "SOUTH": "panel_0_0",
       "EAST":  null,
       "WEST":  null
     }

@@ -1,5 +1,6 @@
 """Phase 3.6 smoke test — PanelLoader.load_panel + edge detection logic.
 
+# Updated 2026-11-19 (Arc B canon: Panel(0,0)'s NORTH edge leads to Panel(0,-1)): same checks, new truth.
 Run from LucentForge directory: py smoke_phase36.py
 No pygame display required.
 """
@@ -50,14 +51,21 @@ check("load_panel(0,1) returns None",  loader.load_panel(0, 1) is None)
 check("load_panel(-1,0) returns None", loader.load_panel(-1, 0) is None)
 
 # ── Group 3: can_transition always False for Panel(0,0) ──────────────────────
-print("\n[3] can_transition returns False for all edges of Panel(0,0)")
+print("\n[3] can_transition: NORTH leads to Panel(0,-1); the other edges of Panel(0,0) are closed")
 for edge in PanelEdge:
+    if edge is PanelEdge.NORTH:
+        check("can_transition(0,0,NORTH) is True", loader.can_transition(0, 0, edge))
+        continue
     check(f"can_transition(0,0,{edge.name}) is False",
           not loader.can_transition(0, 0, edge))
 
 # ── Group 4: get_adjacent_panel returns None for all edges ───────────────────
-print("\n[4] get_adjacent_panel returns None for all edges")
+print("\n[4] get_adjacent_panel: Panel(0,-1) to the north, None elsewhere")
 for edge in PanelEdge:
+    if edge is PanelEdge.NORTH:
+        adj = loader.get_adjacent_panel(0, 0, edge)
+        check("get_adjacent_panel(0,0,NORTH) is Panel(0,-1)", adj is not None and (adj.panel_x, adj.panel_y) == (0, -1))
+        continue
     check(f"get_adjacent_panel(0,0,{edge.name}) is None",
           loader.get_adjacent_panel(0, 0, edge) is None)
 
@@ -113,31 +121,36 @@ def simulate_frame(player_x, player_y, last_edge):
 
 last_edge = None
 
-# Step into NORTH edge
-last_edge = simulate_frame(5 * TILE, 0, last_edge)
-check("First entry into NORTH fires log",         len(log_calls) == 1)
-check("Log message mentions north",               "north" in log_calls[-1])
+# Step into SOUTH edge (a closed edge; NORTH now leads to Panel(0,-1) and logs nothing)
+SOUTH_Y = (ROWS - 1) * TILE
+last_edge = simulate_frame(5 * TILE, SOUTH_Y, last_edge)
+check("First entry into SOUTH fires log",         len(log_calls) == 1)
+check("Log message mentions south",               "south" in log_calls[-1])
 
-# Stay on NORTH edge — must NOT re-fire
-last_edge = simulate_frame(6 * TILE, 0, last_edge)
-check("Staying on NORTH: no re-fire",             len(log_calls) == 1)
+# Stay on SOUTH edge — must NOT re-fire
+last_edge = simulate_frame(6 * TILE, SOUTH_Y, last_edge)
+check("Staying on SOUTH: no re-fire",             len(log_calls) == 1)
 
 # Move to interior
 last_edge = simulate_frame(5 * TILE, 9 * TILE, last_edge)
 check("Interior: no log (last_edge cleared)",     len(log_calls) == 1)
 
-# Re-enter NORTH from interior — should fire again
-last_edge = simulate_frame(5 * TILE, 0, last_edge)
-check("Re-enter NORTH: fires again",              len(log_calls) == 2)
+# Re-enter SOUTH from interior — should fire again
+last_edge = simulate_frame(5 * TILE, SOUTH_Y, last_edge)
+check("Re-enter SOUTH: fires again",              len(log_calls) == 2)
 
 # Enter EAST edge
 last_edge = simulate_frame((COLS-1)*TILE, 5 * TILE, last_edge)
 check("Enter EAST: fires log",                    len(log_calls) == 3)
 check("Log mentions east",                        "east" in log_calls[-1])
 
-# Corner: crossing directly from EAST to NORTH — fires once for NORTH
+# Crossing directly from EAST to SOUTH — fires once for SOUTH
+last_edge = simulate_frame(5 * TILE, SOUTH_Y, last_edge)
+check("Cross EAST->SOUTH fires for SOUTH",        len(log_calls) == 4)
+
+# A NORTH entry fires nothing now: that edge has a neighbour (Panel(0,-1)).
 last_edge = simulate_frame(5 * TILE, 0, last_edge)
-check("Cross EAST->NORTH fires for NORTH",        len(log_calls) == 4)
+check("Enter NORTH (has a neighbour): no log",    len(log_calls) == 4)
 
 # ── Group 7: WorldPos dataclass still intact ──────────────────────────────────
 print("\n[7] WorldPos dataclass still intact")

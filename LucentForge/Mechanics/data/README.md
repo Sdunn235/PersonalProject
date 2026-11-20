@@ -22,8 +22,9 @@ data/
   models.py        — Typed dataclasses (AbilityDef, ItemDef, EntityDef)
   *.json           — Canonical seed content (entities, abilities, items, needs, sources, chests)
   chests.json      — Stage 2 chest seed definitions (3 chests: supply, forest_cache, goblin_hoard)
-  rooms.json       — Stage 3 room definitions (9 rooms for Panel(0,0)); loaded by RoomRegistry (Phase 3.1)
-  panels.json      — Stage 3 panel registry (Panel(0,0) = Starting Area, 4 null edges); loaded by PanelLoader (Phase 3.2)
+  rooms.json       — room definitions per panel (9 for Panel(0,0), 3 for Panel(0,-1)); loaded by RoomRegistry. Every region a panel uses needs a room (tested)
+  panels.json      — panel registry, loaded by PanelLoader: Panel(0,0) Starting Area (NORTH → panel_0_-1) and Panel(0,-1) The Upper Reach (SOUTH → panel_0_0). Each entry names its map file in panels/
+  panels/          — one map per panel (readable tile and region rows, legends, rock art): panel_0_0.json, panel_0_-1.json. Panel ids are panel_<x>_<y> with the sign as-is; room ids use panel<x><y>_ with m for minus (panel0m1_river)
   lucentforge.db   — Runtime SQLite store (GITIGNORED; rebuilt from JSON by migration 0001)
 ```
 

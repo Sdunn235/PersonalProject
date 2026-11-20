@@ -11,10 +11,17 @@ no display attached. The presentation shell keeps its own sprite-per-entity laye
 verbatim (no new creation logic). `apply_save()` is the load adapter that folds the
 apply-save + item-rebuild + chest-rebuild + chest-placement sequence into one call.
 `GameContext` (the service locator) stays separate and is passed in where needed.
+
+**Panels (Arc B, LF-010).** Entities are panel-local (`panel_x`/`panel_y`, default the home panel).
+`panel_maps` holds one live `TileMap` per visited panel, loaded on first entry. `tile_map` is the map
+of the panel the *player* is on (what the shell draws). NPCs keep their own controller's map, so the
+panel the player leaves keeps simulating (§R6 BACKGROUND). `enter_panel()` moves the player.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
+HOME_PANEL = (0, 0)          # where a new game starts and every NPC lives today (§R8: no migration yet)
 
 from Mechanics.bootstrap import (
     create_world_sim, create_needs, create_npc_controller,
@@ -44,6 +51,48 @@ class WorldSession:
     defeated_npcs: set = field(default_factory=set)
     combat_cooldowns: dict = field(default_factory=dict)
     zone_ai: object = None   # ZoneAIResponder — sim-side zone behavior (R3)
+    panel_maps: dict = field(default_factory=dict)       # (panel_x, panel_y) -> live TileMap
+    _panel_sources: dict = field(default_factory=dict)   # (panel_x, panel_y) -> [NeedSource] (non-home)
+
+    # ── panels (Arc B) ──────────────────────────────────────────────────────────
+    @staticmethod
+    def panel_of(entity) -> tuple[int, int]:
+        return (getattr(entity, "panel_x", HOME_PANEL[0]), getattr(entity, "panel_y", HOME_PANEL[1]))
+
+    @property
+    def player_panel(self) -> tuple[int, int]:
+        return self.panel_of(self.player)
+
+    def map_for(self, panel: tuple[int, int]):
+        """The live TileMap of `panel`, loaded from panel data on first use, chests stamped."""
+        if panel not in self.panel_maps:
+            from Mechanics.world.tile_map import TileMap
+            tm = TileMap()
+            tm.load_real_map(*panel)
+            tm.place_chests(self.chests_on(panel))
+            self.panel_maps[panel] = tm
+        return self.panel_maps[panel]
+
+    def sources_on(self, panel: tuple[int, int]) -> list:
+        """Need sources of `panel`. The home panel's are the world-sim's tracked sources."""
+        if panel == HOME_PANEL:
+            return self.sources
+        if panel not in self._panel_sources:
+            self._panel_sources[panel] = self.map_for(panel).get_need_sources()
+        return self._panel_sources[panel]
+
+    def chests_on(self, panel: tuple[int, int]) -> dict:
+        return {cid: c for cid, c in self.chest_reg.items()
+                if (getattr(c, "panel_x", 0), getattr(c, "panel_y", 0)) == panel}
+
+    def enter_panel(self, panel: tuple[int, int], ctx=None) -> None:
+        """Put the player on `panel`: its map becomes the world the player walks and the shell draws."""
+        self.player.panel_x, self.player.panel_y = panel
+        self.tile_map = self.map_for(panel)
+        self.player_controller.tile_map = self.tile_map
+        self.player_controller.sources = self.sources_on(panel)
+        if ctx is not None:
+            ctx.current_panel = panel
 
     @property
     def npc_controllers(self) -> list:
@@ -95,7 +144,8 @@ class WorldSession:
 
         inv_svc, equip_svc = create_item_services(ctx)
         chest_reg = create_chest_registry(ctx)
-        tile_map.place_chests(chest_reg)
+        tile_map.place_chests({cid: c for cid, c in chest_reg.items()
+                               if (c.panel_x, c.panel_y) == HOME_PANEL})
 
         session = cls(
             world_sim=world_sim, sources=sources, tile_map=tile_map,
@@ -103,7 +153,11 @@ class WorldSession:
             player_controller=player_controller, npc_list=npc_list,
             inv_svc=inv_svc, equip_svc=equip_svc, chest_reg=chest_reg,
             zone_ai=ZoneAIResponder(),
+            panel_maps={HOME_PANEL: tile_map},
         )
+        for npc, _ctrl in npc_list:
+            npc.panel_x, npc.panel_y = HOME_PANEL
+        player.panel_x, player.panel_y = HOME_PANEL
         session.wire_zone_observers()
         return session
 
@@ -118,4 +172,11 @@ class WorldSession:
                           self.defeated_npcs, self.combat_cooldowns, verbose=verbose)
         rebuild_item_services(save_data, self.inv_svc, self.equip_svc, ctx.item_repo)
         self.chest_reg = rebuild_chest_registry(save_data, ctx.chests, ctx.item_repo)
-        self.tile_map.place_chests(self.chest_reg)
+        for panel, tm in self.panel_maps.items():
+            tm.place_chests(self.chests_on(panel))
+        # Arc B: put every entity back on the panel it was saved on (older saves: the home panel).
+        saved = save_data.get("entities", {})
+        for ent in [npc for npc, _ in self.npc_list] + [self.player]:
+            e = saved.get(ent.entity_id, {})
+            ent.panel_x, ent.panel_y = e.get("panel_x", HOME_PANEL[0]), e.get("panel_y", HOME_PANEL[1])
+        self.enter_panel(self.player_panel, ctx)

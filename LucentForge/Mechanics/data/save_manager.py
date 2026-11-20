@@ -182,6 +182,13 @@ class SaveManager:
                 ),
             )
 
+            # Arc B (LF-010): which panel each entity was on (entity_state.panel_x/y, migration 0006).
+            for ent in [ctrl.npc for ctrl in controllers] + [player]:
+                conn.execute(
+                    "UPDATE entity_state SET panel_x = ?, panel_y = ? WHERE slot_id = ? AND entity_id = ?",
+                    (getattr(ent, "panel_x", 0), getattr(ent, "panel_y", 0), slot_id, ent.entity_id),
+                )
+
             # --- Chest states ---
             conn.execute("DELETE FROM chest_state WHERE slot_id = ?", (slot_id,))
             for chest in (chests or {}).values():
@@ -270,6 +277,8 @@ class SaveManager:
                     "ai_state":  row["ai_state"],
                     "ai_data":   json.loads(row["ai_data"]) if row["ai_data"] else {},
                     "bag":       json.loads(row["bag"]) if row["bag"] else [],
+                    "panel_x":   row["panel_x"] if "panel_x" in row.keys() and row["panel_x"] is not None else 0,
+                    "panel_y":   row["panel_y"] if "panel_y" in row.keys() and row["panel_y"] is not None else 0,
                 }
                 for row in entity_rows
             },

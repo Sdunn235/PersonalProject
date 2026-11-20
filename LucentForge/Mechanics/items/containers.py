@@ -83,3 +83,6 @@ class Chest:
     # is an optional per-chest override (0 → use settings.TRAP_PERCEIVE_DC).
     trap_perceived:  bool       = False
     perceive_dc:     int        = 0
+    # Arc B (LF-010): chests are panel-local; chests.json carries panel_x/panel_y (migration 0006).
+    panel_x:         int        = 0
+    panel_y:         int        = 0

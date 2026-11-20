@@ -440,12 +440,13 @@ def test_kernel_headless():
         check(kernel._detect_combat(now=1_000_000.0 + COMBAT_COOLDOWN - 0.1) is None,
               "no combat while the NPC is on cooldown")
 
-        # Panel-edge detection: player at the north edge -> a [PANEL] message once.
+        # Panel-edge detection: player at a closed edge -> a [PANEL] message once. (SOUTH: since
+        # 2026-11-19 NORTH leads to Panel(0,-1), and an edge with a neighbour reports nothing.)
         s.player.x = settings.TILE_SIZE * 5
-        s.player.y = 0.0
+        s.player.y = settings.TILE_SIZE * (settings.ROWS - 1) + 1.0
         kernel._last_at_edge = None
         msg = kernel._detect_panel_edge()
-        check(msg is not None and "north" in msg, "north panel edge detected", f"{msg}")
+        check(msg is not None and "south" in msg, "south (closed) panel edge detected", f"{msg}")
         check(kernel._detect_panel_edge() is None,
               "edge is edge-triggered (no repeat while still at same edge)")
 

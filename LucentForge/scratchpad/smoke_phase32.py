@@ -1,5 +1,6 @@
 """Phase 3.2 smoke test — world coordinate system + m0006 migration.
 
+# Updated 2026-11-19 (Arc B canon: Panel(0,0)'s NORTH edge leads to Panel(0,-1)): same checks, new truth.
 Run from LucentForge directory: py smoke_phase32.py
 """
 import sys
@@ -54,7 +55,7 @@ check("panel id",      cfg is not None and cfg.id == "panel_0_0")
 check("panel name",    cfg is not None and cfg.name == "Starting Area")
 check("panel_x == 0", cfg is not None and cfg.panel_x == 0)
 check("panel_y == 0", cfg is not None and cfg.panel_y == 0)
-check("north == None", cfg is not None and cfg.north is None)
+check("north == panel_0_-1 (the upper reach)", cfg is not None and cfg.north == "panel_0_-1")
 check("south == None", cfg is not None and cfg.south is None)
 check("east  == None", cfg is not None and cfg.east is None)
 check("west  == None", cfg is not None and cfg.west is None)
@@ -62,6 +63,11 @@ check("west  == None", cfg is not None and cfg.west is None)
 # ── Group 4: can_transition / get_adjacent_panel ─────────────────────────────
 print("\n[4] PanelLoader transitions")
 for edge in PanelEdge:
+    if edge is PanelEdge.NORTH:
+        check("can_transition(0,0,NORTH) == True", loader.can_transition(0, 0, edge))
+        adj = loader.get_adjacent_panel(0, 0, edge)
+        check("get_adjacent(0,0,NORTH) is Panel(0,-1)", adj is not None and (adj.panel_x, adj.panel_y) == (0, -1))
+        continue
     check(f"can_transition(0,0,{edge.value}) == False", not loader.can_transition(0, 0, edge))
     check(f"get_adjacent(0,0,{edge.value}) is None",    loader.get_adjacent_panel(0, 0, edge) is None)
 check("unknown panel can_transition False",    not loader.can_transition(1, 0, PanelEdge.WEST))
@@ -112,7 +118,8 @@ from Mechanics.data.context import GameContext
 ctx = GameContext()
 check("ctx.current_panel == (0,0)", ctx.current_panel == (0, 0), str(ctx.current_panel))
 check("ctx.panel_loader is PanelLoader", isinstance(ctx.panel_loader, PanelLoader))
-check("ctx.panel_loader can_transition False", not ctx.panel_loader.can_transition(0, 0, PanelEdge.NORTH))
+check("ctx.panel_loader can_transition NORTH True", ctx.panel_loader.can_transition(0, 0, PanelEdge.NORTH))
+check("ctx.panel_loader can_transition EAST False", not ctx.panel_loader.can_transition(0, 0, PanelEdge.EAST))
 check("ctx.rooms still works", ctx.rooms is not None)
 check("ctx.entities still works", ctx.entities is not None)
 

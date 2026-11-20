@@ -104,5 +104,8 @@
     "region_tag":  "bridge",
     "affinity":    "WATER",
     "affinity_intensity": 0.5
-  }
+  },
+  {"id": "panel0m1_forest", "name": "Upper Reach Woods", "room_type": "WILDERNESS", "description": "Uncleared broadleaf woodland on both banks, a step up the valley from the town. Closed canopy, no paths. (Physical description by World Building; who uses it is open for Story/Lore.)", "panel_x": 0, "panel_y": -1, "tile_bounds": [0, 0, 17, 17], "region_tag": "forest", "affinity": "EARTH", "affinity_intensity": 0.5},
+  {"id": "panel0m1_river", "name": "The Upper Reach", "room_type": "RIVER", "description": "The river above the town: the same narrow channel, faster water, angular stone along the margins, and no crossing.", "panel_x": 0, "panel_y": -1, "tile_bounds": [6, 0, 9, 17], "region_tag": "river", "affinity": "WATER", "affinity_intensity": 0.7},
+  {"id": "panel0m1_town_outskirts", "name": "Outskirts' Edge", "room_type": "SETTLEMENT", "description": "Where the town's cleared outskirts fade into the woods, a few rows north of the town.", "panel_x": 0, "panel_y": -1, "tile_bounds": [8, 13, 17, 17], "region_tag": "town_outskirts"}
 ]
